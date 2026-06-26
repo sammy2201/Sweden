@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "IE2VOBBXvH8=",
+  "success": true,
+  "projectFilePath": "/Users/sanmaythota/Desktop/web/sweden-start/backend/SwedenStart/SwedenStart.csproj",
+  "expectedPackageFiles": [
+    "/Users/sanmaythota/.nuget/packages/microsoft.aspnetcore.openapi/10.0.4/microsoft.aspnetcore.openapi.10.0.4.nupkg.sha512",
+    "/Users/sanmaythota/.nuget/packages/microsoft.openapi/2.0.0/microsoft.openapi.2.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}
