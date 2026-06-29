@@ -1,8 +1,12 @@
+using Scalar.AspNetCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
@@ -10,6 +14,14 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference(options =>
+    {
+        options.WithTitle("Sweden Start API");
+    });
+    app.UseSwagger();
+    app.UseSwaggerUI();
+    app.MapGet("/docs", () => Results.Redirect("/scalar"));
+    app.MapGet("/swager", () => Results.Redirect("/scalar"));
 }
 
 app.UseHttpsRedirection();
