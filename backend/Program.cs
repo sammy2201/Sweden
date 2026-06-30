@@ -6,7 +6,6 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
-builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
@@ -18,8 +17,6 @@ if (app.Environment.IsDevelopment())
     {
         options.WithTitle("Sweden Start API");
     });
-    app.UseSwagger();
-    app.UseSwaggerUI();
     app.MapGet("/docs", () => Results.Redirect("/scalar"));
     app.MapGet("/swager", () => Results.Redirect("/scalar"));
 }

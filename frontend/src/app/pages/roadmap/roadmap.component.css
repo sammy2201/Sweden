@@ -1,0 +1,57 @@
+.container {
+  max-width: 900px;
+  margin: auto;
+  padding: 40px 20px;
+}
+
+.subtitle {
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.questions {
+  display: grid;
+  gap: 20px;
+}
+
+.question {
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+}
+
+select {
+  width: 100%;
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+button {
+  margin-top: 30px;
+  padding: 14px 28px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  background: #1b7f3b;
+  color: white;
+  font-size: 16px;
+}
+
+.roadmap {
+  margin-top: 50px;
+}
+
+.task {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  padding: 18px;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  margin-bottom: 15px;
+}
+
+.status {
+  font-size: 28px;
+}

@@ -1,6 +1,6 @@
-<main class="pnumber-page">
+<main class="housing-page">
   <section class="intro">
-    <p class="eyebrow">Sweden essentials</p>
+    <p-tag value="Sweden essentials" severity="info"></p-tag>
     <h1>Finding Rental Housing</h1>
 
     <p class="lead">
@@ -12,155 +12,82 @@
   </section>
 
   <section class="summary-grid">
-    <article>
-      <span class="step">01</span>
-      <h2>Housing Queues</h2>
-      <p>
-        Many apartments are rented through housing queues. The earlier you
-        register, the better your chances of receiving an apartment offer.
-      </p>
-    </article>
-
-    <article>
-      <span class="step">02</span>
-      <h2>Private Rentals</h2>
-      <p>
-        Private landlords and rental platforms offer first-hand and second-hand
-        apartments with varying requirements and availability.
-      </p>
-    </article>
-
-    <article>
-      <span class="step">03</span>
-      <h2>Stay Safe</h2>
-      <p>
-        Rental scams exist. Never pay deposits before verifying the landlord and
-        signing a proper rental contract.
-      </p>
-    </article>
+    <p-card *ngFor="let item of housingSteps" styleClass="summary-card">
+      <div class="step-badge">{{ item.step }}</div>
+      <h2>{{ item.title }}</h2>
+      <p>{{ item.description }}</p>
+    </p-card>
   </section>
 
-  <section class="content-band">
-    <div class="section-heading">
-      <p class="eyebrow">Housing search</p>
-      <h2>Recommended Rental Platforms</h2>
+  <p-card styleClass="content-band">
+    <ng-template pTemplate="title">
+      <div class="section-heading">
+        <p-tag value="Housing search" severity="secondary"></p-tag>
+        <h2>Recommended Rental Platforms</h2>
+      </div>
+    </ng-template>
+
+    <div class="process-list">
+      <article class="process-card" *ngFor="let platform of platforms">
+        <h3>{{ platform.name }}</h3>
+        <p>{{ platform.description }}</p>
+      </article>
     </div>
-
-    <ol class="process-list">
-      <li>
-        <h3>HomeQ</h3>
-        <p>
-          One of Sweden's largest housing queues. Many private landlords list
-          apartments here. Register early to begin collecting queue days.
-        </p>
-      </li>
-
-      <li>
-        <h3>Boplats</h3>
-        <p>
-          Official housing queue used by several municipalities including Malmö
-          and Gothenburg. Excellent for long-term rentals.
-        </p>
-      </li>
-
-      <li>
-        <h3>Qasa</h3>
-        <p>
-          A popular marketplace for second-hand rentals with verified users,
-          secure payments and digital rental agreements.
-        </p>
-      </li>
-
-      <li>
-        <h3>Blocket Bostad</h3>
-        <p>
-          One of Sweden's most popular rental marketplaces. Always verify the
-          landlord before making any payment.
-        </p>
-      </li>
-    </ol>
-  </section>
+  </p-card>
 
   <section class="details-layout">
     <div>
-      <p class="eyebrow">Tips</p>
+      <p-tag value="Tips" severity="info"></p-tag>
 
       <h2>Good Practices When Looking For Housing</h2>
 
       <ul class="check-list">
-        <li>Register for housing queues as early as possible.</li>
-        <li>Search every day because new listings appear frequently.</li>
-        <li>Prepare employment or study documents in advance.</li>
-        <li>Keep your profile complete on rental platforms.</li>
-        <li>Respond quickly when apartments become available.</li>
-        <li>Read the rental agreement carefully before signing.</li>
+        <li *ngFor="let tip of tips">{{ tip }}</li>
       </ul>
     </div>
 
-    <aside class="note-panel">
-      <h2>Average Waiting Time</h2>
-
+    <p-card header="Average Waiting Time" styleClass="note-panel">
       <p>
         In cities such as Stockholm, Gothenburg and Malmö, waiting times for
         first-hand apartments can range from several months to several years.
         Second-hand rentals are usually available much faster.
       </p>
-    </aside>
+    </p-card>
   </section>
 
   <section class="faq-section">
     <div class="section-heading">
-      <p class="eyebrow">Rental safety</p>
+      <p-tag value="Rental safety" severity="secondary"></p-tag>
       <h2>Avoid Rental Scams</h2>
     </div>
 
-    <div class="faq-list">
-      <article>
-        <h3>Never pay before viewing</h3>
-
-        <p>
-          Do not send deposits or rent before viewing the apartment or
-          confirming the landlord's identity.
-        </p>
-      </article>
-
-      <article>
-        <h3>Ask for a rental agreement</h3>
-
-        <p>
-          Always request a written rental contract that clearly states the rent,
-          deposit, move-in date and rental period.
-        </p>
-      </article>
-
-      <article>
-        <h3>Watch for warning signs</h3>
-
-        <p>
-          Be cautious if the rent is unusually cheap, the landlord refuses to
-          meet, or asks for payment through unusual methods.
-        </p>
-      </article>
-    </div>
+    <p-card styleClass="faq-card">
+      <p-accordion [multiple]="true" class="faq-accordion">
+        <p-accordion-panel *ngFor="let faq of faqs" [value]="faq.value">
+          <p-accordion-header>{{ faq.question }}</p-accordion-header>
+          <p-accordion-content>
+            <p>{{ faq.answer }}</p>
+          </p-accordion-content>
+        </p-accordion-panel>
+      </p-accordion>
+    </p-card>
   </section>
+
+  <p-divider></p-divider>
 
   <section class="source-section">
     <h2>Useful Housing Websites</h2>
 
-    <a href="https://www.homeq.se" target="_blank" rel="noopener"> HomeQ </a>
-
-    <a href="https://www.qasa.se" target="_blank" rel="noopener"> Qasa </a>
-
-    <a href="https://bostad.blocket.se" target="_blank" rel="noopener">
-      Blocket Bostad
-    </a>
-
-    <a href="https://www.boplatssyd.se" target="_blank" rel="noopener">
-      Boplats Syd
-    </a>
-
-    <a href="https://bostad.stockholm.se" target="_blank" rel="noopener">
-      Bostadsförmedlingen Stockholm
-    </a>
+    <a
+      *ngFor="let resource of resources"
+      pButton
+      [label]="resource.label"
+      [href]="resource.url"
+      target="_blank"
+      rel="noopener noreferrer"
+      icon="pi pi-external-link"
+      iconPos="right"
+      link
+      class="resource-link"></a>
   </section>
 </main>

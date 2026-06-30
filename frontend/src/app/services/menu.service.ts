@@ -14,6 +14,7 @@ export class MenuService {
     { label: "Home", path: "/" },
     { label: "P Number", path: "/p-number" },
     { label: "Housing", path: "/housing" },
+    { label: "Roadmap", path: "/roadmap" },
   ];
 
   getMenuItems(): MenuItem[] {

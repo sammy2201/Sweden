@@ -1,0 +1,41 @@
+<div class="container">
+  <h1>Your Sweden Roadmap</h1>
+
+  <p class="subtitle">
+    Answer a few questions and we'll generate your checklist.
+  </p>
+
+  <div class="questions">
+    <div class="question" *ngFor="let q of questions">
+      <h3>{{ q.title }}</h3>
+
+      <select [(ngModel)]="answers[q.key]">
+        <option value="">Select...</option>
+
+        <option *ngFor="let option of q.options" [value]="option">
+          {{ option }}
+        </option>
+      </select>
+    </div>
+  </div>
+
+  <button (click)="generateRoadmap()">Generate My Roadmap</button>
+
+  <div class="roadmap" *ngIf="tasks.length">
+    <h2>Your Checklist</h2>
+
+    <div class="task" *ngFor="let task of tasks">
+      <div class="status">
+        <span *ngIf="task.status === 'done'">✅</span>
+        <span *ngIf="task.status === 'current'">⏳</span>
+        <span *ngIf="task.status === 'todo'">⬜</span>
+      </div>
+
+      <div>
+        <h4>{{ task.title }}</h4>
+
+        <p>{{ task.description }}</p>
+      </div>
+    </div>
+  </div>
+</div>

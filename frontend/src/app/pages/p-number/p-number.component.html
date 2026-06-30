@@ -1,12 +1,12 @@
-<div class="surface-ground min-h-screen">
-  <div class="mx-auto max-w-7xl p-4 lg:p-6">
+<div class="page-shell">
+  <div class="page-inner">
     <!-- Hero -->
-    <div class="mb-6">
+    <div class="hero">
       <p-tag severity="success" value="Sweden Essentials"></p-tag>
 
-      <h1 class="text-5xl font-bold mt-3 mb-3">Personal Identity Number</h1>
+      <h1 class="hero-title">Personal Identity Number</h1>
 
-      <p class="text-xl line-height-3 text-600 max-w-4xl">
+      <p class="hero-description">
         A Swedish personal identity number (Personnummer) is the main identity
         number used when living in Sweden. It gives access to healthcare,
         banking, taxation, employment and many government services.
@@ -18,8 +18,8 @@
       <div class="col-12 md:col-4">
         <p-card>
           <ng-template pTemplate="header">
-            <div class="p-4 pb-0">
-              <i class="pi pi-id-card text-primary text-4xl"></i>
+            <div class="card-icon">
+              <i class="pi pi-id-card"></i>
             </div>
           </ng-template>
 
@@ -35,8 +35,8 @@
       <div class="col-12 md:col-4">
         <p-card>
           <ng-template pTemplate="header">
-            <div class="p-4 pb-0">
-              <i class="pi pi-users text-green-500 text-4xl"></i>
+            <div class="card-icon">
+              <i class="pi pi-users"></i>
             </div>
           </ng-template>
 
@@ -52,8 +52,8 @@
       <div class="col-12 md:col-4">
         <p-card>
           <ng-template pTemplate="header">
-            <div class="p-4 pb-0">
-              <i class="pi pi-building-columns text-blue-500 text-4xl"></i>
+            <div class="card-icon">
+              <i class="pi pi-building-columns"></i>
             </div>
           </ng-template>
 
@@ -105,11 +105,9 @@
         <p-card>
           <ng-template pTemplate="title"> Documents To Bring </ng-template>
 
-          <ul class="list-none p-0 m-0">
-            <li
-              *ngFor="let item of documents"
-              class="flex align-items-center gap-3 py-2">
-              <i class="pi pi-check-circle text-green-500"></i>
+          <ul class="document-list">
+            <li *ngFor="let item of documents" class="document-item">
+              <i class="pi pi-check-circle"></i>
 
               <span>{{ item }}</span>
             </li>
@@ -133,34 +131,36 @@
       <ng-template pTemplate="title"> Frequently Asked Questions </ng-template>
 
       <p-accordion>
-        <p-accordionPanel value="0">
-          <p-accordionHeader>
+        <p-accordion-panel value="0">
+          <p-accordion-header>
             Is a Personnummer the same as an ID card?
-          </p-accordionHeader>
+          </p-accordion-header>
 
-          <p-accordionContent>
+          <p-accordion-content>
             No. The Personnummer is your identification number. The Swedish ID
             card is a separate physical document.
-          </p-accordionContent>
-        </p-accordionPanel>
+          </p-accordion-content>
+        </p-accordion-panel>
 
-        <p-accordionPanel value="1">
-          <p-accordionHeader> Can I work without one? </p-accordionHeader>
+        <p-accordion-panel value="1">
+          <p-accordion-header> Can I work without one? </p-accordion-header>
 
-          <p-accordionContent>
+          <p-accordion-content>
             Yes. Depending on your situation you may begin work before receiving
             the Personnummer.
-          </p-accordionContent>
-        </p-accordionPanel>
+          </p-accordion-content>
+        </p-accordion-panel>
 
-        <p-accordionPanel value="2">
-          <p-accordionHeader> Can I use it for healthcare? </p-accordionHeader>
+        <p-accordion-panel value="2">
+          <p-accordion-header>
+            Can I use it for healthcare?
+          </p-accordion-header>
 
-          <p-accordionContent>
+          <p-accordion-content>
             Yes. It is commonly used for healthcare, banking, BankID, tax,
             employment and education.
-          </p-accordionContent>
-        </p-accordionPanel>
+          </p-accordion-content>
+        </p-accordion-panel>
       </p-accordion>
     </p-card>
 
@@ -171,7 +171,7 @@
 
       <div class="grid">
         <div class="col-12 lg:col-4">
-          <div class="p-inputgroup mb-3">
+          <div class="p-inputgroup search-group mb-3">
             <input
               pInputText
               #locationInput
@@ -180,6 +180,7 @@
             <button
               pButton
               icon="pi pi-search"
+              class="search-button"
               (click)="searchByPlace(locationInput.value)"></button>
           </div>
 
@@ -188,21 +189,20 @@
             label="Use Current Location"
             icon="pi pi-map-marker"
             severity="secondary"
-            class="w-full mb-3"
+            class="location-button"
             (click)="useCurrentLocation()"></button>
 
-          <p class="text-600">
+          <p class="location-status">
             {{ locationStatus }}
           </p>
         </div>
 
         <div class="col-12 lg:col-8">
           <iframe
+            class="map-frame"
             [src]="mapUrl"
             width="100%"
-            height="420"
-            style="border: none; border-radius: 12px">
-          </iframe>
+            height="420"></iframe>
         </div>
       </div>
     </p-card>
@@ -212,11 +212,11 @@
     <p-card>
       <ng-template pTemplate="title"> Official Sources </ng-template>
 
-      <div class="flex flex-column gap-3">
+      <div class="source-links">
         <a
           pButton
           severity="secondary"
-          styleClass="p-button-outlined"
+          styleClass="p-button-outlined source-link"
           target="_blank"
           href="https://www.skatteverket.se/servicelankar/otherlanguages/inenglish/individualsandemployees/livinginsweden/personalidentitynumberandcoordinationnumber.4.2cf1b5cd163796a5c8b4295.html">
           Skatteverket – Personal Identity Number
@@ -225,7 +225,7 @@
         <a
           pButton
           severity="secondary"
-          styleClass="p-button-outlined"
+          styleClass="p-button-outlined source-link"
           target="_blank"
           href="https://www.skatteverket.se/servicelankar/otherlanguages/inenglish/individualsandemployees/movingtosweden.4.7be5268414bea064694c40c.html">
           Skatteverket – Moving to Sweden
