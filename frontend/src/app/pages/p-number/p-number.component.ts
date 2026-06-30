@@ -10,20 +10,19 @@ import { InputTextModule } from "primeng/inputtext";
 import { CommonModule } from "@angular/common";
 
 @Component({
-  selector: "app-p-number",
-  standalone: true,
-  templateUrl: "./p-number.component.html",
-  styleUrl: "./p-number.component.css",
-  imports: [
-    CommonModule,
-    CardModule,
-    TagModule,
-    TimelineModule,
-    AccordionModule,
-    PanelModule,
-    ButtonModule,
-    InputTextModule,
-  ],
+    selector: "app-p-number",
+    templateUrl: "./p-number.component.html",
+    styleUrl: "./p-number.component.css",
+    imports: [
+        CommonModule,
+        CardModule,
+        TagModule,
+        TimelineModule,
+        AccordionModule,
+        PanelModule,
+        ButtonModule,
+        InputTextModule,
+    ]
 })
 export class PNumberComponent {
   private readonly sanitizer = inject(DomSanitizer);
