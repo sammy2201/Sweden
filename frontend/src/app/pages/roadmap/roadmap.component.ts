@@ -1,12 +1,7 @@
 import { CommonModule } from "@angular/common";
 import { Component } from "@angular/core";
 import { FormsModule } from "@angular/forms";
-
-interface Question {
-  key: string;
-  title: string;
-  options: string[];
-}
+import { QUESTIONS, FlowQuestion } from "./roadmap.questions";
 
 interface Task {
   title: string;
@@ -22,75 +17,174 @@ interface Task {
   styleUrls: ["./roadmap.component.css"],
 })
 export class RoadmapComponent {
-  questions: Question[] = [
-    {
-      key: "origin",
-      title: "Where are you from?",
-      options: ["EU", "Non-EU"],
-    },
-    {
-      key: "purpose",
-      title: "Why are you in Sweden?",
-      options: ["Work", "Study", "Family"],
-    },
-    {
-      key: "city",
-      title: "Where do you live?",
-      options: ["Malmö", "Stockholm", "Gothenburg", "Other"],
-    },
-    {
-      key: "personnummer",
-      title: "Do you already have a Personnummer?",
-      options: ["Yes", "No"],
-    },
-    {
-      key: "bankid",
-      title: "Do you have BankID?",
-      options: ["Yes", "No"],
-    },
-  ];
+  questions: FlowQuestion[] = QUESTIONS;
 
   answers: Record<string, string> = {};
 
   tasks: Task[] = [];
 
-  generateRoadmap() {
-    this.tasks = [
-      {
-        title: "Register your address",
-        description: "Register where you live.",
-        status: "done",
-      },
-      {
-        title: "Apply for Personnummer",
-        description: "Book an appointment with Skatteverket.",
-        status: this.answers["personnummer"] === "Yes" ? "done" : "current",
-      },
-      {
-        title: "Open a Bank Account",
-        description: "Visit a Swedish bank.",
+  currentIndex = 0;
+
+  get visibleQuestions(): FlowQuestion[] {
+    return this.questions.filter((q) =>
+      q.showIf ? q.showIf(this.answers) : true,
+    );
+  }
+
+  get currentQuestion(): FlowQuestion | undefined {
+    const questions = this.visibleQuestions;
+
+    if (questions.length === 0) {
+      return undefined;
+    }
+
+    if (this.currentIndex >= questions.length) {
+      this.currentIndex = questions.length - 1;
+    }
+
+    return questions[this.currentIndex];
+  }
+
+  get isComplete(): boolean {
+    return this.visibleQuestions.every((q) => Boolean(this.answers[q.id]));
+  }
+
+  get progress(): number {
+    const questions = this.visibleQuestions;
+
+    if (!questions.length || questions.length === 1) {
+      return 100;
+    }
+
+    return Math.round((this.currentIndex / (questions.length - 1)) * 100);
+  }
+
+  previous(): void {
+    if (this.currentIndex > 0) {
+      this.currentIndex -= 1;
+    }
+  }
+
+  next(): void {
+    const question = this.currentQuestion;
+
+    if (!question || !this.answers[question.id]) {
+      return;
+    }
+
+    const nextIndex = this.currentIndex + 1;
+
+    if (nextIndex < this.visibleQuestions.length) {
+      this.currentIndex = nextIndex;
+      return;
+    }
+
+    this.generateRoadmap();
+  }
+
+  onAnswerChange(): void {
+    const unansweredIndex = this.visibleQuestions.findIndex(
+      (q) => !this.answers[q.id],
+    );
+
+    this.currentIndex =
+      unansweredIndex >= 0 ? unansweredIndex : this.visibleQuestions.length;
+  }
+
+  generateRoadmap(): void {
+    this.tasks = [];
+
+    this.tasks.push({
+      title: "Register your address",
+      description: "Register your address with Skatteverket.",
+      status: "done",
+    });
+
+    // If user is not living in Sweden, skip personnummer/bankId flows
+    const liveInSweden = this.answers["liveInSweden"] === "Yes";
+
+    if (liveInSweden) {
+      if (this.answers["personnummer"] === "No") {
+        this.tasks.push({
+          title: "Apply for Personnummer",
+          description: "Book an appointment with Skatteverket.",
+          status: "current",
+        });
+      }
+
+      if (this.answers["personnummer"] === "Yes") {
+        if (this.answers["idCard"] === "No") {
+          this.tasks.push({
+            title: "Apply for Swedish ID Card",
+            description:
+              "Order your ID card after receiving your personnummer.",
+            status: "todo",
+          });
+        }
+
+        if (
+          this.answers["idCard"] === "Yes" &&
+          this.answers["bankAccount"] === "No"
+        ) {
+          this.tasks.push({
+            title: "Open a Swedish Bank Account",
+            description: "Visit Nordea, SEB, Handelsbanken or Swedbank.",
+            status: "todo",
+          });
+        }
+
+        if (
+          this.answers["bankAccount"] === "Yes" &&
+          this.answers["bankid"] === "No"
+        ) {
+          this.tasks.push({
+            title: "Activate BankID",
+            description: "Set up BankID after opening your bank account.",
+            status: "todo",
+          });
+        }
+
+        if (this.answers["insurance"] === "No") {
+          this.tasks.push({
+            title: "Register with Försäkringskassan",
+            description: "Apply for Swedish social insurance.",
+            status: "todo",
+          });
+        }
+      }
+    }
+
+    if (this.answers["purpose"] === "Looking for work") {
+      this.tasks.push({
+        title: "Register with Arbetsförmedlingen",
+        description: "Create a profile and search for jobs.",
         status: "todo",
-      },
-      {
-        title: "Get BankID",
-        description: "Activate BankID after opening your account.",
-        status: this.answers["bankid"] === "Yes" ? "done" : "todo",
-      },
-      {
-        title: "Register with Försäkringskassan",
-        description: "Access Swedish social insurance.",
+      });
+    }
+
+    if (this.answers["housing"] === "Still looking") {
+      this.tasks.push({
+        title: "Join Housing Queues",
+        description: "Register with Boplats, HomeQ and your municipality.",
         status: "todo",
-      },
-      {
-        title: "Join Housing Queue",
-        description: "Start collecting queue days.",
+      });
+    }
+
+    if (
+      this.answers["planToDrive"] === "Yes" &&
+      this.answers["drivingLicenceType"] === "Other"
+    ) {
+      this.tasks.push({
+        title: "Check Driving Licence Rules",
+        description: "Find out whether your licence can be exchanged.",
         status: "todo",
-      },
-      {
-        title: "Get Public Transport Card",
-        description: "Purchase your regional travel card.",
-        status: "todo",
-      },
-    ];
+      });
+    }
+
+    this.tasks.push({
+      title: "Get a Public Transport Card",
+      description: "Purchase a regional travel card.",
+      status: "todo",
+    });
   }
 }

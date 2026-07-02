@@ -1,41 +1,134 @@
-<div class="container">
-  <h1>Your Sweden Roadmap</h1>
+<div class="roadmap-page">
+  <section class="hero">
+    <h1>Create Your Sweden Roadmap</h1>
 
-  <p class="subtitle">
-    Answer a few questions and we'll generate your checklist.
-  </p>
+    <p>
+      Answer a few questions and we'll generate a personalized checklist for
+      your move to Sweden.
+    </p>
+  </section>
 
-  <div class="questions">
-    <div class="question" *ngFor="let q of questions">
-      <h3>{{ q.title }}</h3>
+  @if (!isComplete && currentQuestion; as question) {
+    <section class="wizard">
+      <div class="progress-header">
+        <div>
+          <span class="step-label">
+            Question {{ currentIndex + 1 }} of {{ visibleQuestions.length }}
+          </span>
 
-      <select [(ngModel)]="answers[q.key]">
-        <option value="">Select...</option>
+          <h2>{{ question.title }}</h2>
+        </div>
 
-        <option *ngFor="let option of q.options" [value]="option">
-          {{ option }}
-        </option>
-      </select>
-    </div>
-  </div>
-
-  <button (click)="generateRoadmap()">Generate My Roadmap</button>
-
-  <div class="roadmap" *ngIf="tasks.length">
-    <h2>Your Checklist</h2>
-
-    <div class="task" *ngFor="let task of tasks">
-      <div class="status">
-        <span *ngIf="task.status === 'done'">✅</span>
-        <span *ngIf="task.status === 'current'">⏳</span>
-        <span *ngIf="task.status === 'todo'">⬜</span>
+        <span class="progress-percent"> {{ progress }}% </span>
       </div>
 
-      <div>
-        <h4>{{ task.title }}</h4>
-
-        <p>{{ task.description }}</p>
+      <div class="progress">
+        <div class="progress-fill" [style.width.%]="progress"></div>
       </div>
-    </div>
-  </div>
+
+      <div class="options">
+        @for (option of question.options; track option) {
+          <label
+            class="option-card"
+            [class.selected]="answers[question.id] === option">
+            <input
+              type="radio"
+              [name]="question.id"
+              [value]="option"
+              [(ngModel)]="answers[question.id]" />
+
+            <div class="option-content">
+              <div class="circle">
+                @if (answers[question.id] === option) {
+                  ✓
+                }
+              </div>
+
+              <span>
+                {{ option }}
+              </span>
+            </div>
+          </label>
+        }
+      </div>
+
+      <div class="actions">
+        <button
+          class="secondary"
+          type="button"
+          (click)="previous()"
+          [disabled]="currentIndex === 0">
+          Previous
+        </button>
+
+        <button
+          class="primary"
+          type="button"
+          (click)="next()"
+          [disabled]="!answers[question.id]">
+          {{ isComplete ? "Generate My Roadmap" : "Next" }}
+        </button>
+      </div>
+    </section>
+  } @else {
+    <section class="finish">
+      <div class="finish-card">
+        <div class="emoji">🎉</div>
+
+        <h2>You're all set!</h2>
+
+        <p>
+          We've collected everything we need. Generate your personalized
+          roadmap.
+        </p>
+
+        <button class="primary large" (click)="generateRoadmap()">
+          Generate My Roadmap
+        </button>
+      </div>
+    </section>
+  }
+
+  @if (tasks.length) {
+    <section class="roadmap">
+      <div class="roadmap-header">
+        <h2>Your Sweden Checklist</h2>
+
+        <p>Follow these steps to settle in Sweden.</p>
+      </div>
+
+      <div class="timeline">
+        @for (task of tasks; track task.title) {
+          <div
+            class="timeline-item"
+            [class.done]="task.status === 'done'"
+            [class.current]="task.status === 'current'">
+            <div class="timeline-icon">
+              @if (task.status === "done") {
+                ✓
+              }
+
+              @if (task.status === "current") {
+                ⏳
+              }
+
+              @if (task.status === "todo") {
+                ○
+              }
+            </div>
+
+            <div>
+              <h3>
+                {{ task.title }}
+              </h3>
+
+              <p>
+                {{ task.description }}
+              </p>
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+  }
 </div>
