@@ -1,13 +1,18 @@
+using Microsoft.Extensions.Logging;
 using Npgsql;
 
-namespace SwedenStart.Health;
+namespace SwedenStart;
 
 public class RoadmapRepository : IRoadmapRepository
 {
     private readonly NpgsqlDataSource _dataSource;
+    private readonly ILogger<RoadmapRepository> _logger;
 
-    public RoadmapRepository(NpgsqlDataSource dataSource)
-        => _dataSource = dataSource;
+    public RoadmapRepository(NpgsqlDataSource dataSource, ILogger<RoadmapRepository> logger)
+    {
+        _dataSource = dataSource;
+        _logger = logger;
+    }
 
     public async Task<Roadmap> SaveAsync(Roadmap roadmap)
     {
@@ -105,9 +110,10 @@ public class RoadmapRepository : IRoadmapRepository
 
             await transaction.CommitAsync();
         }
-        catch
+        catch (Exception ex)
         {
             await transaction.RollbackAsync();
+            _logger.LogError(ex, "Failed to save roadmap {RoadmapId}.", roadmap.Id);
             throw;
         }
 

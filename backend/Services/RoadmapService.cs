@@ -1,4 +1,4 @@
-namespace SwedenStart.Health;
+namespace SwedenStart;
 
 public class RoadmapService : IRoadmapService
 {
@@ -72,17 +72,11 @@ public class RoadmapService : IRoadmapService
             },
         };
 
-        var liveInSweden = string.Equals(
-            request.LiveInSweden,
-            "Yes",
-            StringComparison.OrdinalIgnoreCase);
+        var liveInSweden = RoadmapValues.IsYes(request.LiveInSweden);
 
         if (liveInSweden)
         {
-            if (string.Equals(
-                    request.Personnummer,
-                    "No",
-                    StringComparison.OrdinalIgnoreCase))
+            if (RoadmapValues.IsNo(request.Personnummer))
             {
                 tasks.Add(new RoadmapTask
                 {
@@ -92,15 +86,9 @@ public class RoadmapService : IRoadmapService
                 });
             }
 
-            if (string.Equals(
-                    request.Personnummer,
-                    "Yes",
-                    StringComparison.OrdinalIgnoreCase))
+            if (RoadmapValues.IsYes(request.Personnummer))
             {
-                if (string.Equals(
-                        request.IdCard,
-                        "No",
-                        StringComparison.OrdinalIgnoreCase))
+                if (RoadmapValues.IsNo(request.IdCard))
                 {
                     tasks.Add(new RoadmapTask
                     {
@@ -110,14 +98,8 @@ public class RoadmapService : IRoadmapService
                     });
                 }
 
-                if (string.Equals(
-                        request.BankAccount,
-                        "Yes",
-                        StringComparison.OrdinalIgnoreCase) &&
-                    string.Equals(
-                        request.BankId,
-                        "No",
-                        StringComparison.OrdinalIgnoreCase))
+                if (RoadmapValues.IsYes(request.BankAccount) &&
+                    RoadmapValues.IsNo(request.BankId))
                 {
                     tasks.Add(new RoadmapTask
                     {
@@ -127,10 +109,7 @@ public class RoadmapService : IRoadmapService
                     });
                 }
 
-                if (string.Equals(
-                        request.Insurance,
-                        "No",
-                        StringComparison.OrdinalIgnoreCase))
+                if (RoadmapValues.IsNo(request.Insurance))
                 {
                     tasks.Add(new RoadmapTask
                     {
@@ -144,7 +123,7 @@ public class RoadmapService : IRoadmapService
 
         if (string.Equals(
                 request.Purpose,
-                "Looking for work",
+                RoadmapValues.LookingForWork,
                 StringComparison.OrdinalIgnoreCase))
         {
             tasks.Add(new RoadmapTask
@@ -157,7 +136,7 @@ public class RoadmapService : IRoadmapService
 
         if (string.Equals(
                 request.Housing,
-                "Still looking",
+                RoadmapValues.StillLooking,
                 StringComparison.OrdinalIgnoreCase))
         {
             tasks.Add(new RoadmapTask
@@ -168,13 +147,10 @@ public class RoadmapService : IRoadmapService
             });
         }
 
-        if (string.Equals(
-                request.PlanToDrive,
-                "Yes",
-                StringComparison.OrdinalIgnoreCase) &&
+        if (RoadmapValues.IsYes(request.PlanToDrive) &&
             string.Equals(
                 request.DrivingLicenceType,
-                "Other",
+                RoadmapValues.Other,
                 StringComparison.OrdinalIgnoreCase))
         {
             tasks.Add(new RoadmapTask

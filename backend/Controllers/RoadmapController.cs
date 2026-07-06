@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace SwedenStart.Health;
+namespace SwedenStart;
 
 
 [ApiController]

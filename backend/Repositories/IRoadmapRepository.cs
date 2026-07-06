@@ -1,4 +1,4 @@
-namespace SwedenStart.Health;
+namespace SwedenStart;
 
 public interface IRoadmapRepository
 {
