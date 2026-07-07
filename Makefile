@@ -62,6 +62,18 @@ backend_restore: ## Restore .NET backend packages
 backend_build: ## Build .NET backend
 	cd $(BACKEND_DIR) && $(ENV_RUN) dotnet build
 
+db_migrate: ## Apply EF Core database migrations to the target database
+	cd $(BACKEND_DIR) && $(ENV_RUN) dotnet ef database update
+
+db_migrate_add: ## Add a new EF Core migration. Use MIGRATION_NAME=YourName
+	cd $(BACKEND_DIR) && $(ENV_RUN) dotnet ef migrations add $(MIGRATION_NAME)
+
+db_migrate_initial: ## Add the initial EF Core migration named InitialCreate
+	cd $(BACKEND_DIR) && $(ENV_RUN) dotnet ef migrations add InitialCreate
+
+db_migrate_remove: ## Remove the last EF Core migration
+	cd $(BACKEND_DIR) && $(ENV_RUN) dotnet ef migrations remove
+
 backend_run: ## Run .NET backend on the configured launch profile
 	cd $(BACKEND_DIR) && $(ENV_RUN) dotnet run --launch-profile $(BACKEND_PROFILE)
 

@@ -1,41 +1,62 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Npgsql;
 using Scalar.AspNetCore;
-using SwedenStart.Health;
+using System.Text;
+using SwedenStart;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
-builder.Services.AddSingleton<IRoadmapRepository, RoadmapRepository>();
-builder.Services.AddSingleton<IRoadmapService, RoadmapService>();
-builder.Services.AddSingleton<IHealthService, HealthService>();
-builder.Services.AddSingleton(sp => DbSettings.FromConfiguration(builder.Configuration));
-builder.Services.AddSingleton(sp =>
-{
-    var settings = sp.GetRequiredService<DbSettings>();
-    var connectionStringBuilder = new NpgsqlConnectionStringBuilder
-    {
-        Host = settings.Host,
-        Port = settings.Port,
-        Database = settings.Database,
-        Username = settings.Username,
-        Password = settings.Password,
-        SslMode = SslMode.Disable,
-    };
 
-    return NpgsqlDataSource.Create(connectionStringBuilder.ConnectionString);
+// Auth services and repos
+builder.Services.AddScoped<IAuthRepo, AuthRepo>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+
+// Configure authentication
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"] ?? "sweden-start",
+        ValidAudience = builder.Configuration["Jwt:Audience"] ?? "sweden-start-audience",
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? "dev-key-change-me"))
+    };
 });
+builder.Services.AddScoped<IRoadmapRepository, RoadmapRepository>();
+builder.Services.AddScoped<IRoadmapService, RoadmapService>();
+builder.Services.AddSingleton<IHealthService, HealthService>();
+
+var defaultConnection = builder.Configuration.GetConnectionString("DefaultConnection")
+                        ?? throw new InvalidOperationException("Connection string 'DefaultConnection' is not configured.");
+
+var connectionStringBuilder = new NpgsqlConnectionStringBuilder(defaultConnection);
+
+builder.Services.AddSingleton(sp => NpgsqlDataSource.Create(defaultConnection));
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(defaultConnection));
 
 var app = builder.Build();
-var dbSettings = app.Services.GetRequiredService<DbSettings>();
 
 app.Logger.LogInformation(
     "Starting Sweden Start API. PostgreSQL target: {Host}:{Port}/{Database}",
-    dbSettings.Host,
-    dbSettings.Port,
-    dbSettings.Database);
+    connectionStringBuilder.Host,
+    connectionStringBuilder.Port,
+    connectionStringBuilder.Database);
 
 if (app.Environment.IsDevelopment())
 {
@@ -49,6 +70,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 
 app.Lifetime.ApplicationStarted.Register(() =>
@@ -68,24 +92,5 @@ app.Lifetime.ApplicationStarted.Register(() =>
 app.MapControllers();
 
 app.Run();
-
-sealed record DbSettings(string Host, int Port, string Database, string Username, string Password)
-{
-    public static DbSettings FromConfiguration(IConfiguration configuration)
-    {
-        var host = GetSetting(configuration, "POSTGRES_HOST", "localhost");
-        var port = int.TryParse(GetSetting(configuration, "POSTGRES_PORT", "5432"), out var parsedPort)
-            ? parsedPort
-            : 5432;
-        var database = GetSetting(configuration, "POSTGRES_DB", "sweden_start");
-        var username = GetSetting(configuration, "POSTGRES_USER", "sweden_start");
-        var password = GetSetting(configuration, "POSTGRES_PASSWORD", "sweden_start_dev");
-
-        return new DbSettings(host, port, database, username, password);
-    }
-
-    private static string GetSetting(IConfiguration configuration, string key, string fallback)
-        => configuration[key] ?? Environment.GetEnvironmentVariable(key) ?? fallback;
-}
 
 
