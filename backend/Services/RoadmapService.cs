@@ -8,12 +8,13 @@ public class RoadmapService : IRoadmapService
         => _roadmapRepository = roadmapRepository;
 
     public async Task<RoadmapResponseDto> GenerateRoadmapAsync(
-        RoadmapRequestDto request)
+        RoadmapRequestDto request, Guid userId)
     {
+
         var roadmap = new Roadmap
         {
             Id = Guid.NewGuid(),
-            UserId = request.UserId,
+            UserId = userId,
             CreatedAt = DateTime.UtcNow,
             Origin = request.Origin,
             ResidencePermit = request.ResidencePermit,
@@ -36,8 +37,6 @@ public class RoadmapService : IRoadmapService
         return new RoadmapResponseDto
         {
             Id = savedRoadmap.Id,
-            UserId = savedRoadmap.UserId,
-            CreatedAt = savedRoadmap.CreatedAt,
             Origin = savedRoadmap.Origin,
             ResidencePermit = savedRoadmap.ResidencePermit,
             LiveInSweden = savedRoadmap.LiveInSweden,

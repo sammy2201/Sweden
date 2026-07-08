@@ -4,7 +4,6 @@ public class RoadmapResponseDto
 {
     public Guid Id { get; set; }
     public string UserId { get; set; } = string.Empty;
-    public DateTime CreatedAt { get; set; }
     public string Origin { get; set; } = string.Empty;
     public string ResidencePermit { get; set; } = string.Empty;
     public string LiveInSweden { get; set; } = string.Empty;
