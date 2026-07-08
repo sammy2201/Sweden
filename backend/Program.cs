@@ -10,7 +10,8 @@ using SwedenStart;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var jwtKey = builder.Configuration["Jwt:Key"] ?? builder.Configuration["Jwt:Secret"] ?? "dev-key-change-me";
+var jwtKey = builder.Configuration["Jwt:Key"] ?? builder.Configuration["Jwt:Secret"] ?? throw new InvalidOperationException(
+"JWT key missing"); ;
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

@@ -26,8 +26,6 @@ public class RegisterRequestDto
     [Required]
     [StringLength(100, MinimumLength = 8)]
     public string Password { get; set; } = string.Empty;
-
-    public bool IsAdmin { get; set; } = false;
 }
 
 public class LoginRequestDto

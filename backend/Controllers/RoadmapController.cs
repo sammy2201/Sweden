@@ -19,7 +19,11 @@ public class RoadmapController : ControllerBase
     public async Task<ActionResult<RoadmapResponseDto>> GenerateRoadmap(
         RoadmapRequestDto request)
     {
-        var userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var claim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+        if (claim == null || !Guid.TryParse(claim.Value, out var userId))
+            return Unauthorized();
+
         var response = await _roadmapService.GenerateRoadmapAsync(request, userId);
         return Ok(response);
     }

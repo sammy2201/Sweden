@@ -5,9 +5,9 @@ namespace SwedenStart;
 
 public static class PasswordHasher
 {
-    private const int SaltSize = 16; 
-    private const int KeySize = 32; 
-    private const int Iterations = 100_000;
+    private const int SaltSize = 16;
+    private const int KeySize = 32;
+    private const int Iterations = 210_000;
 
     public static string Hash(string password)
     {
