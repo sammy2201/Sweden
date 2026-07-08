@@ -6,12 +6,11 @@ namespace SwedenStart;
 public class RoadmapRepository : IRoadmapRepository
 {
     private readonly AppDbContext _dbContext;
-    private readonly ILogger<RoadmapRepository> _logger;
 
-    public RoadmapRepository(AppDbContext dbContext, ILogger<RoadmapRepository> logger)
+
+    public RoadmapRepository(AppDbContext dbContext)
     {
         _dbContext = dbContext;
-        _logger = logger;
     }
 
     public async Task<Roadmap> SaveAsync(Roadmap roadmap)

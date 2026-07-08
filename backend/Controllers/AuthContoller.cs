@@ -50,13 +50,6 @@ public class AuthController : ControllerBase
         return CreatedAtAction(nameof(Register), new { username = request.Username });
     }
 
-    [HttpGet("logout")]
-    [Authorize]
-    public async Task<IActionResult> Logout()
-    {
-        await _authService.LogoutAsync();
-        return NoContent();
-    }
 
     [HttpGet("user")]
     [Authorize]

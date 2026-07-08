@@ -6,14 +6,12 @@ namespace SwedenStart;
 public class AuthRepo : IAuthRepo
 {
     private readonly AppDbContext _dbContext;
-    private readonly ILogger<AuthRepo> _logger;
 
-    public AuthRepo(
-        AppDbContext dbContext,
-        ILogger<AuthRepo> logger)
+
+    public AuthRepo(AppDbContext dbContext)
     {
         _dbContext = dbContext;
-        _logger = logger;
+
     }
 
     public Task<User?> GetUserByUsernameAsync(string username)

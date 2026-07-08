@@ -18,7 +18,9 @@ public class AuthService : IAuthService
     }
 
     public async Task<string> LoginAsync(string email, string password)
+
     {
+        email = email.Trim().ToLowerInvariant();
         var user = await _repo.GetUserByEmailAsync(email);
         if (user is null || !PasswordHasher.Verify(password, user.PasswordHash))
         {
@@ -30,6 +32,12 @@ public class AuthService : IAuthService
 
     public async Task<bool> RegisterAsync(string firstName, string lastName, string username, string email, string password)
     {
+
+        firstName = firstName.Trim();
+        lastName = lastName.Trim();
+        username = username.Trim().ToLowerInvariant();
+        email = email.Trim().ToLowerInvariant();
+
         if (await _repo.UserExistsAsync(username, email))
         {
             return false;
@@ -52,11 +60,6 @@ public class AuthService : IAuthService
         return true;
     }
 
-    public Task LogoutAsync()
-    {
-        // Stateless JWT - nothing to do here. Implement refresh token revocation if used.
-        return Task.CompletedTask;
-    }
 
     public Task<User?> GetUserAsync(Guid id)
     {
