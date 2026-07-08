@@ -1,7 +1,6 @@
 namespace SwedenStart;
 
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -11,27 +10,18 @@ public class AuthService : IAuthService
 {
     private readonly IAuthRepo _repo;
     private readonly IConfiguration _config;
-    private readonly ILogger<AuthService> _logger;
 
-    public AuthService(IAuthRepo repo, IConfiguration config, ILogger<AuthService> logger)
+    public AuthService(IAuthRepo repo, IConfiguration config)
     {
         _repo = repo;
         _config = config;
-        _logger = logger;
     }
 
     public async Task<string> LoginAsync(string email, string password)
     {
         var user = await _repo.GetUserByEmailAsync(email);
-        if (user == null)
+        if (user is null || !PasswordHasher.Verify(password, user.PasswordHash))
         {
-            _logger.LogInformation("Login failed: unknown email {Email}", email);
-            throw new UnauthorizedAccessException("Invalid credentials");
-        }
-
-        if (!PasswordHasher.Verify(password, user.PasswordHash))
-        {
-            _logger.LogInformation("Login failed: invalid password for {Email}", email);
             throw new UnauthorizedAccessException("Invalid credentials");
         }
 
@@ -75,10 +65,10 @@ public class AuthService : IAuthService
 
     public Task<string> GenerateJwtToken(User user)
     {
-        var key = _config["Jwt:Secret"] ?? throw new InvalidOperationException("JWT secret is missing.");
+        var key = _config["Jwt:Key"] ?? _config["Jwt:Secret"] ?? throw new InvalidOperationException("JWT secret is missing.");
         var issuer = _config["Jwt:Issuer"] ?? "sweden-start";
         var audience = _config["Jwt:Audience"] ?? "sweden-start-audience";
-        var expiresMinutes = int.TryParse(_config["Jwt:ExpiryMinutes"], out var m) ? m : 60;
+        var expiresMinutes = int.TryParse(_config["Jwt:ExpiresMinutes"], out var m) || int.TryParse(_config["Jwt:ExpiryMinutes"], out m) ? m : 60;
 
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
         var creds = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);

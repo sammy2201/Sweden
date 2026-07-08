@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.OpenApi;
 using Npgsql;
 using Scalar.AspNetCore;
 using System.Text;
@@ -9,9 +10,39 @@ using SwedenStart;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var jwtKey = builder.Configuration["Jwt:Key"] ?? builder.Configuration["Jwt:Secret"] ?? "dev-key-change-me";
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddOpenApi();
+builder.Services.AddAuthorization();
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer((document, context, cancellationToken) =>
+    {
+        document.Components ??= new OpenApiComponents();
+        document.Components.SecuritySchemes ??= new Dictionary<string, IOpenApiSecurityScheme>();
+
+        document.Components.SecuritySchemes["Bearer"] = new OpenApiSecurityScheme
+        {
+            Type = SecuritySchemeType.Http,
+            Scheme = "bearer",
+            BearerFormat = "JWT",
+            In = ParameterLocation.Header,
+            Name = "Authorization",
+            Description = "Enter 'Bearer' followed by your JWT token."
+        };
+
+        document.Security =
+        [
+            new OpenApiSecurityRequirement
+            {
+                [new OpenApiSecuritySchemeReference("Bearer", null)] = []
+            }
+        ];
+
+        return Task.CompletedTask;
+    });
+});
 
 // Auth services and repos
 builder.Services.AddScoped<IAuthRepo, AuthRepo>();
@@ -26,6 +57,7 @@ builder.Services.AddAuthentication(options =>
 {
     options.RequireHttpsMetadata = false;
     options.SaveToken = true;
+
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
@@ -34,8 +66,10 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
         ValidIssuer = builder.Configuration["Jwt:Issuer"] ?? "sweden-start",
         ValidAudience = builder.Configuration["Jwt:Audience"] ?? "sweden-start-audience",
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? "dev-key-change-me"))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
     };
+
+    options.Events = new JwtBearerEvents();
 });
 builder.Services.AddScoped<IRoadmapRepository, RoadmapRepository>();
 builder.Services.AddScoped<IRoadmapService, RoadmapService>();
@@ -64,6 +98,12 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference(options =>
     {
         options.WithTitle("Sweden Start API");
+        options.AddHttpAuthentication("Bearer", scheme =>
+        {
+            scheme.Token = string.Empty;
+        });
+        options.AddPreferredSecuritySchemes(["Bearer"]);
+        options.EnablePersistentAuthentication();
     });
     app.MapGet("/docs", () => Results.Redirect("/scalar"));
     app.MapGet("/swager", () => Results.Redirect("/scalar"));
@@ -71,6 +111,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseMiddleware<JwtAuthenticationMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 
