@@ -1,0 +1,612 @@
+:host {
+  display: block;
+  background: var(--app-bg);
+}
+
+.page {
+  width: min(1180px, 100%);
+  margin: auto;
+  padding: 3rem 1.5rem 5rem;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: 1.5fr 380px;
+  gap: 2rem;
+  align-items: center;
+
+  margin-bottom: 5rem;
+}
+
+.hero h1 {
+  margin: 1rem 0;
+
+  font-size: clamp(2.8rem, 5vw, 4.2rem);
+
+  color: var(--app-heading);
+}
+
+.hero span {
+  color: var(--app-primary);
+}
+
+.hero p {
+  max-width: 650px;
+
+  color: var(--app-text-soft);
+
+  line-height: 1.8;
+
+  margin-bottom: 2rem;
+}
+
+.section-title {
+  margin-bottom: 2rem;
+
+  color: var(--app-heading);
+}
+
+.journey {
+  display: flex;
+
+  align-items: center;
+
+  overflow: auto;
+
+  margin-bottom: 5rem;
+}
+
+.step {
+  text-align: center;
+
+  min-width: 120px;
+}
+
+.circle {
+  width: 54px;
+  height: 54px;
+
+  margin: auto auto 1rem;
+
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: var(--app-surface-alt);
+
+  color: var(--app-primary);
+
+  font-weight: 700;
+}
+
+.completed .circle {
+  background: var(--app-primary);
+
+  color: white;
+}
+
+.line {
+  flex: 1;
+
+  height: 2px;
+
+  background: var(--app-border);
+
+  min-width: 40px;
+}
+
+.overview {
+  display: grid;
+
+  grid-template-columns: repeat(3, 1fr);
+
+  gap: 1.5rem;
+
+  margin-bottom: 5rem;
+}
+
+.bank-grid {
+  display: grid;
+
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+
+  gap: 1.5rem;
+
+  margin-top: 2rem;
+
+  margin-bottom: 5rem;
+}
+
+.bank-card ul {
+  padding-left: 1rem;
+
+  margin: 1rem 0 1.5rem;
+}
+
+.bank-card li {
+  margin-bottom: 0.5rem;
+}
+
+:host ::ng-deep .p-card {
+  border: 1px solid var(--app-border);
+
+  box-shadow: none;
+
+  border-radius: 18px;
+}
+
+@media (max-width: 900px) {
+  .hero {
+    grid-template-columns: 1fr;
+  }
+
+  .overview {
+    grid-template-columns: 1fr;
+  }
+}
+
+.journey-section,
+.documents-section,
+.bankid-section,
+.swish-section {
+  margin-top: 5rem;
+}
+
+.timeline {
+  margin-top: 2rem;
+  position: relative;
+}
+
+.timeline::before {
+  content: "";
+
+  position: absolute;
+
+  left: 24px;
+
+  top: 0;
+
+  bottom: 0;
+
+  width: 2px;
+
+  background: var(--app-border);
+}
+
+.timeline-item {
+  display: flex;
+
+  gap: 1.5rem;
+
+  position: relative;
+
+  margin-bottom: 2rem;
+}
+
+.timeline-number {
+  width: 50px;
+
+  height: 50px;
+
+  flex-shrink: 0;
+
+  border-radius: 50%;
+
+  background: var(--app-primary);
+
+  color: white;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  font-weight: 700;
+
+  z-index: 1;
+}
+
+.timeline-content {
+  flex: 1;
+
+  padding: 1.5rem;
+
+  background: var(--app-surface);
+
+  border: 1px solid var(--app-border);
+
+  border-radius: 16px;
+}
+
+.documents-grid {
+  display: grid;
+
+  grid-template-columns: repeat(2, 1fr);
+
+  gap: 2rem;
+}
+
+.two-column {
+  display: grid;
+
+  grid-template-columns: 1.5fr 380px;
+
+  gap: 2rem;
+
+  align-items: start;
+}
+
+.check-list {
+  margin: 1rem 0 0;
+
+  padding-left: 1.25rem;
+}
+
+.check-list li {
+  margin-bottom: 0.75rem;
+}
+
+.info-list {
+  margin: 1rem 0 0;
+
+  padding-left: 1.25rem;
+}
+
+.info-list li {
+  margin-bottom: 1rem;
+}
+
+.mini-steps {
+  margin-top: 2rem;
+
+  display: grid;
+
+  gap: 1rem;
+}
+
+.mini-steps div {
+  padding: 1rem 1.25rem;
+
+  border: 1px solid var(--app-border);
+
+  border-radius: 12px;
+
+  background: var(--app-surface);
+}
+
+@media (max-width: 900px) {
+  .documents-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .two-column {
+    grid-template-columns: 1fr;
+  }
+
+  .timeline::before {
+    left: 22px;
+  }
+}
+.cards-section {
+  margin-top: 5rem;
+}
+
+.section-heading {
+  margin-bottom: 2rem;
+}
+
+.section-heading h2 {
+  margin: 0.75rem 0;
+  color: var(--app-heading);
+}
+
+.section-heading p {
+  max-width: 720px;
+  color: var(--app-text-soft);
+  line-height: 1.8;
+}
+
+/* Debit vs Credit */
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+}
+
+.card-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+}
+
+.debit {
+  background: #dff7f2;
+  color: var(--app-primary);
+}
+
+.credit {
+  background: #eef3ff;
+  color: #3157d5;
+}
+
+.feature-list {
+  margin: 1.5rem 0 0;
+  padding-left: 1.2rem;
+}
+
+.feature-list li {
+  margin-bottom: 0.75rem;
+}
+
+/* Popular Cards */
+
+.popular-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.popular-cards small {
+  display: block;
+  margin-bottom: 1rem;
+  color: var(--app-primary);
+  font-weight: 600;
+}
+
+/* Wallets */
+
+.wallet-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.wallet {
+  display: flex;
+  gap: 1rem;
+  padding: 1.5rem;
+  border: 1px solid var(--app-border);
+  border-radius: 16px;
+  background: var(--app-surface);
+  transition: 0.2s;
+}
+
+.wallet:hover {
+  border-color: var(--app-primary);
+  transform: translateY(-3px);
+}
+
+.wallet i {
+  font-size: 2rem;
+  color: var(--app-primary);
+}
+
+.wallet h3 {
+  margin: 0 0 0.4rem;
+}
+
+.wallet p {
+  margin: 0;
+  color: var(--app-text-soft);
+}
+
+/* Tips */
+
+.tips {
+  display: grid;
+  grid-template-columns: 1.3fr 0.7fr;
+  gap: 2rem;
+  padding: 2rem;
+  border: 1px solid var(--app-border);
+  border-radius: 20px;
+  background: var(--app-surface-alt);
+}
+
+.tips h2 {
+  margin-top: 0;
+}
+
+.tips ul {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.tips li {
+  margin-bottom: 1rem;
+}
+
+/* PrimeNG */
+
+:host ::ng-deep .p-card {
+  border: 1px solid var(--app-border);
+  border-radius: 18px;
+  box-shadow: none;
+  height: 100%;
+}
+
+:host ::ng-deep .p-card-body {
+  padding: 1.75rem;
+}
+
+/* Responsive */
+
+@media (max-width: 900px) {
+  .cards-grid,
+  .popular-cards,
+  .wallet-grid,
+  .tips {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bank-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.bank-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.bank-note {
+  margin: 1rem 0;
+  color: var(--app-text-soft);
+  line-height: 1.6;
+}
+
+.bank-features {
+  padding: 0;
+  margin: 1.25rem 0;
+  list-style: none;
+}
+
+.bank-features li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--app-border);
+}
+
+.bank-features li:last-child {
+  border-bottom: none;
+}
+
+.bank-features i {
+  color: var(--app-primary);
+  width: 18px;
+}
+
+.recommendations {
+  margin-top: 1.25rem;
+}
+
+.recommendations small {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--app-text-muted);
+  font-weight: 600;
+}
+
+.recommendation-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.bank-actions {
+  margin-top: 1.5rem;
+}
+
+.bank-carousel {
+  margin-top: 2rem;
+}
+
+.bank-card {
+  margin: 0.5rem;
+  height: 100%;
+}
+
+.bank-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.bank-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.bank-note {
+  color: var(--app-text-soft);
+  line-height: 1.6;
+  min-height: 72px;
+}
+
+.bank-features {
+  margin: 1.25rem 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bank-features li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--app-border);
+}
+
+.bank-features li:last-child {
+  border-bottom: none;
+}
+
+.bank-features i {
+  width: 18px;
+  color: var(--app-primary);
+}
+
+.recommendations {
+  margin-top: 1rem;
+}
+
+.recommendations small {
+  display: block;
+  margin-bottom: 0.6rem;
+  font-weight: 600;
+  color: var(--app-text-muted);
+}
+
+.recommendation-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.bank-actions {
+  margin-top: 1.5rem;
+}
+
+.bank-actions .p-button {
+  width: 100%;
+}
+
+/* PrimeNG Carousel */
+
+:host ::ng-deep .p-carousel-content {
+  padding: 0 0.75rem;
+}
+
+:host ::ng-deep .p-carousel-item {
+  display: flex;
+}
+
+:host ::ng-deep .p-carousel-indicator button {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+:host ::ng-deep .p-carousel-prev,
+:host ::ng-deep .p-carousel-next {
+  width: 42px;
+  height: 42px;
+}

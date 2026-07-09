@@ -1,0 +1,138 @@
+<!-- BANKS -->
+<section>
+  <div class="section-heading">
+    <h2>Popular Swedish Banks</h2>
+
+    <p>Compare traditional Swedish banks and digital banking alternatives.</p>
+  </div>
+
+  <p-carousel
+    [value]="banks()"
+    [numVisible]="3"
+    [numScroll]="1"
+    [circular]="true"
+    [autoplayInterval]="6000"
+    [responsiveOptions]="responsiveOptions"
+    styleClass="bank-carousel">
+    <ng-template let-bank pTemplate="item">
+      <p-card class="bank-card">
+        <div class="bank-header">
+          <h3>{{ bank.name }}</h3>
+
+          <span class="fee">{{ bank.fee }}</span>
+        </div>
+
+        <div class="bank-tags">
+          <p-tag
+            [severity]="bank.providesBankId ? 'success' : 'danger'"
+            [value]="bank.providesBankId ? 'BankID' : 'No BankID'">
+          </p-tag>
+
+          <p-tag
+            [severity]="bank.providesSwish ? 'success' : 'warn'"
+            [value]="bank.providesSwish ? 'Swish' : 'No Swish'">
+          </p-tag>
+
+          @if (bank.studentFriendly) {
+            <p-tag severity="info" value="Student"></p-tag>
+          }
+        </div>
+
+        <p class="bank-note">
+          {{ bank.notes }}
+        </p>
+
+        <ul class="bank-features">
+          <li>
+            <i class="pi pi-language"></i>
+            {{ bank.englishSupport ? "English Support" : "Limited English" }}
+          </li>
+
+          <li>
+            <i class="pi pi-credit-card"></i>
+            {{ bank.debitCard ? "Debit Card" : "No Debit Card" }}
+          </li>
+
+          <li>
+            <i class="pi pi-wallet"></i>
+            {{ bank.creditCard ? "Credit Card" : "No Credit Card" }}
+          </li>
+
+          <li>
+            <i class="pi pi-mobile"></i>
+            {{ bank.mobileApp ? "Mobile App" : "No Mobile App" }}
+          </li>
+
+          <li>
+            <i class="pi pi-building"></i>
+            {{ bank.physicalBranches ? "Physical Branches" : "Digital Only" }}
+          </li>
+
+          <li>
+            <i class="pi pi-apple"></i>
+            Apple Pay {{ bank.applePay ? "✓" : "✕" }}
+          </li>
+
+          <li>
+            <i class="pi pi-android"></i>
+            Google Wallet {{ bank.googleWallet ? "✓" : "✕" }}
+          </li>
+        </ul>
+
+        @if (bank.recommendedFor?.length) {
+          <div class="recommendations">
+            <small>Recommended For</small>
+
+            <div class="recommendation-tags">
+              @for (item of bank.recommendedFor; track item) {
+                <p-tag severity="secondary" [value]="item"> </p-tag>
+              }
+            </div>
+          </div>
+        }
+
+        <div class="bank-actions">
+          <p-button
+            label="Visit Website"
+            icon="pi pi-external-link"
+            severity="secondary"
+            variant="outlined"
+            (onClick)="openWebsite(bank.website)">
+          </p-button>
+        </div>
+      </p-card>
+    </ng-template>
+  </p-carousel>
+</section>
+
+<!-- COMPARISON -->
+
+<section>
+  <h2 class="section-title">Quick comparison</h2>
+
+  <p-table [value]="banks()" [dataKey]="'name'" [rowTrackBy]="trackByBankName">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Bank</th>
+
+        <th>BankID</th>
+
+        <th>Student</th>
+
+        <th>English</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-bank>
+      <tr>
+        <td>{{ bank.name }}</td>
+
+        <td>{{ bank.providesBankId ? "✓" : "✗" }}</td>
+
+        <td>{{ bank.studentFriendly ? "✓" : "✗" }}</td>
+
+        <td>{{ bank.englishSupport ? "✓" : "✗" }}</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</section>

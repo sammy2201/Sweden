@@ -1,31 +1,134 @@
 .top-nav {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+
+  height: 76px;
+
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 1rem 1.5rem;
-  background: #0f172a;
-  color: #fff;
+  justify-content: space-between;
+
+  padding: 0 2rem;
+
+  background: var(--app-surface);
+  border-bottom: 1px solid var(--app-border);
+
+  backdrop-filter: blur(16px);
 }
 
 .brand {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
   text-decoration: none;
+}
+
+.brand-mark {
+  width: 46px;
+  height: 46px;
+
+  border-radius: 14px;
+
+  display: grid;
+  place-items: center;
+
+  background: var(--app-accent-soft);
+
+  color: var(--app-primary);
+
+  font-size: 1.2rem;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--app-heading);
+}
+
+.subtitle {
+  font-size: 0.8rem;
+  color: var(--app-text-muted);
 }
 
 .nav-links {
   display: flex;
-  gap: 1rem;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .nav-links a {
-  color: #cbd5e1;
+  padding: 0.65rem 0.9rem;
+  border-radius: 10px;
+
   text-decoration: none;
+
+  color: var(--app-text-soft);
+
+  font-size: 0.95rem;
   font-weight: 500;
+
+  transition: 0.2s;
 }
 
-.nav-links a.active,
 .nav-links a:hover {
-  color: #fff;
+  background: var(--app-accent-soft);
+  color: var(--app-primary);
+}
+
+.nav-links a.active {
+  background: var(--app-accent-soft);
+  color: var(--app-primary);
+  font-weight: 600;
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.page-content {
+  min-height: calc(100vh - 76px);
+}
+
+/* PrimeNG buttons */
+
+:host ::ng-deep .nav-actions .p-button {
+  height: 42px;
+}
+
+:host ::ng-deep .nav-actions .p-button-label {
+  font-weight: 600;
+}
+
+/* Mobile */
+
+@media (max-width: 900px) {
+  .top-nav {
+    height: auto;
+    padding: 1rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .nav-links {
+    width: 100%;
+    justify-content: center;
+    order: 3;
+    flex-wrap: wrap;
+  }
+
+  .nav-actions {
+    margin-left: auto;
+  }
+
+  .subtitle {
+    display: none;
+  }
 }

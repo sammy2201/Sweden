@@ -1,13 +1,47 @@
-<nav class="top-nav">
-  <a class="brand" routerLink="/">Sweden Start</a>
-  <div class="nav-links">
+<header class="top-nav">
+  <a class="brand" routerLink="/">
+    <div class="brand-mark">
+      <i class="pi pi-map"></i>
+    </div>
+
+    <div class="brand-text">
+      <span class="title">Sweden Start</span>
+      <span class="subtitle">Moving made easier</span>
+    </div>
+  </a>
+
+  <nav class="nav-links">
     @for (item of menuItems; track item.path) {
-      <a [routerLink]="item.path" routerLinkActive="active">
+      <a
+        [routerLink]="item.path"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }">
         {{ item.label }}
       </a>
     }
+  </nav>
+
+  <div class="nav-actions">
+    @if (authService.isAuthenticated()) {
+      <p-button
+        label="Logout"
+        severity="secondary"
+        variant="outlined"
+        icon="pi pi-sign-out"
+        (onClick)="logout()">
+      </p-button>
+    } @else {
+      <p-button
+        label="Login"
+        severity="secondary"
+        variant="text"
+        routerLink="/login">
+      </p-button>
+
+      <p-button label="Get Started" routerLink="/register"> </p-button>
+    }
   </div>
-</nav>
+</header>
 
 <main class="page-content">
   <router-outlet />
