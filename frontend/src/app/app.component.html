@@ -1,10 +1,28 @@
 <nav class="top-nav">
-  <a class="brand" routerLink="/">Sweden Start</a>
+  <a class="brand" routerLink="/">
+    <span class="brand-mark">S</span>
+    <span>Sweden Start</span>
+  </a>
+
   <div class="nav-links">
     @for (item of menuItems; track item.path) {
-      <a [routerLink]="item.path" routerLinkActive="active">
+      <a
+        [routerLink]="item.path"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }">
         {{ item.label }}
       </a>
+    }
+  </div>
+
+  <div class="nav-actions">
+    @if (authService.isAuthenticated()) {
+      <button class="nav-button logout" type="button" (click)="logout()">
+        Logout
+      </button>
+    } @else {
+      <a class="nav-button" routerLink="/login">Login</a>
+      <a class="nav-button primary" routerLink="/register">Register</a>
     }
   </div>
 </nav>

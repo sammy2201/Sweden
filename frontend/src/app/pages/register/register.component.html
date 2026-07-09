@@ -1,0 +1,100 @@
+<section class="register-page">
+  <div class="register-layout">
+    <div class="hero">
+      <span class="hero-badge">Sweden Start</span>
+
+      <h1>Create your account</h1>
+
+      <p>
+        Join thousands of newcomers using Sweden Start to navigate housing,
+        banking, work and life in Sweden.
+      </p>
+
+      <div class="hero-features">
+        <div>
+          <i class="pi pi-map"></i>
+          <span>Personal roadmap</span>
+        </div>
+
+        <div>
+          <i class="pi pi-home"></i>
+          <span>Housing guides</span>
+        </div>
+
+        <div>
+          <i class="pi pi-briefcase"></i>
+          <span>Career resources</span>
+        </div>
+      </div>
+    </div>
+
+    <p-card class="register-card">
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <div class="name-row">
+          <div class="field">
+            <label>First name</label>
+            <input pInputText formControlName="firstName" placeholder="John" />
+          </div>
+
+          <div class="field">
+            <label>Last name</label>
+            <input pInputText formControlName="lastName" placeholder="Doe" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Username</label>
+
+          <input pInputText formControlName="username" placeholder="johndoe" />
+        </div>
+
+        <div class="field">
+          <label>Email</label>
+
+          <input
+            pInputText
+            type="email"
+            formControlName="email"
+            placeholder="john@email.com" />
+        </div>
+
+        <div class="field">
+          <label>Password</label>
+
+          <p-password
+            formControlName="password"
+            [feedback]="false"
+            [toggleMask]="true"
+            placeholder="Create a password"
+            styleClass="w-full"
+            inputStyleClass="w-full">
+          </p-password>
+        </div>
+
+        @if (errorMessage) {
+          <small class="error-message">
+            {{ errorMessage }}
+          </small>
+        }
+
+        @if (successMessage) {
+          <small class="success-message">
+            {{ successMessage }}
+          </small>
+        }
+
+        <p-button
+          type="submit"
+          label="Create account"
+          [loading]="isSubmitting"
+          styleClass="register-btn">
+        </p-button>
+
+        <p class="login-link">
+          Already have an account?
+          <a routerLink="/login">Log in</a>
+        </p>
+      </form>
+    </p-card>
+  </div>
+</section>
