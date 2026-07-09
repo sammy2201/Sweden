@@ -4,10 +4,13 @@ import { CardModule } from "primeng/card";
 import { TagModule } from "primeng/tag";
 
 @Component({
-  selector: "app-home",
+  selector: "app-banking-cards",
   standalone: true,
   imports: [ButtonModule, CardModule, TagModule],
-  templateUrl: "./home.component.html",
-  styleUrl: "./home.component.css",
+  templateUrl: "./banking-cards.component.html",
 })
-export class HomeComponent {}
+export class BankingCardsComponent {
+  openWebsite(url: string): void {
+    globalThis.open(url, "_blank", "noopener,noreferrer");
+  }
+}

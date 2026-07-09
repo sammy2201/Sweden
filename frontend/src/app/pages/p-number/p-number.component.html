@@ -1,236 +1,165 @@
-<div class="page-shell">
-  <div class="page-inner">
-    <!-- Hero -->
-    <div class="hero">
-      <p-tag severity="success" value="Sweden Essentials"></p-tag>
+<section class="page">
+  <!-- Hero -->
 
-      <h1 class="hero-title">Personal Identity Number</h1>
+  <section class="hero">
+    <p-tag severity="success" value="Sweden Essentials"></p-tag>
 
-      <p class="hero-description">
-        A Swedish personal identity number (Personnummer) is the main identity
-        number used when living in Sweden. It gives access to healthcare,
-        banking, taxation, employment and many government services.
-      </p>
+    <h1>Personal Identity Number</h1>
+
+    <p class="hero-text">
+      The Swedish Personal Identity Number (Personnummer) is your key to living
+      in Sweden. It is required for healthcare, banking, employment, taxes,
+      education and many public services.
+    </p>
+
+    <div class="hero-actions">
+      <p-button label="Start your roadmap" icon="pi pi-arrow-right"> </p-button>
+
+      <p-button
+        label="Visit Skatteverket"
+        severity="secondary"
+        variant="outlined">
+      </p-button>
+    </div>
+  </section>
+
+  <!-- Quick facts -->
+
+  <section>
+    <h2 class="section-title">Quick overview</h2>
+
+    <div class="fact-grid">
+      <div class="fact-card">
+        <div class="fact-icon">
+          <i class="pi pi-id-card"></i>
+        </div>
+
+        <h3>What is it?</h3>
+
+        <p>
+          Your permanent identification number used across Sweden by public
+          authorities, banks and employers.
+        </p>
+      </div>
+
+      <div class="fact-card">
+        <div class="fact-icon">
+          <i class="pi pi-users"></i>
+        </div>
+
+        <h3>Who needs one?</h3>
+
+        <p>
+          Anyone planning to live in Sweden for at least one year usually needs
+          a Personnummer.
+        </p>
+      </div>
+
+      <div class="fact-card">
+        <div class="fact-icon">
+          <i class="pi pi-building-columns"></i>
+        </div>
+
+        <h3>Where do I apply?</h3>
+
+        <p>
+          Apply in person at your nearest Skatteverket office after arriving in
+          Sweden.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Timeline -->
+
+  <section>
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">Application process</h2>
+
+        <p class="section-subtitle">
+          Follow these simple steps after arriving in Sweden.
+        </p>
+      </div>
     </div>
 
-    <!-- Overview -->
-    <div class="grid mb-6">
-      <div class="col-12 md:col-4">
-        <p-card>
-          <ng-template pTemplate="header">
-            <div class="card-icon">
-              <i class="pi pi-id-card"></i>
-            </div>
-          </ng-template>
-
-          <h3>What It Is</h3>
-
-          <p>
-            Your unique identification number used throughout Sweden by both
-            government authorities and private companies.
-          </p>
-        </p-card>
-      </div>
-
-      <div class="col-12 md:col-4">
-        <p-card>
-          <ng-template pTemplate="header">
-            <div class="card-icon">
-              <i class="pi pi-users"></i>
-            </div>
-          </ng-template>
-
-          <h3>Who Can Get It</h3>
-
-          <p>
-            Usually people moving to Sweden for one year or longer who are
-            registered in the Swedish Population Register.
-          </p>
-        </p-card>
-      </div>
-
-      <div class="col-12 md:col-4">
-        <p-card>
-          <ng-template pTemplate="header">
-            <div class="card-icon">
-              <i class="pi pi-building-columns"></i>
-            </div>
-          </ng-template>
-
-          <h3>Where To Apply</h3>
-
-          <p>
-            Apply through Skatteverket after moving to Sweden and completing
-            identity verification.
-          </p>
-        </p-card>
-      </div>
-    </div>
-
-    <!-- Timeline -->
-
-    <p-card class="mb-6">
-      <ng-template pTemplate="title"> Application Process </ng-template>
-
-      <ng-template pTemplate="subtitle">
-        How to get your Personnummer
+    <p-timeline [value]="steps" align="left">
+      <ng-template pTemplate="marker">
+        <span class="timeline-marker">
+          <i class="pi pi-check"></i>
+        </span>
       </ng-template>
 
-      <p-timeline [value]="steps" align="left">
-        <ng-template pTemplate="marker">
-          <span
-            class="inline-flex align-items-center justify-content-center w-2rem h-2rem border-circle bg-primary text-white">
-            <i class="pi pi-check"></i>
-          </span>
-        </ng-template>
+      <ng-template pTemplate="content" let-step>
+        <div class="timeline-content">
+          <h3>{{ step.title }}</h3>
 
-        <ng-template pTemplate="content" let-step>
-          <div class="mb-5">
-            <h3 class="mb-2">
-              {{ step.title }}
-            </h3>
-
-            <p class="m-0 text-600">
-              {{ step.description }}
-            </p>
-          </div>
-        </ng-template>
-      </p-timeline>
-    </p-card>
-
-    <!-- Documents -->
-
-    <div class="grid mb-6">
-      <div class="col-12 lg:col-8">
-        <p-card>
-          <ng-template pTemplate="title"> Documents To Bring </ng-template>
-
-          <ul class="document-list">
-            <li *ngFor="let item of documents" class="document-item">
-              <i class="pi pi-check-circle"></i>
-
-              <span>{{ item }}</span>
-            </li>
-          </ul>
-        </p-card>
-      </div>
-
-      <div class="col-12 lg:col-4">
-        <p-panel header="Coordination Number">
-          <p class="line-height-3">
-            If you are not eligible for a Personnummer, Swedish authorities may
-            instead issue a Coordination Number for official communication.
+          <p>
+            {{ step.description }}
           </p>
-        </p-panel>
+        </div>
+      </ng-template>
+    </p-timeline>
+  </section>
+  <section class="office-section">
+    <div class="section-header">
+      <div>
+        <h2>Find a Skatteverket office</h2>
+
+        <p>Search for your nearest office or use your current location.</p>
       </div>
     </div>
 
-    <!-- FAQ -->
+    <div class="office-layout">
+      <div class="office-sidebar">
+        <label>City</label>
 
-    <p-card class="mb-6">
-      <ng-template pTemplate="title"> Frequently Asked Questions </ng-template>
+        <div class="search-box">
+          <input
+            pInputText
+            #locationInput
+            placeholder="Stockholm, Malmö, Göteborg..." />
 
-      <p-accordion>
-        <p-accordion-panel value="0">
-          <p-accordion-header>
-            Is a Personnummer the same as an ID card?
-          </p-accordion-header>
+          <p-button
+            icon="pi pi-search"
+            (onClick)="searchByPlace(locationInput.value)">
+          </p-button>
+        </div>
 
-          <p-accordion-content>
-            No. The Personnummer is your identification number. The Swedish ID
-            card is a separate physical document.
-          </p-accordion-content>
-        </p-accordion-panel>
+        <p-button
+          label="Use Current Location"
+          icon="pi pi-map-marker"
+          severity="secondary"
+          class="current-location"
+          (onClick)="useCurrentLocation()">
+        </p-button>
 
-        <p-accordion-panel value="1">
-          <p-accordion-header> Can I work without one? </p-accordion-header>
+        <div class="location-info">
+          <i class="pi pi-info-circle"></i>
 
-          <p-accordion-content>
-            Yes. Depending on your situation you may begin work before receiving
-            the Personnummer.
-          </p-accordion-content>
-        </p-accordion-panel>
-
-        <p-accordion-panel value="2">
-          <p-accordion-header>
-            Can I use it for healthcare?
-          </p-accordion-header>
-
-          <p-accordion-content>
-            Yes. It is commonly used for healthcare, banking, BankID, tax,
-            employment and education.
-          </p-accordion-content>
-        </p-accordion-panel>
-      </p-accordion>
-    </p-card>
-
-    <!-- Map -->
-
-    <p-card class="mb-6">
-      <ng-template pTemplate="title"> Find Skatteverket Near You </ng-template>
-
-      <div class="grid">
-        <div class="col-12 lg:col-4">
-          <div class="p-inputgroup search-group mb-3">
-            <input
-              pInputText
-              #locationInput
-              placeholder="Stockholm, Malmö..." />
-
-            <button
-              pButton
-              icon="pi pi-search"
-              class="search-button"
-              (click)="searchByPlace(locationInput.value)"></button>
-          </div>
-
-          <button
-            pButton
-            label="Use Current Location"
-            icon="pi pi-map-marker"
-            severity="secondary"
-            class="location-button"
-            (click)="useCurrentLocation()"></button>
-
-          <p class="location-status">
+          <span>
             {{ locationStatus }}
-          </p>
+          </span>
         </div>
 
-        <div class="col-12 lg:col-8">
-          <iframe
-            class="map-frame"
-            [src]="mapUrl"
-            width="100%"
-            height="420"></iframe>
+        <div class="office-tips">
+          <h3>Before you visit</h3>
+
+          <ul>
+            <li>Bring your passport</li>
+
+            <li>Bring your residence permit</li>
+
+            <li>Book an appointment if required</li>
+
+            <li>Bring original documents</li>
+          </ul>
         </div>
       </div>
-    </p-card>
 
-    <!-- Sources -->
-
-    <p-card>
-      <ng-template pTemplate="title"> Official Sources </ng-template>
-
-      <div class="source-links">
-        <a
-          pButton
-          severity="secondary"
-          styleClass="p-button-outlined source-link"
-          target="_blank"
-          href="https://www.skatteverket.se/servicelankar/otherlanguages/inenglish/individualsandemployees/livinginsweden/personalidentitynumberandcoordinationnumber.4.2cf1b5cd163796a5c8b4295.html">
-          Skatteverket – Personal Identity Number
-        </a>
-
-        <a
-          pButton
-          severity="secondary"
-          styleClass="p-button-outlined source-link"
-          target="_blank"
-          href="https://www.skatteverket.se/servicelankar/otherlanguages/inenglish/individualsandemployees/movingtosweden.4.7be5268414bea064694c40c.html">
-          Skatteverket – Moving to Sweden
-        </a>
+      <div class="office-map">
+        <iframe class="map-frame" [src]="mapUrl" loading="lazy"> </iframe>
       </div>
-    </p-card>
-  </div>
-</div>
+    </div>
+  </section>
+</section>

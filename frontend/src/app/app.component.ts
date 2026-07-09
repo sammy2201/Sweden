@@ -7,10 +7,11 @@ import {
 } from "@angular/router";
 import { MenuService } from "./services/menu.service";
 import { AuthService } from "./services/auth.service";
+import { ButtonModule } from "primeng/button";
 
 @Component({
   selector: "app-root",
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, ButtonModule],
   templateUrl: "./app.component.html",
   styleUrl: "./app.component.css",
 })

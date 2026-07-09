@@ -1,0 +1,189 @@
+:host {
+  display: block;
+  background: var(--app-bg);
+}
+
+.page {
+  width: min(1120px, 100%);
+  margin: auto;
+  padding: 3rem 1.5rem 5rem;
+}
+
+.hero {
+  margin-bottom: 3rem;
+}
+
+.hero h1 {
+  margin: 1rem 0;
+  font-size: clamp(2.8rem, 5vw, 4rem);
+  color: var(--app-heading);
+  line-height: 1.05;
+}
+
+.hero p {
+  max-width: 720px;
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: var(--app-text-soft);
+}
+
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 0.8fr;
+  gap: 2rem;
+  margin-top: 1rem;
+}
+
+.content-grid h2 {
+  margin-top: 0;
+  color: var(--app-heading);
+}
+
+.content-grid p {
+  line-height: 1.8;
+  color: var(--app-text-soft);
+}
+
+.content-grid ul {
+  margin: 1.5rem 0;
+  padding-left: 1.2rem;
+}
+
+.content-grid li {
+  margin-bottom: 0.75rem;
+}
+
+.compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.compare-table th {
+  background: var(--app-surface-alt);
+  text-align: left;
+}
+
+.compare-table th,
+.compare-table td {
+  padding: 1rem;
+  border: 1px solid var(--app-border);
+}
+
+:host ::ng-deep .p-card {
+  border: 1px solid var(--app-border);
+  box-shadow: none;
+}
+
+:host ::ng-deep .p-card-body {
+  padding: 1.5rem;
+}
+
+:host ::ng-deep .p-tabs-nav {
+  margin-bottom: 2rem;
+}
+
+:host ::ng-deep .p-tab {
+  font-weight: 600;
+}
+
+@media (max-width: 900px) {
+  .overview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.guide-section {
+  margin-top: 4rem;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.section-header h2 {
+  margin: 0.75rem 0;
+  color: var(--app-heading);
+}
+
+.section-header p {
+  max-width: 720px;
+  color: var(--app-text-soft);
+  line-height: 1.8;
+}
+
+.guide-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 380px;
+  gap: 2rem;
+  align-items: start;
+}
+
+.step-card {
+  display: flex;
+  gap: 1rem;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--app-border);
+  border-radius: 16px;
+  background: var(--app-surface);
+}
+
+.step-card h3 {
+  margin: 0 0 0.5rem;
+}
+
+.step-card p {
+  margin: 0;
+  color: var(--app-text-soft);
+  line-height: 1.7;
+}
+
+.step-number {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+  background: var(--app-accent-soft);
+  color: var(--app-primary);
+
+  font-weight: 700;
+}
+
+.check-list {
+  margin: 1rem 0 0;
+  padding-left: 1.2rem;
+}
+
+.check-list li {
+  margin-bottom: 0.75rem;
+  color: var(--app-text-soft);
+}
+
+@media (max-width: 900px) {
+  .section-header {
+    flex-direction: column;
+  }
+
+  .guide-grid {
+    grid-template-columns: 1fr;
+  }
+}

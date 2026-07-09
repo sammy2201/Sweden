@@ -1,0 +1,319 @@
+<section class="page">
+  <div class="hero">
+    <p-tag severity="success" value="Sweden Essentials"></p-tag>
+
+    <h1>Digital Identity</h1>
+
+    <p>
+      Sweden relies on digital identification for almost every online service.
+      Learn how BankID and Freja eID+ work, when you need them, and how to get
+      started.
+    </p>
+  </div>
+
+  <p-tabs value="0">
+    <p-tablist>
+      <p-tab value="0">Overview</p-tab>
+
+      <p-tab value="1">BankID</p-tab>
+
+      <p-tab value="2">Freja eID+</p-tab>
+
+      <p-tab value="3">Comparison</p-tab>
+    </p-tablist>
+
+    <p-tabpanels>
+      <!-- Overview -->
+
+      <p-tabpanel value="0">
+        <div class="overview-grid">
+          <p-card>
+            <h3>What is Digital Identity?</h3>
+
+            <p>
+              Digital identity lets you securely prove who you are online. In
+              Sweden it's required for banking, healthcare, taxes and many
+              government services.
+            </p>
+          </p-card>
+
+          <p-card>
+            <h3>Why is it important?</h3>
+
+            <p>
+              Without digital identification you'll find it difficult to access
+              many essential online services after moving to Sweden.
+            </p>
+          </p-card>
+
+          <p-card>
+            <h3>Which one should I choose?</h3>
+
+            <p>
+              Most residents use BankID. Freja eID+ is an excellent alternative
+              if BankID isn't available.
+            </p>
+          </p-card>
+        </div>
+      </p-tabpanel>
+
+      <!-- BankID -->
+
+      <p-tabpanel value="1">
+        <div class="content-grid">
+          <div>
+            <h2>BankID</h2>
+
+            <p>
+              BankID is Sweden's most widely used digital identification
+              solution. It is issued through participating Swedish banks.
+            </p>
+
+            <ul>
+              @for (feature of bankIdFeatures; track feature) {
+                <li>{{ feature }}</li>
+              }
+            </ul>
+
+            <p-button label="Learn how to get BankID"> </p-button>
+          </div>
+
+          <p-card>
+            <h3>Requirements</h3>
+
+            <ul>
+              <li>Personnummer</li>
+
+              <li>Swedish bank account</li>
+
+              <li>Valid identification</li>
+
+              <li>Supported bank</li>
+            </ul>
+          </p-card>
+        </div>
+      </p-tabpanel>
+
+      <!-- Freja -->
+
+      <p-tabpanel value="2">
+        <div class="content-grid">
+          <div>
+            <h2>Freja eID+</h2>
+
+            <p>
+              Freja eID+ is another approved electronic identification in Sweden
+              and can be used for many government services.
+            </p>
+
+            <ul>
+              @for (feature of frejaFeatures; track feature) {
+                <li>{{ feature }}</li>
+              }
+            </ul>
+          </div>
+
+          <p-card>
+            <h3>Good to know</h3>
+
+            <p>
+              Freja may be useful if you don't yet have access to BankID or need
+              another approved digital identity.
+            </p>
+          </p-card>
+        </div>
+      </p-tabpanel>
+
+      <!-- Comparison -->
+
+      <p-tabpanel value="3">
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th></th>
+
+              <th>BankID</th>
+
+              <th>Freja eID+</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr>
+              <td>Government services</td>
+
+              <td>✓</td>
+
+              <td>✓</td>
+            </tr>
+
+            <tr>
+              <td>Swedish bank required</td>
+
+              <td>✓</td>
+
+              <td>✗</td>
+            </tr>
+
+            <tr>
+              <td>Swish</td>
+
+              <td>✓</td>
+
+              <td>✗</td>
+            </tr>
+
+            <tr>
+              <td>Healthcare</td>
+
+              <td>✓</td>
+
+              <td>✓</td>
+            </tr>
+          </tbody>
+        </table>
+      </p-tabpanel>
+    </p-tabpanels>
+  </p-tabs>
+
+  <section class="guide-section">
+    <div class="section-header">
+      <div>
+        <p-tag severity="info" value="BankID"></p-tag>
+
+        <h2>How to get BankID</h2>
+
+        <p>
+          BankID is issued by participating Swedish banks. Before you can
+          activate BankID, you'll usually need a Swedish personal identity
+          number and a bank account.
+        </p>
+      </div>
+
+      <p-button
+        label="Official BankID website"
+        severity="secondary"
+        variant="outlined">
+      </p-button>
+    </div>
+
+    <div class="guide-grid">
+      <div>
+        <div class="step-card">
+          <span class="step-number">1</span>
+
+          <div>
+            <h3>When should I apply?</h3>
+
+            <p>
+              Apply after receiving your Personnummer and opening a Swedish bank
+              account.
+            </p>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <span class="step-number">2</span>
+
+          <div>
+            <h3>Where do I apply?</h3>
+
+            <p>
+              Visit your bank or use the bank's mobile application if you're
+              already a customer.
+            </p>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <span class="step-number">3</span>
+
+          <div>
+            <h3>How do I activate it?</h3>
+
+            <p>
+              Your bank will verify your identity and guide you through the
+              activation process.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <p-card>
+        <h3>You'll usually need</h3>
+
+        <ul class="check-list">
+          <li>Personnummer</li>
+
+          <li>Swedish bank account</li>
+
+          <li>Valid passport or Swedish ID</li>
+
+          <li>Registered mobile device</li>
+        </ul>
+      </p-card>
+    </div>
+  </section>
+  <section class="guide-section">
+    <div class="section-header">
+      <div>
+        <p-tag severity="success" value="Freja eID+"></p-tag>
+
+        <h2>How to get Freja eID+</h2>
+
+        <p>
+          Freja eID+ is an approved Swedish digital identity that doesn't
+          require a Swedish bank account.
+        </p>
+      </div>
+    </div>
+
+    <div class="guide-grid">
+      <div>
+        <div class="step-card">
+          <span class="step-number">1</span>
+
+          <div>
+            <h3>Download the app</h3>
+
+            <p>Install Freja from the App Store or Google Play.</p>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <span class="step-number">2</span>
+
+          <div>
+            <h3>Create your account</h3>
+
+            <p>Register your information inside the application.</p>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <span class="step-number">3</span>
+
+          <div>
+            <h3>Verify your identity</h3>
+
+            <p>Complete identity verification to upgrade to Freja eID+.</p>
+          </div>
+        </div>
+      </div>
+
+      <p-card>
+        <h3>You'll usually need</h3>
+
+        <ul class="check-list">
+          <li>Passport or National ID</li>
+
+          <li>Smartphone</li>
+
+          <li>Email address</li>
+
+          <li>Identity verification</li>
+        </ul>
+      </p-card>
+    </div>
+  </section>
+</section>

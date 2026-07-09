@@ -15,6 +15,8 @@ export class MenuService {
     { label: "P Number", path: "/p-number" },
     { label: "Housing", path: "/housing" },
     { label: "Roadmap", path: "/roadmap" },
+    { label: "Digital ID", path: "/digital-id" },
+    { label: "Banking", path: "/banking" },
   ];
 
   getMenuItems(): MenuItem[] {

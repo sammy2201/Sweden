@@ -1,0 +1,150 @@
+.hero {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 5rem 2rem;
+
+  display: grid;
+  grid-template-columns: 1.1fr 480px;
+  gap: 4rem;
+  align-items: center;
+}
+
+.hero-content h1 {
+  margin: 1.5rem 0 1rem;
+
+  font-size: clamp(3rem, 6vw, 4.5rem);
+  line-height: 1.05;
+  letter-spacing: -2px;
+
+  color: var(--app-heading);
+}
+
+.hero-content h1 span {
+  display: block;
+  color: var(--app-primary);
+}
+
+.hero-description {
+  max-width: 620px;
+  margin: 0;
+
+  font-size: 1.1rem;
+  line-height: 1.8;
+
+  color: var(--app-text-soft);
+}
+
+.hero-actions {
+  display: flex;
+  gap: 1rem;
+  margin: 2rem 0 3rem;
+}
+
+.hero-stats {
+  display: flex;
+  gap: 3rem;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.stat .value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--app-heading);
+}
+
+.stat .label {
+  color: var(--app-text-muted);
+  font-size: 0.9rem;
+}
+
+/* Right Card */
+
+.hero-card .p-card {
+  border: 1px solid var(--app-border);
+  border-radius: 22px;
+  box-shadow: var(--app-shadow);
+}
+
+.checklist-header h3 {
+  margin: 0;
+  color: var(--app-heading);
+}
+
+.checklist-header p {
+  margin: 0.5rem 0 2rem;
+  color: var(--app-text-soft);
+  line-height: 1.6;
+}
+
+.check-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  padding: 0.9rem 0;
+
+  border-bottom: 1px solid var(--app-border);
+}
+
+.check-item:last-child {
+  border-bottom: none;
+}
+
+.check-item i {
+  color: var(--app-primary);
+  font-size: 1.1rem;
+}
+
+.check-item.completed i {
+  color: var(--app-success);
+}
+
+.check-item span {
+  color: var(--app-text);
+}
+
+@media (max-width: 960px) {
+  .hero {
+    grid-template-columns: 1fr;
+    padding: 3rem 1.5rem;
+    gap: 2.5rem;
+  }
+
+  .hero-content {
+    text-align: center;
+  }
+
+  .hero-description {
+    margin: auto;
+  }
+
+  .hero-actions {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .hero-stats {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero-stats {
+    flex-direction: column;
+    gap: 1.5rem;
+    align-items: center;
+  }
+
+  .hero-content h1 {
+    font-size: 2.6rem;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+  }
+}
