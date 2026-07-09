@@ -20,9 +20,5 @@ import { BankingCardsComponent } from "./components/banking-cards.component";
   encapsulation: ViewEncapsulation.None,
 })
 export class BankingComponent {
-  progress = 42;
-
-  userName = "Sanmay";
-
   banks: Bank[] = BANKS;
 }

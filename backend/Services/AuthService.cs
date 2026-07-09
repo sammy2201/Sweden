@@ -68,7 +68,7 @@ public class AuthService : IAuthService
 
     public Task<string> GenerateJwtToken(User user)
     {
-        var key = _config["Jwt:Key"] ?? _config["Jwt:Secret"] ?? "dev-secret-key-for-local-development-please-change";
+        var key = _config["Jwt:Key"] ?? _config["Jwt:Secret"] ?? throw new InvalidOperationException("JWT key is not configured.");
         var issuer = _config["Jwt:Issuer"] ?? "sweden-start";
         var audience = _config["Jwt:Audience"] ?? "sweden-start-audience";
         var expiresMinutes = int.TryParse(_config["Jwt:ExpiresMinutes"], out var m) || int.TryParse(_config["Jwt:ExpiryMinutes"], out m) ? m : 60;

@@ -15,6 +15,8 @@ import { CarouselModule } from "primeng/carousel";
 export class BankingBanksComponent {
   banks = input.required<Bank[]>();
 
+  trackByBankName = (_: number, bank: Bank): string => bank.name;
+
   openWebsite(url: string): void {
     globalThis.open(url, "_blank", "noopener,noreferrer");
   }

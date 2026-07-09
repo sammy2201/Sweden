@@ -110,7 +110,7 @@
 <section>
   <h2 class="section-title">Quick comparison</h2>
 
-  <p-table [value]="banks()">
+  <p-table [value]="banks()" [dataKey]="'name'" [rowTrackBy]="trackByBankName">
     <ng-template pTemplate="header">
       <tr>
         <th>Bank</th>
