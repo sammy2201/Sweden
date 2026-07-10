@@ -1,10 +1,10 @@
-import { Component, ViewEncapsulation } from "@angular/core";
+import { Component, inject, ViewEncapsulation } from "@angular/core";
 import type { Bank } from "./bank.model";
-import { BANKS } from "./bank.data";
 import { BankingIntroComponent } from "./components/banking-intro.component";
 import { BankingBanksComponent } from "./components/banking-banks.component";
 import { BankingSetupComponent } from "./components/banking-setup.component";
 import { BankingCardsComponent } from "./components/banking-cards.component";
+import { BankService } from "../../services/bank.service";
 
 @Component({
   selector: "app-banking",
@@ -20,5 +20,17 @@ import { BankingCardsComponent } from "./components/banking-cards.component";
   encapsulation: ViewEncapsulation.None,
 })
 export class BankingComponent {
-  banks: Bank[] = BANKS;
+  private bankService = inject(BankService);
+  banks: Bank[] = [];
+
+  ngOnInit(): void {
+    this.bankService.getBanks().subscribe({
+      next: (banks) => {
+        this.banks = banks;
+      },
+      error: (err) => {
+        console.error("Failed to load banks", err);
+      },
+    });
+  }
 }

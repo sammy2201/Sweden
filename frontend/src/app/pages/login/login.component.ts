@@ -1,6 +1,6 @@
 import { Component, inject } from "@angular/core";
 import { FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
-import { Router, RouterLink } from "@angular/router";
+import { ActivatedRoute, Router, RouterLink } from "@angular/router";
 import { CommonModule } from "@angular/common";
 import { AuthService } from "../../services/auth.service";
 import { ButtonModule } from "primeng/button";
@@ -27,6 +27,7 @@ export class LoginComponent {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   showPassword = false;
 
   readonly form = this.fb.nonNullable.group({
@@ -49,7 +50,8 @@ export class LoginComponent {
     this.authService.login(this.form.getRawValue()).subscribe({
       next: () => {
         this.isSubmitting = false;
-        this.router.navigate(["/"]);
+        const redirectTo = this.route.snapshot.queryParamMap.get("redirectTo");
+        this.router.navigateByUrl(redirectTo || "/");
       },
       error: () => {
         this.isSubmitting = false;
