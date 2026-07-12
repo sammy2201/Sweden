@@ -17,6 +17,7 @@ export class MenuService {
     { label: "Roadmap", path: "/roadmap" },
     { label: "Digital ID", path: "/digital-id" },
     { label: "Banking", path: "/banking" },
+    { label: "Tax Info", path: "/tax-info" },
   ];
 
   getMenuItems(): MenuItem[] {

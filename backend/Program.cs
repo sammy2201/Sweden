@@ -96,6 +96,7 @@ builder.Services.AddScoped<IRoadmapRepository, RoadmapRepository>();
 builder.Services.AddScoped<IRoadmapService, RoadmapService>();
 builder.Services.AddScoped<IBankService, BankService>();
 builder.Services.AddSingleton<IHealthService, HealthService>();
+builder.Services.AddScoped<ITaxService, TaxService>();
 
 
 var defaultConnection = builder.Configuration.GetConnectionString("DefaultConnection");

@@ -1,0 +1,213 @@
+<section class="page">
+  <!-- Hero -->
+
+  <section class="hero">
+    <p-tag severity="success" value="Sweden Essentials"></p-tag>
+
+    <h1>Taxes in Sweden</h1>
+
+    <p class="hero-text">
+      Learn how Swedish taxes work, how to submit your annual tax return,
+      receive tax refunds, claim deductions and use Skatteverket's online
+      services.
+    </p>
+
+    <div class="hero-actions">
+      <p-button label="File your tax return" icon="pi pi-arrow-right">
+      </p-button>
+
+      <p-button
+        label="Visit Skatteverket"
+        severity="secondary"
+        variant="outlined">
+      </p-button>
+
+      <p-button label="Calculate your tax" icon="pi pi-calculator"> </p-button>
+    </div>
+  </section>
+
+  <!-- Quick Overview -->
+
+  <section>
+    <h2 class="section-title">Quick overview</h2>
+
+    <div class="fact-grid">
+      <div class="fact-card" *ngFor="let fact of facts">
+        <div class="fact-icon">
+          <i [class]="fact.icon"></i>
+        </div>
+
+        <h3>{{ fact.title }}</h3>
+
+        <p>{{ fact.description }}</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Timeline -->
+
+  <section>
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">How Swedish taxes work</h2>
+
+        <p class="section-subtitle">
+          From your first salary to receiving your tax refund.
+        </p>
+      </div>
+    </div>
+
+    <p-timeline [value]="steps" align="left">
+      <ng-template pTemplate="marker">
+        <span class="timeline-marker">
+          <i class="pi pi-check"></i>
+        </span>
+      </ng-template>
+
+      <ng-template pTemplate="content" let-step>
+        <div class="timeline-content">
+          <h3>{{ step.title }}</h3>
+
+          <p>{{ step.description }}</p>
+        </div>
+      </ng-template>
+    </p-timeline>
+  </section>
+
+  <!-- Tax deductions -->
+
+  <section>
+    <h2 class="section-title">Common tax deductions</h2>
+
+    <p class="section-subtitle">
+      Depending on your situation, you may qualify for these deductions.
+    </p>
+
+    <div class="fact-grid">
+      <div class="fact-card" *ngFor="let deduction of deductions">
+        <div class="fact-icon">
+          <i [class]="deduction.icon"></i>
+        </div>
+
+        <h3>{{ deduction.title }}</h3>
+
+        <p>{{ deduction.description }}</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Filing methods -->
+
+  <section>
+    <h2 class="section-title">Ways to file your tax return</h2>
+
+    <div class="fact-grid">
+      <div class="fact-card" *ngFor="let method of filingMethods">
+        <div class="fact-icon">
+          <i [class]="method.icon"></i>
+        </div>
+
+        <h3>{{ method.title }}</h3>
+
+        <p>{{ method.description }}</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tax Calendar -->
+
+  <section>
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">Tax calendar</h2>
+
+        <p class="section-subtitle">Important events throughout the year.</p>
+      </div>
+    </div>
+
+    <p-timeline [value]="calendar" align="left">
+      <ng-template pTemplate="marker">
+        <span class="timeline-marker">
+          <i class="pi pi-calendar"></i>
+        </span>
+      </ng-template>
+
+      <ng-template pTemplate="content" let-item>
+        <div class="timeline-content">
+          <h3>{{ item.title }}</h3>
+
+          <p>{{ item.description }}</p>
+        </div>
+      </ng-template>
+    </p-timeline>
+  </section>
+
+  <!-- Online Services -->
+
+  <section>
+    <h2 class="section-title">Online services</h2>
+
+    <p class="section-subtitle">
+      Useful services available through Skatteverket.
+    </p>
+
+    <div class="fact-grid">
+      <div class="fact-card" *ngFor="let service of services">
+        <div class="fact-icon">
+          <i [class]="service.icon"></i>
+        </div>
+
+        <h3>{{ service.title }}</h3>
+
+        <p>{{ service.description }}</p>
+
+        <div style="margin-top: 1.5rem">
+          <p-button
+            [label]="service.button"
+            severity="secondary"
+            variant="outlined">
+          </p-button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+
+  <section>
+    <h2 class="section-title">Frequently asked questions</h2>
+
+    <p-accordion>
+      <p-accordion-panel *ngFor="let faq of faqs; let i = index" [value]="i">
+        <p-accordion-header>{{ faq.question }}</p-accordion-header>
+        <p-accordion-content>
+          <p>{{ faq.answer }}</p>
+        </p-accordion-content>
+      </p-accordion-panel>
+    </p-accordion>
+  </section>
+
+  <!-- CTA -->
+
+  <section class="hero">
+    <p-tag severity="info" value="Need Help?"></p-tag>
+
+    <h2 class="section-title">Visit Skatteverket</h2>
+
+    <p class="hero-text">
+      Skatteverket provides English guidance, online services and local service
+      offices throughout Sweden to help you manage your taxes.
+    </p>
+
+    <div class="hero-actions">
+      <p-button label="Go to Skatteverket" icon="pi pi-external-link">
+      </p-button>
+
+      <p-button
+        label="Find a Service Office"
+        severity="secondary"
+        variant="outlined">
+      </p-button>
+    </div>
+  </section>
+</section>
