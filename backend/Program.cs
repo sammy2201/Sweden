@@ -10,7 +10,13 @@ using SwedenStart;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var jwtKey = builder.Configuration["Jwt:Key"] ?? builder.Configuration["Jwt:Secret"] ?? throw new InvalidOperationException("JWT key is not configured.");
+var jwtKey = builder.Configuration["Jwt:Key"] ?? builder.Configuration["Jwt:Secret"];
+
+if (string.IsNullOrWhiteSpace(jwtKey))
+{
+    throw new InvalidOperationException("JWT key is not configured.");
+}
+
 builder.Configuration["Jwt:Key"] = jwtKey;
 builder.Configuration["Jwt:Secret"] = jwtKey;
 
@@ -84,10 +90,18 @@ builder.Services.AddAuthentication(options =>
 });
 builder.Services.AddScoped<IRoadmapRepository, RoadmapRepository>();
 builder.Services.AddScoped<IRoadmapService, RoadmapService>();
+builder.Services.AddScoped<IBankService, BankService>();
 builder.Services.AddSingleton<IHealthService, HealthService>();
+builder.Services.AddSingleton<TaxDataProvider>();
+builder.Services.AddScoped<ITaxService, TaxService>();
 
-var defaultConnection = builder.Configuration.GetConnectionString("DefaultConnection")
-                        ?? throw new InvalidOperationException("Connection string 'DefaultConnection' is not configured.");
+
+var defaultConnection = builder.Configuration.GetConnectionString("DefaultConnection");
+
+if (string.IsNullOrWhiteSpace(defaultConnection))
+{
+    throw new InvalidOperationException("Connection string 'DefaultConnection' is not configured.");
+}
 
 var connectionStringBuilder = new NpgsqlConnectionStringBuilder(defaultConnection);
 

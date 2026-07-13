@@ -1,0 +1,193 @@
+:host {
+  display: block;
+  background: var(--app-bg);
+}
+
+.page {
+  width: min(1120px, 100%);
+  margin: auto;
+  padding: 3rem 1.5rem 5rem;
+}
+
+/* ---------------- HERO ---------------- */
+
+.hero {
+  padding-bottom: 4rem;
+  border-bottom: 1px solid var(--app-border);
+  margin-bottom: 4rem;
+}
+
+.hero h1 {
+  margin: 1rem 0;
+  font-size: clamp(2.8rem, 5vw, 4rem);
+  line-height: 1.05;
+  letter-spacing: -2px;
+  color: var(--app-heading);
+}
+
+.hero-text {
+  max-width: 720px;
+  margin: 0;
+  font-size: 1.15rem;
+  line-height: 1.8;
+  color: var(--app-text-soft);
+}
+
+.hero-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+/* ---------------- SECTIONS ---------------- */
+
+section:not(.hero) {
+  margin-bottom: 5rem;
+}
+
+.section-title {
+  margin: 0;
+  font-size: 2rem;
+  color: var(--app-heading);
+}
+
+.section-subtitle {
+  margin-top: 0.5rem;
+  color: var(--app-text-muted);
+}
+
+/* ---------------- CARDS ---------------- */
+
+.fact-grid {
+  margin-top: 2rem;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.fact-card {
+  padding: 2rem;
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: 18px;
+  transition: 0.2s;
+  display: flex;
+  flex-direction: column;
+}
+
+.fact-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgb(22 95 102 / 8%);
+}
+
+.fact-icon {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: var(--app-accent-soft);
+  margin-bottom: 1.25rem;
+}
+
+.fact-icon i {
+  font-size: 1.4rem;
+  color: var(--app-primary);
+}
+
+.fact-card h3 {
+  margin: 0 0 0.75rem;
+  color: var(--app-heading);
+}
+
+.fact-card p {
+  margin: 0;
+  line-height: 1.7;
+  color: var(--app-text-soft);
+}
+
+.fact-card .p-button {
+  width: 100%;
+  margin-top: auto;
+}
+
+/* ---------------- TIMELINE ---------------- */
+
+.section-header {
+  margin-bottom: 2rem;
+}
+
+.timeline-marker {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--app-primary);
+  color: white;
+}
+
+.timeline-content {
+  padding-bottom: 2rem;
+}
+
+.timeline-content h3 {
+  margin: 0 0 0.5rem;
+  color: var(--app-heading);
+}
+
+.timeline-content p {
+  margin: 0;
+  line-height: 1.7;
+  color: var(--app-text-soft);
+}
+
+:host ::ng-deep .p-timeline-event-opposite {
+  display: none;
+}
+
+:host ::ng-deep .p-timeline-event-content {
+  padding-left: 1.5rem;
+}
+
+/* ---------------- FAQ ---------------- */
+
+:host ::ng-deep .p-accordion {
+  margin-top: 2rem;
+}
+
+:host ::ng-deep .p-accordion-header-link {
+  font-weight: 600;
+}
+
+:host ::ng-deep .p-accordion-content {
+  line-height: 1.7;
+  color: var(--app-text-soft);
+}
+
+/* ---------------- BUTTONS ---------------- */
+
+:host ::ng-deep .p-button {
+  border-radius: 10px;
+}
+
+/* ---------------- RESPONSIVE ---------------- */
+
+@media (max-width: 900px) {
+  .fact-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+  }
+
+  .hero h1 {
+    font-size: 2.8rem;
+    letter-spacing: -1px;
+  }
+
+  .section-title {
+    font-size: 1.7rem;
+  }
+}

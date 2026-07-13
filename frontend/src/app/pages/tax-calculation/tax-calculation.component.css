@@ -1,0 +1,142 @@
+.tax-page {
+  max-width: 1250px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.page-header {
+  margin-bottom: 2rem;
+}
+
+.page-header h1 {
+  margin: 0;
+  font-size: 2rem;
+  color: #1f2937;
+}
+
+.page-header p {
+  margin-top: 0.5rem;
+  color: #6b7280;
+}
+
+.tax-layout {
+  display: grid;
+  grid-template-columns: 400px 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+.tax-card,
+.summary-card {
+  background: white;
+  border-radius: 18px;
+  padding: 2rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+.tax-card h2 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.field label {
+  font-weight: 600;
+  color: #374151;
+}
+
+.field input,
+.field p-inputnumber {
+  width: 100%;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1rem 0 2rem;
+}
+
+.salary-card {
+  background: linear-gradient(135deg, #16a34a, #22c55e);
+  color: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.salary-card span {
+  display: block;
+  opacity: 0.9;
+  font-size: 0.95rem;
+}
+
+.salary-card h2 {
+  margin: 0.5rem 0 0;
+  font-size: 2rem;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.summary-item {
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #fafafa;
+}
+
+.summary-item label {
+  display: block;
+  color: #6b7280;
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+}
+
+.summary-item strong {
+  font-size: 1.1rem;
+  color: #1f2937;
+}
+
+.empty-state {
+  height: 520px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #64748b;
+  text-align: center;
+}
+
+.empty-state i {
+  font-size: 4rem;
+  color: #d1d5db;
+  margin-bottom: 1rem;
+}
+
+.skeleton-grid {
+  margin-top: 2rem;
+}
+
+.skeleton-grid .p-skeleton {
+  width: 100%;
+}
+
+@media (max-width: 992px) {
+  .tax-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+}
