@@ -9,6 +9,7 @@ import { DigitalIDComponent } from "./pages/digitalID/digital-ID.component";
 import { BankingComponent } from "./pages/banking/banking.component";
 import { TaxInfoComponent } from "./pages/tax/tax.component";
 import { authGuard } from "./guards/auth.guard";
+import { TaxCalculationComponent } from "./pages/tax-calculation/tax-calculation.component";
 
 export const routes: Routes = [
   { path: "p-number", component: PNumberComponent },
@@ -20,4 +21,9 @@ export const routes: Routes = [
   { path: "banking", component: BankingComponent, canActivate: [authGuard] },
   { path: "tax-info", component: TaxInfoComponent, canActivate: [authGuard] },
   { path: "digital-id", component: DigitalIDComponent },
+  {
+    path: "tax-calculation",
+    component: TaxCalculationComponent,
+    canActivate: [authGuard],
+  },
 ];

@@ -1,0 +1,153 @@
+<div class="tax-page">
+  <div class="page-header">
+    <h1>Swedish Tax Calculator</h1>
+    <p>
+      Estimate your monthly income tax based on your salary and municipality.
+    </p>
+  </div>
+
+  <div class="tax-layout">
+    <!-- Left Card -->
+    <div class="tax-card">
+      <h2>Calculate Tax</h2>
+
+      <div class="field">
+        <label for="salary">Monthly Salary (SEK)</label>
+        <p-inputNumber
+          inputId="salary"
+          [(ngModel)]="request.monthlySalary"
+          mode="decimal"
+          [min]="0"
+          [useGrouping]="true"
+          suffix=" kr">
+        </p-inputNumber>
+      </div>
+
+      <div class="field">
+        <label for="municipality">Municipality</label>
+        <input
+          pInputText
+          id="municipality"
+          [(ngModel)]="request.municipality"
+          placeholder="Malmö" />
+      </div>
+
+      <div class="field">
+        <label for="age">Age</label>
+        <p-inputNumber
+          inputId="age"
+          [(ngModel)]="request.age"
+          [min]="18"
+          [max]="120">
+        </p-inputNumber>
+      </div>
+
+      <div class="checkbox-row">
+        <p-checkbox
+          inputId="church"
+          [(ngModel)]="request.churchMember"
+          [binary]="true">
+        </p-checkbox>
+
+        <label for="church"> Member of the Church of Sweden </label>
+      </div>
+
+      <p-button
+        label="Calculate Tax"
+        icon="pi pi-calculator"
+        (onClick)="calculate()">
+      </p-button>
+    </div>
+
+    <!-- Right Card -->
+    <!-- Right Card -->
+    <div class="summary-card">
+      <!-- Loading -->
+      <ng-container *ngIf="loading">
+        <p-skeleton height="120px" borderRadius="16px"></p-skeleton>
+
+        <div class="summary-grid skeleton-grid">
+          <p-skeleton
+            *ngFor="let i of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]"
+            height="90px"
+            borderRadius="12px">
+          </p-skeleton>
+        </div>
+      </ng-container>
+
+      <!-- Empty State -->
+      <ng-container *ngIf="!loading && !result">
+        <div class="empty-state">
+          <i class="pi pi-calculator"></i>
+
+          <h3>Calculate your tax</h3>
+
+          <p>
+            Fill in your salary details and click
+            <strong>Calculate Tax</strong>.
+          </p>
+        </div>
+      </ng-container>
+
+      <!-- Results -->
+      <ng-container *ngIf="!loading && result">
+        <div class="salary-card">
+          <span>Net Monthly Salary</span>
+          <h2>{{ result.netSalary | number: "1.2-2" }} kr</h2>
+        </div>
+
+        <div class="summary-grid">
+          <div class="summary-item">
+            <label>Total Tax</label>
+            <strong>{{ result.totalTax | number: "1.2-2" }} kr</strong>
+          </div>
+
+          <div class="summary-item">
+            <label>Gross Salary</label>
+            <strong>{{ result.grossSalary | number: "1.2-2" }} kr</strong>
+          </div>
+
+          <div class="summary-item">
+            <label>Municipal Tax</label>
+            <strong>{{ result.municipalTax | number: "1.2-2" }} kr</strong>
+          </div>
+
+          <div class="summary-item">
+            <label>State Tax</label>
+            <strong>{{ result.stateTax | number: "1.2-2" }} kr</strong>
+          </div>
+
+          <div class="summary-item">
+            <label>Church Fee</label>
+            <strong>{{ result.churchFee | number: "1.2-2" }} kr</strong>
+          </div>
+
+          <div class="summary-item">
+            <label>Tax Credits</label>
+            <strong>{{ result.taxCredits | number: "1.2-2" }} kr</strong>
+          </div>
+
+          <div class="summary-item">
+            <label>Effective Tax Rate</label>
+            <strong>{{ result.effectiveTaxRate | number: "1.2-2" }}%</strong>
+          </div>
+
+          <div class="summary-item">
+            <label>Tax Table</label>
+            <strong>{{ result.taxTable }}</strong>
+          </div>
+
+          <div class="summary-item">
+            <label>Legacy Tax Amount</label>
+            <strong>{{ result.taxAmount | number: "1.2-2" }} kr</strong>
+          </div>
+
+          <div class="summary-item full-width">
+            <label>Legacy Tax Rate</label>
+            <strong>{{ result.taxRate | number: "1.2-2" }}%</strong>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</div>

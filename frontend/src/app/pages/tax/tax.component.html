@@ -13,16 +13,30 @@
     </p>
 
     <div class="hero-actions">
-      <p-button label="File your tax return" icon="pi pi-arrow-right">
-      </p-button>
+      <a
+        href="https://www.skatteverket.se/servicelankar/otherlanguages/englishengelska/individualsandemployees/declaringtaxesforindividuals.4.7be5268414bea064694c5df.html"
+        target="_blank"
+        rel="noopener noreferrer">
+        <p-button label="File your tax return" icon="pi pi-arrow-right">
+        </p-button>
+      </a>
+
+      <a
+        href="https://www.skatteverket.se/"
+        target="_blank"
+        rel="noopener noreferrer">
+        <p-button
+          label="Visit Skatteverket"
+          severity="secondary"
+          variant="outlined">
+        </p-button>
+      </a>
 
       <p-button
-        label="Visit Skatteverket"
-        severity="secondary"
-        variant="outlined">
+        label="Calculate your tax"
+        icon="pi pi-calculator"
+        routerLink="/tax-calculation">
       </p-button>
-
-      <p-button label="Calculate your tax" icon="pi pi-calculator"> </p-button>
     </div>
   </section>
 
@@ -162,11 +176,39 @@
         <p>{{ service.description }}</p>
 
         <div style="margin-top: 1.5rem">
-          <p-button
-            [label]="service.button"
-            severity="secondary"
-            variant="outlined">
-          </p-button>
+          @if (service.title === "Tax Calculator") {
+            <p-button
+              [label]="service.button"
+              severity="secondary"
+              variant="outlined"
+              routerLink="/tax-calculation">
+            </p-button>
+          } @else if (service.title === "Register Bank Account") {
+            <p-button
+              [label]="service.button"
+              severity="secondary"
+              variant="outlined"
+              routerLink="/banking">
+            </p-button>
+          } @else if (service.title === "Deduction Guide") {
+            <p-button
+              [label]="service.button"
+              severity="secondary"
+              variant="outlined"
+              routerLink="/tax-info">
+            </p-button>
+          } @else {
+            <a
+              href="https://www.skatteverket.se/"
+              target="_blank"
+              rel="noopener noreferrer">
+              <p-button
+                [label]="service.button"
+                severity="secondary"
+                variant="outlined">
+              </p-button>
+            </a>
+          }
         </div>
       </div>
     </div>
@@ -200,14 +242,24 @@
     </p>
 
     <div class="hero-actions">
-      <p-button label="Go to Skatteverket" icon="pi pi-external-link">
-      </p-button>
+      <a
+        href="https://www.skatteverket.se/"
+        target="_blank"
+        rel="noopener noreferrer">
+        <p-button label="Go to Skatteverket" icon="pi pi-external-link">
+        </p-button>
+      </a>
 
-      <p-button
-        label="Find a Service Office"
-        severity="secondary"
-        variant="outlined">
-      </p-button>
+      <a
+        href="https://www.skatteverket.se/omoss/kontaktaoss/besokservicekontor.4.7be5268414bea064694160.html"
+        target="_blank"
+        rel="noopener noreferrer">
+        <p-button
+          label="Find a Service Office"
+          severity="secondary"
+          variant="outlined">
+        </p-button>
+      </a>
     </div>
   </section>
 </section>

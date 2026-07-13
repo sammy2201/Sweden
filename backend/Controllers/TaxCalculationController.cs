@@ -1,10 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 namespace SwedenStart;
 
 
 
 [ApiController]
 [Route("api/tax")]
+[Authorize]
 public class TaxController : ControllerBase
 {
      private readonly ITaxService _taxService;
