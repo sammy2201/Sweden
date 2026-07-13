@@ -23,7 +23,10 @@ public class TaxController : ControllerBase
      }
 
      [HttpPost("calculate")]
-     public IActionResult Calculate([FromBody] TaxCalculationRequest request)
+     [ProducesResponseType(typeof(TaxCalculationResponse), StatusCodes.Status200OK)]
+     [ProducesResponseType(typeof(object), StatusCodes.Status400BadRequest)]
+     [ProducesResponseType(typeof(object), StatusCodes.Status404NotFound)]
+     public ActionResult<TaxCalculationResponse> Calculate([FromBody] TaxCalculationRequest request)
      {
           try
           {

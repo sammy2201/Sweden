@@ -32,7 +32,7 @@ export class TaxCalculationComponent {
     monthlySalary: 42000,
     municipality: "Malmö",
     age: 25,
-    churchMember: true,
+    churchMember: false,
   };
   loading = false;
   result: TaxCalculationResponse | null = null;

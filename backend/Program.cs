@@ -10,10 +10,6 @@ using SwedenStart;
 
 var builder = WebApplication.CreateBuilder(args);
 
-Console.WriteLine($"Environment: {builder.Environment.EnvironmentName}");
-Console.WriteLine($"Content root: {builder.Environment.ContentRootPath}");
-Console.WriteLine($"Jwt Key: '{builder.Configuration["Jwt:Key"]}'");
-
 var jwtKey = builder.Configuration["Jwt:Key"] ?? builder.Configuration["Jwt:Secret"];
 
 if (string.IsNullOrWhiteSpace(jwtKey))
