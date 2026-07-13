@@ -1,6 +1,4 @@
 using System.Globalization;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace SwedenStart;
 
@@ -13,24 +11,12 @@ public class TaxService : ITaxService
 
      private readonly List<MunicipalityTaxRate> _rates;
 
-     public TaxService(IWebHostEnvironment env)
+     public TaxService(TaxDataProvider taxDataProvider)
      {
-          var path = Path.Combine(env.ContentRootPath, "Data", "skattesatser-kommuner-2026.json");
-
-          if (!File.Exists(path))
-               throw new FileNotFoundException("The 2026 Swedish municipal tax-rate file was not found.", path);
-
-          var json = File.ReadAllText(path);
-          var options = new JsonSerializerOptions
-          {
-               PropertyNameCaseInsensitive = true,
-               NumberHandling = JsonNumberHandling.AllowReadingFromString
-          };
-
-          _rates = JsonSerializer.Deserialize<List<MunicipalityTaxRate>>(json, options) ?? [];
+          _rates = taxDataProvider.TaxRates.ToList();
 
           if (_rates.Count == 0)
-               throw new InvalidOperationException("The 2026 Swedish municipal tax-rate file is empty.");
+               throw new InvalidOperationException("Tax data source returned no municipality rates.");
      }
 
      public IEnumerable<MunicipalityTaxRate> GetTaxRates()
@@ -43,7 +29,7 @@ public class TaxService : ITaxService
 
      public TaxCalculationResponse Calculate(TaxCalculationRequest request)
      {
-          Validate(request);
+
 
           var annualGrossIncome = RoundDownToHundred(request.MonthlySalary * 12m);
           var rate = FindMunicipalityRate(request.Municipality);
@@ -83,12 +69,9 @@ public class TaxService : ITaxService
                ChurchFee = RoundMoney(churchFee / 12m),
                TaxCredits = RoundMoney(-(earnedIncomeTaxCredit / 12m)),
                TotalTax = monthlyTax,
-
-               TaxAmount = monthlyTax,
                NetSalary = monthlyNetSalary,
 
                EffectiveTaxRate = effectiveTaxRate,
-               TaxRate = effectiveTaxRate,
 
                Municipality = rate.Municipality,
                TaxTable = rate.TaxTable
@@ -253,21 +236,6 @@ public class TaxService : ITaxService
           return age >= 66;
      }
 
-     private static void Validate(TaxCalculationRequest request)
-     {
-          if (request == null)
-               throw new ArgumentNullException(nameof(request));
-
-          if (request.MonthlySalary <= 0m)
-               throw new ArgumentException("Monthly salary must be greater than zero.");
-
-          if (string.IsNullOrWhiteSpace(request.Municipality))
-               throw new ArgumentException("Municipality is required.");
-
-          if (request.Age < 0 || request.Age > 120)
-               throw new ArgumentException("Age must be between 0 and 120.");
-     }
-
      private static string NormalizeMunicipality(string value)
      {
           return value.Trim().Normalize().ToUpperInvariant();
@@ -306,5 +274,14 @@ public class TaxService : ITaxService
      private static decimal RoundUpToHundred(decimal amount)
      {
           return Math.Ceiling(amount / 100m) * 100m;
+     }
+
+
+     public IEnumerable<string> GetMunicipalities()
+     {
+          return _rates
+              .Select(r => ToDisplayMunicipality(r.Municipality))
+              .Distinct(StringComparer.OrdinalIgnoreCase)
+              .OrderBy(m => m, StringComparer.Create(new CultureInfo("sv-SE"), true));
      }
 }

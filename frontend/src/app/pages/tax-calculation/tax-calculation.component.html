@@ -25,11 +25,14 @@
 
       <div class="field">
         <label for="municipality">Municipality</label>
-        <input
-          pInputText
-          id="municipality"
+        <p-select
+          inputId="municipality"
+          [options]="municipalities"
           [(ngModel)]="request.municipality"
-          placeholder="Malmö" />
+          [filter]="true"
+          [showClear]="true"
+          placeholder="Select municipality">
+        </p-select>
       </div>
 
       <div class="field">
@@ -132,19 +135,9 @@
             <strong>{{ result.effectiveTaxRate | number: "1.2-2" }}%</strong>
           </div>
 
-          <div class="summary-item">
+          <div class="summary-item full-width">
             <label>Tax Table</label>
             <strong>{{ result.taxTable }}</strong>
-          </div>
-
-          <div class="summary-item">
-            <label>Legacy Tax Amount</label>
-            <strong>{{ result.taxAmount | number: "1.2-2" }} kr</strong>
-          </div>
-
-          <div class="summary-item full-width">
-            <label>Legacy Tax Rate</label>
-            <strong>{{ result.taxRate | number: "1.2-2" }}%</strong>
           </div>
         </div>
       </ng-container>

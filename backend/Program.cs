@@ -10,10 +10,6 @@ using SwedenStart;
 
 var builder = WebApplication.CreateBuilder(args);
 
-Console.WriteLine($"Environment: {builder.Environment.EnvironmentName}");
-Console.WriteLine($"Content root: {builder.Environment.ContentRootPath}");
-Console.WriteLine($"Jwt Key: '{builder.Configuration["Jwt:Key"]}'");
-
 var jwtKey = builder.Configuration["Jwt:Key"] ?? builder.Configuration["Jwt:Secret"];
 
 if (string.IsNullOrWhiteSpace(jwtKey))
@@ -96,6 +92,7 @@ builder.Services.AddScoped<IRoadmapRepository, RoadmapRepository>();
 builder.Services.AddScoped<IRoadmapService, RoadmapService>();
 builder.Services.AddScoped<IBankService, BankService>();
 builder.Services.AddSingleton<IHealthService, HealthService>();
+builder.Services.AddSingleton<TaxDataProvider>();
 builder.Services.AddScoped<ITaxService, TaxService>();
 
 

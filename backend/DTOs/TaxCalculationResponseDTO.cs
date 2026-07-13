@@ -14,13 +14,9 @@ public class TaxCalculationResponse
 
      public decimal TotalTax { get; set; }
 
-     public decimal TaxAmount { get; set; }
-
      public decimal NetSalary { get; set; }
 
      public decimal EffectiveTaxRate { get; set; }
-
-     public decimal TaxRate { get; set; }
 
      public string Municipality { get; set; } = string.Empty;
 
