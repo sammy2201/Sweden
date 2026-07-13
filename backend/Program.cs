@@ -92,6 +92,7 @@ builder.Services.AddScoped<IRoadmapRepository, RoadmapRepository>();
 builder.Services.AddScoped<IRoadmapService, RoadmapService>();
 builder.Services.AddScoped<IBankService, BankService>();
 builder.Services.AddSingleton<IHealthService, HealthService>();
+builder.Services.AddSingleton<TaxDataProvider>();
 builder.Services.AddScoped<ITaxService, TaxService>();
 
 

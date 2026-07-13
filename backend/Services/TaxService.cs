@@ -1,6 +1,4 @@
 using System.Globalization;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace SwedenStart;
 
@@ -13,24 +11,12 @@ public class TaxService : ITaxService
 
      private readonly List<MunicipalityTaxRate> _rates;
 
-     public TaxService(IWebHostEnvironment env)
+     public TaxService(TaxDataProvider taxDataProvider)
      {
-          var path = Path.Combine(env.ContentRootPath, "Data", "skattesatser-kommuner-2026.json");
-
-          if (!File.Exists(path))
-               throw new FileNotFoundException("The 2026 Swedish municipal tax-rate file was not found.", path);
-
-          var json = File.ReadAllText(path);
-          var options = new JsonSerializerOptions
-          {
-               PropertyNameCaseInsensitive = true,
-               NumberHandling = JsonNumberHandling.AllowReadingFromString
-          };
-
-          _rates = JsonSerializer.Deserialize<List<MunicipalityTaxRate>>(json, options) ?? [];
+          _rates = taxDataProvider.TaxRates.ToList();
 
           if (_rates.Count == 0)
-               throw new InvalidOperationException("The 2026 Swedish municipal tax-rate file is empty.");
+               throw new InvalidOperationException("Tax data source returned no municipality rates.");
      }
 
      public IEnumerable<MunicipalityTaxRate> GetTaxRates()
