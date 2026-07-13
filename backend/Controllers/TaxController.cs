@@ -17,6 +17,7 @@ public class TaxController : ControllerBase
      }
 
      [HttpGet("rates")]
+
      public IActionResult GetRates()
      {
           return Ok(_taxService.GetTaxRates());
@@ -43,4 +44,18 @@ public class TaxController : ControllerBase
                return NotFound(new { message = ex.Message });
           }
      }
+
+     [HttpGet("municipality")]
+     public IActionResult GetMunicipalities()
+     {
+          try
+          {
+               return Ok(_taxService.GetMunicipalities());
+          }
+          catch (KeyNotFoundException ex)
+          {
+               return NotFound(new { message = ex.Message });
+          }
+     }
+
 }

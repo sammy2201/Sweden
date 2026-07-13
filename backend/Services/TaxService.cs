@@ -29,7 +29,7 @@ public class TaxService : ITaxService
 
      public TaxCalculationResponse Calculate(TaxCalculationRequest request)
      {
-          Validate(request);
+
 
           var annualGrossIncome = RoundDownToHundred(request.MonthlySalary * 12m);
           var rate = FindMunicipalityRate(request.Municipality);
@@ -69,12 +69,9 @@ public class TaxService : ITaxService
                ChurchFee = RoundMoney(churchFee / 12m),
                TaxCredits = RoundMoney(-(earnedIncomeTaxCredit / 12m)),
                TotalTax = monthlyTax,
-
-               TaxAmount = monthlyTax,
                NetSalary = monthlyNetSalary,
 
                EffectiveTaxRate = effectiveTaxRate,
-               TaxRate = effectiveTaxRate,
 
                Municipality = rate.Municipality,
                TaxTable = rate.TaxTable
@@ -239,21 +236,6 @@ public class TaxService : ITaxService
           return age >= 66;
      }
 
-     private static void Validate(TaxCalculationRequest request)
-     {
-          if (request == null)
-               throw new ArgumentNullException(nameof(request));
-
-          if (request.MonthlySalary <= 0m)
-               throw new ArgumentException("Monthly salary must be greater than zero.");
-
-          if (string.IsNullOrWhiteSpace(request.Municipality))
-               throw new ArgumentException("Municipality is required.");
-
-          if (request.Age < 0 || request.Age > 120)
-               throw new ArgumentException("Age must be between 0 and 120.");
-     }
-
      private static string NormalizeMunicipality(string value)
      {
           return value.Trim().Normalize().ToUpperInvariant();
@@ -292,5 +274,14 @@ public class TaxService : ITaxService
      private static decimal RoundUpToHundred(decimal amount)
      {
           return Math.Ceiling(amount / 100m) * 100m;
+     }
+
+
+     public IEnumerable<string> GetMunicipalities()
+     {
+          return _rates
+              .Select(r => ToDisplayMunicipality(r.Municipality))
+              .Distinct(StringComparer.OrdinalIgnoreCase)
+              .OrderBy(m => m, StringComparer.Create(new CultureInfo("sv-SE"), true));
      }
 }

@@ -4,8 +4,8 @@ import { FormsModule } from "@angular/forms";
 import { InputNumberModule } from "primeng/inputnumber";
 import { CheckboxModule } from "primeng/checkbox";
 import { ButtonModule } from "primeng/button";
-import { InputTextModule } from "primeng/inputtext";
 import { SkeletonModule } from "primeng/skeleton";
+import { SelectModule } from "primeng/select";
 import {
   TaxService,
   TaxCalculationRequest,
@@ -22,7 +22,7 @@ import {
     CheckboxModule,
     ButtonModule,
     SkeletonModule,
-    InputTextModule,
+    SelectModule,
   ],
   templateUrl: "./tax-calculation.component.html",
   styleUrls: ["./tax-calculation.component.css"],
@@ -49,6 +49,19 @@ export class TaxCalculationComponent {
       error: (err) => {
         console.error(err);
         this.loading = false;
+      },
+    });
+  }
+
+  municipalities: string[] = [];
+
+  ngOnInit(): void {
+    this.taxService.getMunicipalities().subscribe({
+      next: (res) => {
+        this.municipalities = res;
+      },
+      error: (err) => {
+        console.error(err);
       },
     });
   }
