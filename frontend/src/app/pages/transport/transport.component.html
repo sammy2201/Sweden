@@ -1,0 +1,35 @@
+<div class="transport-page">
+  <div class="hero">
+    <h1>Travel Around Sweden</h1>
+
+    <p>Learn how to travel using buses and trains and where to buy tickets.</p>
+  </div>
+
+  <div class="provider-grid">
+    <p-card
+      *ngFor="let provider of providers"
+      [style]="{ 'border-top': '5px solid ' + provider.color }">
+      <ng-template pTemplate="header">
+        <div class="card-header">
+          <i [class]="provider.icon"></i>
+
+          <h2>{{ provider.name }}</h2>
+        </div>
+      </ng-template>
+
+      <p>{{ provider.description }}</p>
+
+      <h4>How to buy a ticket</h4>
+
+      <ol>
+        <li *ngFor="let step of provider.ticketInfo">
+          {{ step }}
+        </li>
+      </ol>
+
+      <a [href]="provider.website" target="_blank">
+        <p-button label="Visit Website" icon="pi pi-external-link"> </p-button>
+      </a>
+    </p-card>
+  </div>
+</div>
