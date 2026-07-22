@@ -94,6 +94,19 @@ builder.Services.AddScoped<IBankService, BankService>();
 builder.Services.AddSingleton<IHealthService, HealthService>();
 builder.Services.AddSingleton<TaxDataProvider>();
 builder.Services.AddScoped<ITaxService, TaxService>();
+builder.Services.AddHttpClient<ITransportService, TransportService>((sp, client) =>
+{
+    var config = sp.GetRequiredService<IConfiguration>();
+    var baseUrl = config["ResRobot:BaseUrl"] ?? "https://api.resrobot.se/v2.1/";
+
+    if (!baseUrl.EndsWith('/'))
+    {
+        baseUrl += "/";
+    }
+
+    client.BaseAddress = new Uri(baseUrl);
+    client.Timeout = TimeSpan.FromSeconds(20);
+});
 
 
 var defaultConnection = builder.Configuration.GetConnectionString("DefaultConnection");
