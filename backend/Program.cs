@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.OpenApi;
 using Npgsql;
 using Scalar.AspNetCore;
@@ -9,6 +8,7 @@ using System.Text;
 using SwedenStart;
 
 var builder = WebApplication.CreateBuilder(args);
+
 
 var jwtKey = builder.Configuration["Jwt:Key"] ?? builder.Configuration["Jwt:Secret"];
 
@@ -117,6 +117,10 @@ if (string.IsNullOrWhiteSpace(defaultConnection))
 }
 
 var connectionStringBuilder = new NpgsqlConnectionStringBuilder(defaultConnection);
+var redactedConnectionStringBuilder = new NpgsqlConnectionStringBuilder(defaultConnection)
+{
+    Password = string.IsNullOrWhiteSpace(connectionStringBuilder.Password) ? string.Empty : "***"
+};
 
 builder.Services.AddSingleton(sp => NpgsqlDataSource.Create(defaultConnection));
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -171,5 +175,4 @@ app.Lifetime.ApplicationStarted.Register(() =>
 app.MapControllers();
 
 app.Run();
-
 

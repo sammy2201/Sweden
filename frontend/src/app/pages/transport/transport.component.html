@@ -1,35 +1,85 @@
 <div class="transport-page">
   <div class="hero">
     <h1>Travel Around Sweden</h1>
-
-    <p>Learn how to travel using buses and trains and where to buy tickets.</p>
+    <p>
+      Search buses and trains across Sweden. Compare available journeys and view
+      full route details.
+    </p>
   </div>
 
-  <div class="provider-grid">
-    <p-card
-      *ngFor="let provider of providers"
-      [style]="{ 'border-top': '5px solid ' + provider.color }">
-      <ng-template pTemplate="header">
-        <div class="card-header">
-          <i [class]="provider.icon"></i>
+  <!-- Search Card -->
+  <p-card class="search-card">
+    <div class="search-grid">
+      <span class="p-float-label">
+        <input pInputText id="from" [(ngModel)]="from" />
+        <label for="from">From</label>
+      </span>
 
-          <h2>{{ provider.name }}</h2>
+      <span class="p-float-label">
+        <input pInputText id="to" [(ngModel)]="to" />
+        <label for="to">To</label>
+      </span>
+
+      <button
+        pButton
+        label="Search"
+        icon="pi pi-search"
+        (click)="searchTrips()"></button>
+    </div>
+  </p-card>
+
+  <!-- Results -->
+
+  <div class="results" *ngIf="trips.length">
+    <p-card *ngFor="let trip of trips" class="trip-card">
+      <div class="trip-header">
+        <div>
+          <h3>{{ trip.operator }}</h3>
+          <small>{{ trip.transportType }}</small>
         </div>
-      </ng-template>
 
-      <p>{{ provider.description }}</p>
+        <p-tag
+          [severity]="trip.isDirect ? 'success' : 'warn'"
+          [value]="
+            trip.isDirect ? 'Direct' : trip.numberOfChanges + ' Changes'
+          ">
+        </p-tag>
+      </div>
 
-      <h4>How to buy a ticket</h4>
+      <div class="trip-times">
+        <div>
+          <strong>{{ trip.departureTime | date: "HH:mm" }}</strong>
+          <p>{{ trip.origin.name }}</p>
+        </div>
 
-      <ol>
-        <li *ngFor="let step of provider.ticketInfo">
-          {{ step }}
-        </li>
-      </ol>
+        <div class="duration">
+          {{ trip.duration }}
+        </div>
 
-      <a [href]="provider.website" target="_blank">
-        <p-button label="Visit Website" icon="pi pi-external-link"> </p-button>
-      </a>
+        <div>
+          <strong>{{ trip.arrivalTime | date: "HH:mm" }}</strong>
+          <p>{{ trip.destination.name }}</p>
+        </div>
+      </div>
+
+      <div class="journey-details" *ngIf="trip.legs.length > 0">
+        <h4>Journey details</h4>
+        <div *ngFor="let leg of trip.legs" class="leg">
+          <strong>{{ leg.operator }}</strong>
+
+          <div>
+            {{ leg.from }}
+            →
+            {{ leg.to }}
+          </div>
+
+          <small>
+            {{ leg.departureTime | date: "HH:mm" }}
+            -
+            {{ leg.arrivalTime | date: "HH:mm" }}
+          </small>
+        </div>
+      </div>
     </p-card>
   </div>
 </div>

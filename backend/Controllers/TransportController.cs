@@ -5,7 +5,7 @@ namespace SwedenStart;
 
 [ApiController]
 [Route("api/transport")]
-[Authorize]
+[AllowAnonymous]
 public class TransportController : ControllerBase
 {
      private readonly ITransportService _transportService;
