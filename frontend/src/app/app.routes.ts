@@ -10,6 +10,7 @@ import { BankingComponent } from "./pages/banking/banking.component";
 import { TaxInfoComponent } from "./pages/tax/tax.component";
 import { authGuard } from "./guards/auth.guard";
 import { TaxCalculationComponent } from "./pages/tax-calculation/tax-calculation.component";
+import { TransportComponent } from "./pages/transport/transport.component";
 
 export const routes: Routes = [
   { path: "p-number", component: PNumberComponent },
@@ -24,6 +25,11 @@ export const routes: Routes = [
   {
     path: "tax-calculation",
     component: TaxCalculationComponent,
+    canActivate: [authGuard],
+  },
+  {
+    path: "transport",
+    component: TransportComponent,
     canActivate: [authGuard],
   },
 ];

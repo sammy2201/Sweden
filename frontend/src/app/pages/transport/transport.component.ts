@@ -1,4 +1,7 @@
 import { Component } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { CardModule } from "primeng/card";
+import { ButtonModule } from "primeng/button";
 
 interface TransportProvider {
   name: string;
@@ -12,6 +15,7 @@ interface TransportProvider {
 @Component({
   selector: "app-transport",
   standalone: true,
+  imports: [CommonModule, CardModule, ButtonModule],
   templateUrl: "./transport.component.html",
   styleUrls: ["./transport.component.css"],
 })
