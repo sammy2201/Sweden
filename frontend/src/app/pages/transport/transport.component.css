@@ -1,123 +1,53 @@
 .transport-page {
-  max-width: 1100px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 2rem 1rem;
 }
 
-.hero {
-  margin-bottom: 2rem;
-}
-
-.hero h1 {
-  margin: 0;
-  color: var(--app-heading);
-  font-size: 2.2rem;
-}
-
-.hero p {
-  margin-top: 0.75rem;
-  color: var(--app-text-muted);
-}
-
-.search-card {
-  margin-bottom: 2rem;
-}
-
-.search-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr auto;
-  gap: 1rem;
-  align-items: end;
-}
-
-.results {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-
-.trip-card {
-  border-radius: var(--app-radius);
-}
-
-.trip-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-}
-
-.trip-header h3 {
-  margin: 0;
+h1 {
   color: var(--app-heading);
 }
 
-.trip-header small {
-  color: var(--app-text-muted);
-}
-
-.trip-times {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  margin-bottom: 1.5rem;
-}
-
-.trip-times strong {
-  font-size: 1.2rem;
-  color: var(--app-heading);
-}
-
-.trip-times p {
-  margin-top: 0.25rem;
-  color: var(--app-text-muted);
-}
-
-.duration {
-  font-weight: 600;
+.text-primary {
   color: var(--app-primary);
-  padding: 0.5rem 1rem;
-  background: var(--app-accent-soft);
-  border-radius: 999px;
 }
 
-.leg {
-  padding: 1rem 0;
-  border-bottom: 1px solid var(--app-border);
+:host ::ng-deep .p-card {
+  border-radius: 16px;
 }
 
-.leg:last-child {
-  border-bottom: none;
+:host ::ng-deep .p-button {
+  border-radius: 10px;
 }
 
-.leg strong {
-  display: block;
-  color: var(--app-heading);
+:host ::ng-deep .p-inputtext,
+:host ::ng-deep .p-datepicker,
+:host ::ng-deep .p-datepicker input {
+  width: 100%;
 }
 
-.leg div {
-  margin: 0.4rem 0;
-  color: var(--app-text);
+:host ::ng-deep .p-tag {
+  font-size: 0.8rem;
 }
 
-.leg small {
-  color: var(--app-text-muted);
+:host ::ng-deep .p-divider {
+  margin: 1.25rem 0;
+}
+
+:host ::ng-deep .p-accordion-header {
+  font-weight: 600;
+}
+
+.font-semibold {
+  font-weight: 600;
 }
 
 @media (max-width: 768px) {
-  .search-grid {
-    grid-template-columns: 1fr;
+  .transport-page {
+    padding: 1rem;
   }
 
-  .trip-times {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-    text-align: center;
-  }
-
-  .trip-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.75rem;
+  h1 {
+    font-size: 1.8rem;
   }
 }

@@ -45,8 +45,21 @@ export interface TransportTrip {
 export class TransportService {
   constructor(private readonly http: HttpClient) {}
 
-  searchTrips(from: string, to: string): Observable<TransportTrip[]> {
-    const params = new HttpParams().set("from", from).set("to", to);
+  searchTrips(
+    from: string,
+    to: string,
+    departureTime?: Date | null,
+    arrivalTime?: Date | null,
+  ): Observable<TransportTrip[]> {
+    let params = new HttpParams().set("from", from).set("to", to);
+
+    if (departureTime) {
+      params = params.set("departureTime", departureTime.toISOString());
+    }
+
+    if (arrivalTime) {
+      params = params.set("arrivalTime", arrivalTime.toISOString());
+    }
 
     return this.http.get<TransportTrip[]>(
       `${environment.apiUrl}/transport/search`,

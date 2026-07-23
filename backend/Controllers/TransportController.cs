@@ -5,7 +5,7 @@ namespace SwedenStart;
 
 [ApiController]
 [Route("api/transport")]
-[AllowAnonymous]
+[Authorize]
 public class TransportController : ControllerBase
 {
      private readonly ITransportService _transportService;
@@ -25,14 +25,16 @@ public class TransportController : ControllerBase
      public async Task<ActionResult<IReadOnlyList<TransportTripDto>>> Search(
           [FromQuery] string from,
           [FromQuery] string to,
-          CancellationToken cancellationToken)
+          [FromQuery] DateTime? departureTime = null,
+          [FromQuery] DateTime? arrivalTime = null,
+          CancellationToken cancellationToken = default)
      {
           if (string.IsNullOrWhiteSpace(from) || string.IsNullOrWhiteSpace(to))
                return BadRequest(new { message = "Both query params 'from' and 'to' are required." });
 
           try
           {
-               var trips = await _transportService.SearchTripsAsync(from, to, cancellationToken);
+               var trips = await _transportService.SearchTripsAsync(from, to, departureTime, arrivalTime, cancellationToken);
                return Ok(trips);
           }
           catch (ArgumentException ex)

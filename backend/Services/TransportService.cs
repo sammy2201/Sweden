@@ -22,7 +22,12 @@ public class TransportService : ITransportService
           _logger = logger;
      }
 
-     public async Task<IReadOnlyList<TransportTripDto>> SearchTripsAsync(string from, string to, CancellationToken cancellationToken = default)
+     public async Task<IReadOnlyList<TransportTripDto>> SearchTripsAsync(
+          string from,
+          string to,
+          DateTime? departureTime = null,
+          DateTime? arrivalTime = null,
+          CancellationToken cancellationToken = default)
      {
           if (string.IsNullOrWhiteSpace(from))
                throw new ArgumentException("'from' is required.", nameof(from));
@@ -36,9 +41,7 @@ public class TransportService : ITransportService
 
           var origin = await LookupStationAsync(from.Trim(), apiKey, cancellationToken);
           var destination = await LookupStationAsync(to.Trim(), apiKey, cancellationToken);
-
-
-          var trips = await FetchTripsAsync(origin.ExtId, destination.ExtId, apiKey, cancellationToken);
+          var trips = await FetchTripsAsync(origin.ExtId, destination.ExtId, apiKey, cancellationToken, departureTime, arrivalTime);
           return trips;
      }
 
@@ -75,10 +78,32 @@ public class TransportService : ITransportService
           string originId,
           string destinationId,
           string apiKey,
-          CancellationToken cancellationToken)
+          CancellationToken cancellationToken,
+          DateTime? departureTime = null,
+          DateTime? arrivalTime = null)
      {
-          var endpoint =
-               $"trip?format=json&originId={Uri.EscapeDataString(originId)}&destId={Uri.EscapeDataString(destinationId)}&accessId={Uri.EscapeDataString(apiKey)}";
+          var queryParts = new List<string>
+          {
+               "format=json",
+               $"originId={Uri.EscapeDataString(originId)}",
+               $"destId={Uri.EscapeDataString(destinationId)}",
+               $"accessId={Uri.EscapeDataString(apiKey)}"
+          };
+
+          // ResRobot uses date/time as the search anchor (departure by default, arrival when requested).
+          if (arrivalTime.HasValue)
+          {
+               queryParts.Add($"date={arrivalTime.Value:yyyy-MM-dd}");
+               queryParts.Add($"time={arrivalTime.Value:HH:mm}");
+               queryParts.Add("searchForArrival=1");
+          }
+          else if (departureTime.HasValue)
+          {
+               queryParts.Add($"date={departureTime.Value:yyyy-MM-dd}");
+               queryParts.Add($"time={departureTime.Value:HH:mm}");
+          }
+
+          var endpoint = $"trip?{string.Join("&", queryParts)}";
 
           using var response = await _httpClient.GetAsync(endpoint, cancellationToken);
 
