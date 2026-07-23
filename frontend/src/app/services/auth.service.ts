@@ -13,6 +13,8 @@ export interface RegisterPayload {
   lastName: string;
   username: string;
   email: string;
+  city: string;
+  address: string;
   password: string;
 }
 
@@ -27,6 +29,8 @@ interface UserProfile {
   lastName: string;
   username: string;
   email: string;
+  city: string;
+  address: string;
 }
 
 @Injectable({ providedIn: "root" })

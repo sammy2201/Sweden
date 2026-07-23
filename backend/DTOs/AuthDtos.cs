@@ -24,6 +24,14 @@ public class RegisterRequestDto
     public string Email { get; set; } = string.Empty;
 
     [Required]
+    [StringLength(100, MinimumLength = 2)]
+    public string City { get; set; } = string.Empty;
+
+    [Required]
+    [StringLength(255, MinimumLength = 3)]
+    public string Address { get; set; } = string.Empty;
+
+    [Required]
     [StringLength(100, MinimumLength = 8)]
     public string Password { get; set; } = string.Empty;
 }
@@ -58,4 +66,8 @@ public class UserDto
     public string Username { get; set; } = string.Empty;
 
     public string Email { get; set; } = string.Empty;
+
+    public string City { get; set; } = string.Empty;
+
+    public string Address { get; set; } = string.Empty;
 }

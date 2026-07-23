@@ -30,13 +30,15 @@ public class AuthService : IAuthService
         return await GenerateJwtToken(user);
     }
 
-    public async Task<bool> RegisterAsync(string firstName, string lastName, string username, string email, string password)
+    public async Task<bool> RegisterAsync(string firstName, string lastName, string username, string email, string city, string address, string password)
     {
 
         firstName = firstName.Trim();
         lastName = lastName.Trim();
         username = username.Trim().ToLowerInvariant();
         email = email.Trim().ToLowerInvariant();
+        city = city.Trim();
+        address = address.Trim();
 
         if (await _repo.UserExistsAsync(username, email))
         {
@@ -50,6 +52,8 @@ public class AuthService : IAuthService
             LastName = lastName,
             Username = username,
             Email = email,
+            City = city,
+            Address = address,
             PasswordHash = PasswordHasher.Hash(password),
             IsActive = true,
             IsAdmin = false,

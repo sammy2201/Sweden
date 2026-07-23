@@ -1,8 +1,10 @@
-import { Component } from "@angular/core";
+import { Component, DestroyRef, inject } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { TransportService } from "../../services/transport.service";
 import type { TransportTrip } from "../../services/transport.service";
+import { ActivatedRoute } from "@angular/router";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { CardModule } from "primeng/card";
 import { ButtonModule } from "primeng/button";
 import { TagModule } from "primeng/tag";
@@ -31,6 +33,8 @@ import { InputTextModule } from "primeng/inputtext";
   styleUrls: ["./transport.component.css"],
 })
 export class TransportComponent {
+  private readonly destroyRef = inject(DestroyRef);
+
   from = "";
   to = "";
 
@@ -43,7 +47,29 @@ export class TransportComponent {
 
   trips: TransportTrip[] = [];
 
-  constructor(private readonly transportService: TransportService) {}
+  constructor(
+    private readonly transportService: TransportService,
+    private readonly route: ActivatedRoute,
+  ) {
+    this.route.queryParamMap
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((params) => {
+        const from = params.get("from");
+        const to = params.get("to");
+
+        if (from !== null) {
+          this.from = from;
+        }
+
+        if (to !== null) {
+          this.to = to;
+        }
+
+        if (from !== null || to !== null) {
+          this.trips = [];
+        }
+      });
+  }
 
   searchTrips(): void {
     if (!this.from.trim() || !this.to.trim()) {

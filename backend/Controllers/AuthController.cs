@@ -42,7 +42,7 @@ public class AuthController : ControllerBase
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        var created = await _authService.RegisterAsync(request.FirstName, request.LastName, request.Username, request.Email, request.Password);
+        var created = await _authService.RegisterAsync(request.FirstName, request.LastName, request.Username, request.Email, request.City, request.Address, request.Password);
         if (!created) return Conflict(new { message = "User with that username or email already exists" });
 
         return CreatedAtAction(nameof(Register), new { username = request.Username });
@@ -67,7 +67,9 @@ public class AuthController : ControllerBase
             FirstName = user.FirstName,
             LastName = user.LastName,
             Username = user.Username,
-            Email = user.Email
+            Email = user.Email,
+            City = user.City,
+            Address = user.Address
         };
 
         return Ok(dto);

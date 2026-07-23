@@ -83,13 +83,14 @@ namespace SwedenStart.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Roadmaps");
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Roadmaps", (string)null);
                 });
 
             modelBuilder.Entity("SwedenStart.RoadmapTask", b =>
@@ -116,7 +117,7 @@ namespace SwedenStart.Migrations
 
                     b.HasIndex("RoadmapId");
 
-                    b.ToTable("RoadmapTasks");
+                    b.ToTable("RoadmapTasks", (string)null);
                 });
 
             modelBuilder.Entity("SwedenStart.User", b =>
@@ -124,6 +125,14 @@ namespace SwedenStart.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("City")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -159,7 +168,24 @@ namespace SwedenStart.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.HasIndex("Username")
+                        .IsUnique();
+
+                    b.ToTable("Users", (string)null);
+                });
+
+            modelBuilder.Entity("SwedenStart.Roadmap", b =>
+                {
+                    b.HasOne("SwedenStart.User", "User")
+                        .WithMany("Roadmaps")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SwedenStart.RoadmapTask", b =>
@@ -172,6 +198,11 @@ namespace SwedenStart.Migrations
             modelBuilder.Entity("SwedenStart.Roadmap", b =>
                 {
                     b.Navigation("Tasks");
+                });
+
+            modelBuilder.Entity("SwedenStart.User", b =>
+                {
+                    b.Navigation("Roadmaps");
                 });
 #pragma warning restore 612, 618
         }

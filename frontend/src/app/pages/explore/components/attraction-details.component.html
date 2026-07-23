@@ -1,0 +1,161 @@
+<section class="explore-page">
+  @if (vm$ | async; as vm) {
+    @if (vm.county && vm.attraction) {
+      <div class="mb-4">
+        <p-button
+          label="{{ vm.county.name }}"
+          icon="pi pi-arrow-left"
+          severity="secondary"
+          variant="text"
+          [routerLink]="['/explore', vm.county.id]">
+        </p-button>
+      </div>
+
+      <div class="grid">
+        <div class="col-12 lg:col-7">
+          <p-image
+            [src]="vm.attraction.imageUrl"
+            [alt]="vm.attraction.name"
+            imageClass="details-image"
+            [preview]="true">
+          </p-image>
+        </div>
+
+        <div class="col-12 lg:col-5">
+          <p-card styleClass="h-full">
+            <div class="flex flex-column gap-4">
+              <div>
+                <div class="flex gap-2 flex-wrap mb-3">
+                  <p-tag severity="secondary" [value]="vm.attraction.category">
+                  </p-tag>
+
+                  <p-tag severity="info" [value]="vm.attraction.city"></p-tag>
+                </div>
+
+                <h1 class="m-0">{{ vm.attraction.name }}</h1>
+
+                <p class="text-color-secondary line-height-3">
+                  {{ vm.attraction.shortDescription }}
+                </p>
+              </div>
+
+              <div class="flex align-items-center gap-2">
+                <p-rating
+                  [ngModel]="ratingStars(vm.attraction.rating)"
+                  [readonly]="true"
+                  [stars]="5">
+                </p-rating>
+
+                <span class="font-semibold">{{ vm.attraction.rating }}</span>
+              </div>
+
+              <div class="flex flex-wrap gap-2">
+                @for (tag of vm.attraction.tags; track tag) {
+                  <p-chip [label]="tag"></p-chip>
+                }
+              </div>
+
+              <p-divider></p-divider>
+
+              <div class="grid">
+                <div class="col-12 sm:col-6">
+                  <span class="block text-sm text-color-secondary">Duration</span>
+                  <strong>{{ vm.attraction.estimatedVisitDuration }}</strong>
+                </div>
+
+                <div class="col-12 sm:col-6">
+                  <span class="block text-sm text-color-secondary">Nearest station</span>
+                  <strong>{{ vm.attraction.nearestStation }}</strong>
+                </div>
+              </div>
+
+              <div class="flex gap-2 flex-wrap">
+                <p-button
+                  label="Plan Journey"
+                  icon="pi pi-directions"
+                  (onClick)="planJourney(vm.county, vm.attraction)">
+                </p-button>
+
+                <a
+                  [href]="vm.attraction.googleMapsUrl"
+                  target="_blank"
+                  rel="noopener">
+                  <p-button
+                    label="Google Maps"
+                    icon="pi pi-map-marker"
+                    severity="secondary"
+                    variant="outlined">
+                  </p-button>
+                </a>
+              </div>
+            </div>
+          </p-card>
+        </div>
+      </div>
+
+      <div class="mt-4">
+        <p-tabs value="overview">
+          <p-tablist>
+            <p-tab value="overview">Overview</p-tab>
+            <p-tab value="visit">Visit</p-tab>
+          </p-tablist>
+
+          <p-tabpanels>
+            <p-tabpanel value="overview">
+              <p-panel header="About">
+                <p class="line-height-3 m-0">
+                  {{ vm.attraction.description }}
+                </p>
+              </p-panel>
+            </p-tabpanel>
+
+            <p-tabpanel value="visit">
+              <div class="grid">
+                <div class="col-12 md:col-6">
+                  <p-panel header="Opening hours">
+                    <p class="m-0">{{ vm.attraction.openingHours }}</p>
+                  </p-panel>
+                </div>
+
+                <div class="col-12 md:col-6">
+                  <p-panel header="Entry fee">
+                    <p class="m-0">{{ vm.attraction.entryFee }}</p>
+                  </p-panel>
+                </div>
+
+                <div class="col-12">
+                  <p-panel header="Address">
+                    <div
+                      class="flex justify-content-between align-items-center flex-wrap gap-3">
+                      <p class="m-0">{{ vm.attraction.address }}</p>
+
+                      <a
+                        [href]="vm.attraction.officialWebsite"
+                        target="_blank"
+                        rel="noopener">
+                        <p-button
+                          label="Official website"
+                          icon="pi pi-external-link"
+                          severity="secondary"
+                          variant="outlined">
+                        </p-button>
+                      </a>
+                    </div>
+                  </p-panel>
+                </div>
+              </div>
+            </p-tabpanel>
+          </p-tabpanels>
+        </p-tabs>
+      </div>
+    } @else {
+      <p-card>
+        <div class="text-center py-6">
+          <h1>Attraction not found</h1>
+
+          <p-button label="Back to Explore" routerLink="/explore"></p-button>
+        </div>
+      </p-card>
+    }
+  }
+</section>

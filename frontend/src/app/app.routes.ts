@@ -11,11 +11,20 @@ import { TaxInfoComponent } from "./pages/tax/tax.component";
 import { authGuard } from "./guards/auth.guard";
 import { TaxCalculationComponent } from "./pages/tax-calculation/tax-calculation.component";
 import { TransportComponent } from "./pages/transport/transport.component";
+import { AttractionDetailsComponent } from "./pages/explore/components/attraction-details.component";
+import { CountyAttractionsComponent } from "./pages/explore/components/county-attractions.component";
+import { ExploreCountiesComponent } from "./pages/explore/components/explore-counties.component";
 
 export const routes: Routes = [
   { path: "p-number", component: PNumberComponent },
   { path: "", component: HomeComponent },
   { path: "housing", component: HousingComponent },
+  { path: "explore", component: ExploreCountiesComponent },
+  {
+    path: "explore/:countyId/:attractionId",
+    component: AttractionDetailsComponent,
+  },
+  { path: "explore/:countyId", component: CountyAttractionsComponent },
   { path: "roadmap", component: RoadmapComponent },
   { path: "login", component: LoginComponent },
   { path: "register", component: RegisterComponent },

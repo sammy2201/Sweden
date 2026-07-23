@@ -14,6 +14,7 @@ export class MenuService {
     { label: "Home", path: "/" },
     { label: "P Number", path: "/p-number" },
     { label: "Housing", path: "/housing" },
+    { label: "Explore", path: "/explore" },
     { label: "Roadmap", path: "/roadmap" },
     { label: "Digital ID", path: "/digital-id" },
     { label: "Banking", path: "/banking" },

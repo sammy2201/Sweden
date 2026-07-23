@@ -1,0 +1,23 @@
+.explore-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+}
+
+:host ::ng-deep .details-image {
+  width: 100%;
+  height: 420px;
+  object-fit: cover;
+  border-radius: var(--app-radius);
+  display: block;
+}
+
+a {
+  text-decoration: none;
+}
+
+@media (max-width: 640px) {
+  :host ::ng-deep .details-image {
+    height: 280px;
+  }
+}
