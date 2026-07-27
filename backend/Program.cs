@@ -9,6 +9,8 @@ using SwedenStart;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Logging.AddFilter("System.Net.Http.HttpClient.IVisitSwedenService", LogLevel.Warning);
+
 
 var jwtKey = builder.Configuration["Jwt:Key"] ?? builder.Configuration["Jwt:Secret"];
 
@@ -107,6 +109,23 @@ builder.Services.AddHttpClient<ITransportService, TransportService>((sp, client)
     client.BaseAddress = new Uri(baseUrl);
     client.Timeout = TimeSpan.FromSeconds(20);
 });
+builder.Services.AddScoped<IExploreService, ExploreService>();
+builder.Services.AddScoped<IAttractionRepository, AttractionRepository>();
+builder.Services.AddScoped<IVisitSwedenRepository, VisitSwedenRepository>();
+builder.Services.AddSingleton<ICountyLookupService, CountyLookupService>();
+builder.Services.AddHttpClient<IVisitSwedenService, VisitSwedenService>((sp, client) =>
+{
+    var config = sp.GetRequiredService<IConfiguration>();
+    var baseUrl = config["VisitSweden:BaseUrl"] ?? "https://data.visitsweden.com/store/";
+
+    if (!baseUrl.EndsWith('/'))
+    {
+        baseUrl += "/";
+    }
+
+    client.BaseAddress = new Uri(baseUrl);
+    client.Timeout = TimeSpan.FromSeconds(20);
+});
 
 
 var defaultConnection = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -117,10 +136,6 @@ if (string.IsNullOrWhiteSpace(defaultConnection))
 }
 
 var connectionStringBuilder = new NpgsqlConnectionStringBuilder(defaultConnection);
-var redactedConnectionStringBuilder = new NpgsqlConnectionStringBuilder(defaultConnection)
-{
-    Password = string.IsNullOrWhiteSpace(connectionStringBuilder.Password) ? string.Empty : "***"
-};
 
 builder.Services.AddSingleton(sp => NpgsqlDataSource.Create(defaultConnection));
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -148,7 +163,7 @@ if (app.Environment.IsDevelopment())
         options.EnablePersistentAuthentication();
     });
     app.MapGet("/docs", () => Results.Redirect("/scalar"));
-    app.MapGet("/swager", () => Results.Redirect("/scalar"));
+    app.MapGet("/swagger", () => Results.Redirect("/scalar"));
 }
 
 app.UseHttpsRedirection();
