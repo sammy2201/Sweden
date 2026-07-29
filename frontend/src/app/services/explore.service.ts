@@ -1,521 +1,94 @@
+import { HttpClient, HttpParams } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { Observable, of } from "rxjs";
-import { Attraction, Category, County } from "../models/explore.models";
+import { map, Observable } from "rxjs";
+import { environment } from "../../environments/environment";
+import {
+  Attraction,
+  AttractionDetail,
+  County,
+  PagedResponse,
+} from "../models/explore.models";
+
+interface ExploreCountiesResponseDto {
+  counties: County[];
+}
+
+interface ExploreAttractionsResponseDto {
+  attractions: Attraction[];
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
+
+interface ExploreAttractionDetailResponseDto {
+  attraction: AttractionDetail;
+}
 
 @Injectable({
   providedIn: "root",
 })
 export class ExploreService {
-  private readonly counties: County[] = [
-    {
-      id: "skane",
-      name: "Skåne",
-      description: "Castles, beaches and coastal cities",
-      bannerImageUrl: this.createImage("Skåne", "#0f766e", "#bae6fd"),
-      featuredAttractionCount: 32,
-      defaultOrigin: "Malmö",
-    },
-    {
-      id: "stockholm",
-      name: "Stockholm",
-      description: "History, islands and museums",
-      bannerImageUrl: this.createImage("Stockholm", "#1d4ed8", "#bfdbfe"),
-      featuredAttractionCount: 41,
-      defaultOrigin: "Stockholm",
-    },
-    {
-      id: "vastra-gotaland",
-      name: "Västra Götaland",
-      description: "Seafood, archipelago life and design",
-      bannerImageUrl: this.createImage("Västra Götaland", "#7c3aed", "#ddd6fe"),
-      featuredAttractionCount: 38,
-      defaultOrigin: "Göteborg",
-    },
-    {
-      id: "blekinge",
-      name: "Blekinge",
-      description: "Naval history, gardens and island hopping",
-      bannerImageUrl: this.createImage("Blekinge", "#0369a1", "#cffafe"),
-      featuredAttractionCount: 14,
-      defaultOrigin: "Karlskrona",
-    },
-    {
-      id: "dalarna",
-      name: "Dalarna",
-      description: "Lakes, folk traditions and mountain gateways",
-      bannerImageUrl: this.createImage("Dalarna", "#b91c1c", "#fecaca"),
-      featuredAttractionCount: 24,
-      defaultOrigin: "Falun",
-    },
-    {
-      id: "gotland",
-      name: "Gotland",
-      description: "Medieval walls, rauks and Baltic beaches",
-      bannerImageUrl: this.createImage("Gotland", "#a16207", "#fde68a"),
-      featuredAttractionCount: 27,
-      defaultOrigin: "Visby",
-    },
-    {
-      id: "gavleborg",
-      name: "Gävleborg",
-      description: "Coastal towns, forests and heritage sites",
-      bannerImageUrl: this.createImage("Gävleborg", "#166534", "#bbf7d0"),
-      featuredAttractionCount: 18,
-      defaultOrigin: "Gävle",
-    },
-    {
-      id: "halland",
-      name: "Halland",
-      description: "Long beaches, cycling routes and spa towns",
-      bannerImageUrl: this.createImage("Halland", "#0284c7", "#bae6fd"),
-      featuredAttractionCount: 21,
-      defaultOrigin: "Halmstad",
-    },
-    {
-      id: "jamtland",
-      name: "Jämtland",
-      description: "Mountains, winter sport and wilderness trails",
-      bannerImageUrl: this.createImage("Jämtland", "#4d7c0f", "#d9f99d"),
-      featuredAttractionCount: 22,
-      defaultOrigin: "Östersund",
-    },
-    {
-      id: "jonkoping",
-      name: "Jönköping",
-      description: "Lake views, matchstick heritage and family days",
-      bannerImageUrl: this.createImage("Jönköping", "#0e7490", "#a5f3fc"),
-      featuredAttractionCount: 20,
-      defaultOrigin: "Jönköping",
-    },
-    {
-      id: "kalmar",
-      name: "Kalmar",
-      description: "Renaissance castles, islands and coastal towns",
-      bannerImageUrl: this.createImage("Kalmar", "#be123c", "#fecdd3"),
-      featuredAttractionCount: 23,
-      defaultOrigin: "Kalmar",
-    },
-    {
-      id: "kronoberg",
-      name: "Kronoberg",
-      description: "Glassworks, forests and lake country",
-      bannerImageUrl: this.createImage("Kronoberg", "#4338ca", "#c7d2fe"),
-      featuredAttractionCount: 16,
-      defaultOrigin: "Växjö",
-    },
-    {
-      id: "norrbotten",
-      name: "Norrbotten",
-      description: "Arctic light, national parks and river valleys",
-      bannerImageUrl: this.createImage("Norrbotten", "#155e75", "#cffafe"),
-      featuredAttractionCount: 29,
-      defaultOrigin: "Luleå",
-    },
-    {
-      id: "sodermanland",
-      name: "Södermanland",
-      description: "Manors, lake towns and royal history",
-      bannerImageUrl: this.createImage("Södermanland", "#6d28d9", "#e9d5ff"),
-      featuredAttractionCount: 19,
-      defaultOrigin: "Nyköping",
-    },
-    {
-      id: "uppsala",
-      name: "Uppsala",
-      description: "Cathedrals, university life and Viking heritage",
-      bannerImageUrl: this.createImage("Uppsala", "#c2410c", "#fed7aa"),
-      featuredAttractionCount: 20,
-      defaultOrigin: "Uppsala",
-    },
-    {
-      id: "varmland",
-      name: "Värmland",
-      description: "Forests, lakes and literary landscapes",
-      bannerImageUrl: this.createImage("Värmland", "#15803d", "#dcfce7"),
-      featuredAttractionCount: 17,
-      defaultOrigin: "Karlstad",
-    },
-    {
-      id: "vasterbotten",
-      name: "Västerbotten",
-      description: "Culture cities, rivers and northern food",
-      bannerImageUrl: this.createImage("Västerbotten", "#0f766e", "#ccfbf1"),
-      featuredAttractionCount: 18,
-      defaultOrigin: "Umeå",
-    },
-    {
-      id: "vasternorrland",
-      name: "Västernorrland",
-      description: "High Coast hikes and timber-town heritage",
-      bannerImageUrl: this.createImage("Västernorrland", "#854d0e", "#fde68a"),
-      featuredAttractionCount: 21,
-      defaultOrigin: "Sundsvall",
-    },
-    {
-      id: "vastmanland",
-      name: "Västmanland",
-      description: "Industrial history, castles and lake adventures",
-      bannerImageUrl: this.createImage("Västmanland", "#1e40af", "#dbeafe"),
-      featuredAttractionCount: 15,
-      defaultOrigin: "Västerås",
-    },
-    {
-      id: "orebro",
-      name: "Örebro",
-      description: "Castles, cycling trails and family attractions",
-      bannerImageUrl: this.createImage("Örebro", "#a21caf", "#f5d0fe"),
-      featuredAttractionCount: 18,
-      defaultOrigin: "Örebro",
-    },
-    {
-      id: "ostergotland",
-      name: "Östergötland",
-      description: "Canals, aircraft history and medieval towns",
-      bannerImageUrl: this.createImage("Östergötland", "#047857", "#a7f3d0"),
-      featuredAttractionCount: 23,
-      defaultOrigin: "Linköping",
-    },
-  ];
-
-  private readonly attractions: Attraction[] = [
-    {
-      id: "turning-torso",
-      countyId: "skane",
-      name: "Turning Torso",
-      category: Category.Architecture,
-      shortDescription: "Malmö's twisting landmark by the waterfront.",
-      description:
-        "Turning Torso is a modern residential tower in Västra Hamnen and one of Malmö's most recognizable sights. The surrounding waterfront makes it an easy stop for architecture, sea views and a walk toward Ribersborg.",
-      estimatedVisitDuration: "45 min",
-      rating: 4.5,
-      city: "Malmö",
-      tags: ["Waterfront", "Skyline", "Photo stop"],
-      imageUrl: this.createImage("Turning Torso", "#0f766e", "#d1fae5"),
-      openingHours: "Outdoor area accessible all day",
-      entryFee: "Free to view from outside",
-      address: "Lilla Varvsgatan 14, 211 15 Malmö",
-      officialWebsite: "https://www.turningtorso.se/",
-      googleMapsUrl: "https://www.google.com/maps/search/?api=1&query=Turning+Torso+Malm%C3%B6",
-      nearestStation: "Malmö Centralstation",
-    },
-    {
-      id: "malmo-castle",
-      countyId: "skane",
-      name: "Malmö Castle",
-      category: Category.Castle,
-      shortDescription: "A Renaissance castle with museums and park walks.",
-      description:
-        "Malmö Castle combines regional history, exhibitions and green space in one visit. It is a practical first cultural stop for newcomers because it sits close to central Malmö and can be paired with Kungsparken.",
-      estimatedVisitDuration: "2-3 hours",
-      rating: 4.3,
-      city: "Malmö",
-      tags: ["Castle", "Museum", "Park"],
-      imageUrl: this.createImage("Malmö Castle", "#7f1d1d", "#fecaca"),
-      openingHours: "Placeholder: Tue-Sun, daytime hours",
-      entryFee: "Placeholder: Adult ticket required",
-      address: "Malmöhusvägen 6, 211 18 Malmö",
-      officialWebsite: "https://malmo.se/Uppleva-och-gora/Museer-och-konst/Malmo-Museum.html",
-      googleMapsUrl: "https://www.google.com/maps/search/?api=1&query=Malm%C3%B6hus+Castle",
-      nearestStation: "Malmö Centralstation",
-    },
-    {
-      id: "lund-cathedral",
-      countyId: "skane",
-      name: "Lund Cathedral",
-      category: Category.Historic,
-      shortDescription: "A landmark cathedral in one of Sweden's oldest cities.",
-      description:
-        "Lund Cathedral anchors the historic center of Lund. The area is compact, walkable and rich with university-town atmosphere, making it a strong half-day trip from Malmö.",
-      estimatedVisitDuration: "1 hour",
-      rating: 4.7,
-      city: "Lund",
-      tags: ["History", "Architecture", "Old town"],
-      imageUrl: this.createImage("Lund Cathedral", "#92400e", "#fde68a"),
-      openingHours: "Placeholder: Open daily with service exceptions",
-      entryFee: "Free entry",
-      address: "Kyrkogatan 6, 222 22 Lund",
-      officialWebsite: "https://www.lundsdomkyrka.se/",
-      googleMapsUrl: "https://www.google.com/maps/search/?api=1&query=Lund+Cathedral",
-      nearestStation: "Lund Centralstation",
-    },
-    {
-      id: "ales-stenar",
-      countyId: "skane",
-      name: "Ales Stenar",
-      category: Category.Historic,
-      shortDescription: "Ancient stone ship setting above the Baltic Sea.",
-      description:
-        "Ales Stenar is a dramatic archaeological site near Kåseberga with sweeping coastal views. It suits visitors who want a blend of history, open landscape and a small fishing-village stop.",
-      estimatedVisitDuration: "1-2 hours",
-      rating: 4.6,
-      city: "Kåseberga",
-      tags: ["Coast", "Ancient site", "Viewpoint"],
-      imageUrl: this.createImage("Ales Stenar", "#365314", "#d9f99d"),
-      openingHours: "Outdoor area accessible all day",
-      entryFee: "Free",
-      address: "Kåseberga, 271 78 Löderup",
-      officialWebsite: "https://www.visitystadosterlen.se/en/to-do/ales-stenar",
-      googleMapsUrl: "https://www.google.com/maps/search/?api=1&query=Ales+Stenar",
-      nearestStation: "Ystad station",
-    },
-    {
-      id: "soderasens-nationalpark",
-      countyId: "skane",
-      name: "Söderåsen National Park",
-      category: Category.Hiking,
-      shortDescription: "Deep valleys, beech forest and accessible trails.",
-      description:
-        "Söderåsen National Park is one of southern Sweden's best nature escapes, with marked trails, viewpoints and seasonal forest colors. It is ideal when you want a full outdoor day without traveling far north.",
-      estimatedVisitDuration: "3-5 hours",
-      rating: 4.8,
-      city: "Ljungbyhed",
-      tags: ["National park", "Forest", "Hiking"],
-      imageUrl: this.createImage("Söderåsen", "#166534", "#bbf7d0"),
-      openingHours: "Outdoor area accessible all day",
-      entryFee: "Free",
-      address: "Skäralid 747, 264 53 Ljungbyhed",
-      officialWebsite: "https://www.sverigesnationalparker.se/en/choose-park---list/soderasen-national-park/",
-      googleMapsUrl: "https://www.google.com/maps/search/?api=1&query=S%C3%B6der%C3%A5sen+National+Park",
-      nearestStation: "Stehag station",
-    },
-    {
-      id: "vasa-museum",
-      countyId: "stockholm",
-      name: "Vasa Museum",
-      category: Category.Museum,
-      shortDescription: "A preserved 17th-century warship on Djurgården.",
-      description:
-        "The Vasa Museum is one of Sweden's most visited museums and a clear first pick for understanding maritime history. The ship is spectacular, and the museum is easy to combine with other Djurgården attractions.",
-      estimatedVisitDuration: "2 hours",
-      rating: 4.8,
-      city: "Stockholm",
-      tags: ["Ship", "History", "Djurgården"],
-      imageUrl: this.createImage("Vasa Museum", "#1d4ed8", "#bfdbfe"),
-      openingHours: "Placeholder: Daily museum hours",
-      entryFee: "Placeholder: Adult ticket required",
-      address: "Galärvarvsvägen 14, 115 21 Stockholm",
-      officialWebsite: "https://www.vasamuseet.se/en",
-      googleMapsUrl: "https://www.google.com/maps/search/?api=1&query=Vasa+Museum",
-      nearestStation: "Stockholm Centralstation",
-    },
-    {
-      id: "skansen",
-      countyId: "stockholm",
-      name: "Skansen",
-      category: Category.Family,
-      shortDescription: "Open-air museum with Swedish homes and traditions.",
-      description:
-        "Skansen introduces Swedish culture through historic buildings, seasonal events and family-friendly exhibits. It is especially useful for newcomers who want context for holidays, crafts and everyday traditions.",
-      estimatedVisitDuration: "3-4 hours",
-      rating: 4.5,
-      city: "Stockholm",
-      tags: ["Open-air museum", "Family", "Traditions"],
-      imageUrl: this.createImage("Skansen", "#15803d", "#dcfce7"),
-      openingHours: "Placeholder: Seasonal hours",
-      entryFee: "Placeholder: Adult ticket required",
-      address: "Djurgårdsslätten 49-51, 115 21 Stockholm",
-      officialWebsite: "https://skansen.se/en/",
-      googleMapsUrl: "https://www.google.com/maps/search/?api=1&query=Skansen+Stockholm",
-      nearestStation: "Stockholm Centralstation",
-    },
-    {
-      id: "gamla-stan",
-      countyId: "stockholm",
-      name: "Gamla Stan",
-      category: Category.Historic,
-      shortDescription: "Medieval lanes, squares and royal landmarks.",
-      description:
-        "Gamla Stan is Stockholm's old town and one of the easiest places to explore on foot. It offers compact streets, cafes, the Royal Palace and quick access to surrounding islands.",
-      estimatedVisitDuration: "2 hours",
-      rating: 4.6,
-      city: "Stockholm",
-      tags: ["Old town", "Walking", "Royal Palace"],
-      imageUrl: this.createImage("Gamla Stan", "#b45309", "#fed7aa"),
-      openingHours: "Outdoor area accessible all day",
-      entryFee: "Free to explore",
-      address: "Gamla Stan, Stockholm",
-      officialWebsite: "https://www.visitstockholm.com/",
-      googleMapsUrl: "https://www.google.com/maps/search/?api=1&query=Gamla+Stan+Stockholm",
-      nearestStation: "Gamla stan",
-    },
-    {
-      id: "fotografiska",
-      countyId: "stockholm",
-      name: "Fotografiska",
-      category: Category.Museum,
-      shortDescription: "Photography, food and city views by the water.",
-      description:
-        "Fotografiska is a contemporary photography museum with rotating exhibitions and a strong restaurant profile. It works well for evenings and bad-weather days.",
-      estimatedVisitDuration: "1.5-2 hours",
-      rating: 4.4,
-      city: "Stockholm",
-      tags: ["Photography", "Exhibitions", "Food"],
-      imageUrl: this.createImage("Fotografiska", "#581c87", "#e9d5ff"),
-      openingHours: "Placeholder: Open daily, often late",
-      entryFee: "Placeholder: Adult ticket required",
-      address: "Stadsgårdshamnen 22, 116 45 Stockholm",
-      officialWebsite: "https://www.fotografiska.com/sto/en/",
-      googleMapsUrl: "https://www.google.com/maps/search/?api=1&query=Fotografiska+Stockholm",
-      nearestStation: "Slussen",
-    },
-    {
-      id: "drottningholm-palace",
-      countyId: "stockholm",
-      name: "Drottningholm Palace",
-      category: Category.Castle,
-      shortDescription: "Royal residence with gardens and theatre history.",
-      description:
-        "Drottningholm Palace offers royal architecture, formal gardens and a scenic approach by public transport or boat. It is one of the most rewarding day trips within the Stockholm area.",
-      estimatedVisitDuration: "3 hours",
-      rating: 4.5,
-      city: "Drottningholm",
-      tags: ["Royal", "Gardens", "UNESCO"],
-      imageUrl: this.createImage("Drottningholm", "#7f1d1d", "#fecaca"),
-      openingHours: "Placeholder: Seasonal palace hours",
-      entryFee: "Placeholder: Adult ticket required",
-      address: "Drottningholm, 178 93 Drottningholm",
-      officialWebsite: "https://www.kungligaslotten.se/english.html",
-      googleMapsUrl: "https://www.google.com/maps/search/?api=1&query=Drottningholm+Palace",
-      nearestStation: "Brommaplan",
-    },
-    {
-      id: "universeum",
-      countyId: "vastra-gotaland",
-      name: "Universeum",
-      category: Category.Family,
-      shortDescription: "Science center with rainforest and hands-on exhibits.",
-      description:
-        "Universeum is a practical family-friendly choice in central Gothenburg, with science exhibits, animals and indoor activities. It is a strong rainy-day destination for newcomers with children.",
-      estimatedVisitDuration: "3 hours",
-      rating: 4.4,
-      city: "Göteborg",
-      tags: ["Science", "Family", "Rainy day"],
-      imageUrl: this.createImage("Universeum", "#7c3aed", "#ddd6fe"),
-      openingHours: "Placeholder: Daily daytime hours",
-      entryFee: "Placeholder: Adult ticket required",
-      address: "Södra Vägen 50, 412 54 Göteborg",
-      officialWebsite: "https://www.universeum.se/en/",
-      googleMapsUrl: "https://www.google.com/maps/search/?api=1&query=Universeum+G%C3%B6teborg",
-      nearestStation: "Göteborg Korsvägen",
-    },
-    {
-      id: "liseberg",
-      countyId: "vastra-gotaland",
-      name: "Liseberg",
-      category: Category.Family,
-      shortDescription: "Classic amusement park in central Gothenburg.",
-      description:
-        "Liseberg is one of Sweden's best-known amusement parks, with rides, concerts and seasonal events. It is easy to reach by tram and often becomes a go-to place when friends or family visit.",
-      estimatedVisitDuration: "4-6 hours",
-      rating: 4.5,
-      city: "Göteborg",
-      tags: ["Amusement park", "Family", "Seasonal"],
-      imageUrl: this.createImage("Liseberg", "#be123c", "#fecdd3"),
-      openingHours: "Placeholder: Seasonal opening hours",
-      entryFee: "Placeholder: Entry and ride passes vary",
-      address: "Örgrytevägen 5, 402 22 Göteborg",
-      officialWebsite: "https://www.liseberg.com/",
-      googleMapsUrl: "https://www.google.com/maps/search/?api=1&query=Liseberg",
-      nearestStation: "Göteborg Korsvägen",
-    },
-    {
-      id: "gothenburg-archipelago",
-      countyId: "vastra-gotaland",
-      name: "Gothenburg Archipelago",
-      category: Category.Nature,
-      shortDescription: "Car-free islands, ferries and granite coastlines.",
-      description:
-        "The southern Gothenburg archipelago is reachable by tram and ferry, making it one of the easiest island experiences for newcomers. Expect quiet villages, walking paths and sea views.",
-      estimatedVisitDuration: "Half day",
-      rating: 4.7,
-      city: "Göteborg",
-      tags: ["Islands", "Ferry", "Coast"],
-      imageUrl: this.createImage("Archipelago", "#0369a1", "#bae6fd"),
-      openingHours: "Outdoor area accessible all day",
-      entryFee: "Public transport ticket required",
-      address: "Saltholmen, Göteborg",
-      officialWebsite: "https://www.goteborg.com/en/guides/the-gothenburg-archipelago",
-      googleMapsUrl: "https://www.google.com/maps/search/?api=1&query=Gothenburg+Archipelago+Saltholmen",
-      nearestStation: "Saltholmen",
-    },
-    {
-      id: "botanical-garden-gothenburg",
-      countyId: "vastra-gotaland",
-      name: "Gothenburg Botanical Garden",
-      category: Category.Nature,
-      shortDescription: "Large botanical garden with trails and greenhouses.",
-      description:
-        "Gothenburg Botanical Garden is calm, green and easy to visit for a few hours. It suits solo walks, family days and anyone looking for a low-cost introduction to local nature.",
-      estimatedVisitDuration: "2 hours",
-      rating: 4.7,
-      city: "Göteborg",
-      tags: ["Garden", "Walking", "Low cost"],
-      imageUrl: this.createImage("Botanical Garden", "#166534", "#bbf7d0"),
-      openingHours: "Placeholder: Outdoor garden open daily",
-      entryFee: "Voluntary entrance fee placeholder",
-      address: "Carl Skottsbergs gata 22A, 413 19 Göteborg",
-      officialWebsite: "https://www.botaniska.se/en/",
-      googleMapsUrl: "https://www.google.com/maps/search/?api=1&query=Gothenburg+Botanical+Garden",
-      nearestStation: "Botaniska Trädgården",
-    },
-    {
-      id: "marstrand",
-      countyId: "vastra-gotaland",
-      name: "Marstrand",
-      category: Category.Historic,
-      shortDescription: "Seaside town with fortress views and island walks.",
-      description:
-        "Marstrand combines west-coast scenery with Carlsten Fortress and a compact island town. It is a classic summer day trip, but the sea views work year-round.",
-      estimatedVisitDuration: "Half day",
-      rating: 4.6,
-      city: "Marstrand",
-      tags: ["Fortress", "Coast", "Day trip"],
-      imageUrl: this.createImage("Marstrand", "#0e7490", "#cffafe"),
-      openingHours: "Outdoor area accessible all day",
-      entryFee: "Free to explore town; fortress ticket placeholder",
-      address: "Marstrand, Kungälv Municipality",
-      officialWebsite: "https://www.vastsverige.com/en/sodra-bohuslan/products/marstrand/",
-      googleMapsUrl: "https://www.google.com/maps/search/?api=1&query=Marstrand+Sweden",
-      nearestStation: "Ytterby station",
-    },
-  ];
+  constructor(private readonly http: HttpClient) {}
 
   getCounties(): Observable<County[]> {
-    return of([...this.counties]);
+    return this.http
+      .get<ExploreCountiesResponseDto>(`${environment.apiUrl}/explore/counties`)
+      .pipe(map((response) => response.counties ?? []));
   }
 
   getCounty(countyId: string): Observable<County | undefined> {
-    return of(this.counties.find((county) => county.id === countyId));
+    return this.getCounties().pipe(
+      map((counties) => counties.find((county) => county.id === countyId)),
+    );
   }
 
-  getAttractionsByCounty(countyId: string): Observable<Attraction[]> {
-    return of(
-      this.attractions.filter((attraction) => attraction.countyId === countyId),
-    );
+  getAttractions(
+    county: string,
+    page = 1,
+    pageSize = 12,
+    category?: string,
+  ): Observable<PagedResponse<Attraction>> {
+    let params = new HttpParams()
+      .set("county", county)
+      .set("page", page)
+      .set("pageSize", pageSize);
+
+    const cleanedCategory = category?.trim();
+    if (cleanedCategory) {
+      params = params.set("category", cleanedCategory);
+    }
+
+    return this.http
+      .get<ExploreAttractionsResponseDto>(
+        `${environment.apiUrl}/explore/attractions`,
+        {
+          params,
+        },
+      )
+      .pipe(
+        map((response) => ({
+          items: response.attractions ?? [],
+          page: response.page,
+          pageSize: response.pageSize,
+          totalCount: response.totalCount,
+          totalPages: response.totalPages,
+          hasNextPage: response.hasNextPage,
+          hasPreviousPage: response.hasPreviousPage,
+        })),
+      );
   }
 
   getAttraction(
-    countyId: string,
+    _countyId: string,
     attractionId: string,
-  ): Observable<Attraction | undefined> {
-    return of(
-      this.attractions.find(
-        (attraction) =>
-          attraction.countyId === countyId && attraction.id === attractionId,
-      ),
-    );
-  }
-
-  private createImage(label: string, background: string, accent: string): string {
-    const svg = `
-      <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675">
-        <rect width="1200" height="675" fill="${background}"/>
-        <circle cx="1020" cy="80" r="220" fill="${accent}" opacity="0.55"/>
-        <path d="M0 510 C220 410 330 560 540 465 C740 375 845 420 1200 300 L1200 675 L0 675 Z" fill="${accent}" opacity="0.75"/>
-        <path d="M0 560 C210 480 390 620 640 520 C820 448 960 505 1200 420 L1200 675 L0 675 Z" fill="#ffffff" opacity="0.3"/>
-        <text x="72" y="116" fill="#ffffff" font-family="Inter, Arial, sans-serif" font-size="56" font-weight="700">${label}</text>
-      </svg>`;
-
-    return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+  ): Observable<AttractionDetail | undefined> {
+    return this.http
+      .get<ExploreAttractionDetailResponseDto>(
+        `${environment.apiUrl}/explore/attractions/${encodeURIComponent(attractionId)}`,
+      )
+      .pipe(map((response) => response.attraction));
   }
 }

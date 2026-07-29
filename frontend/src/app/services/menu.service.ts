@@ -12,7 +12,7 @@ export interface MenuItem {
 export class MenuService {
   private readonly menuItems: MenuItem[] = [
     { label: "Home", path: "/" },
-    { label: "P Number", path: "/p-number" },
+    { label: "Personal Number", path: "/p-number" },
     { label: "Housing", path: "/housing" },
     { label: "Explore", path: "/explore" },
     { label: "Roadmap", path: "/roadmap" },

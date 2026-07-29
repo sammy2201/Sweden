@@ -2,18 +2,25 @@ import { CommonModule } from "@angular/common";
 import { Component, inject } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
-import { combineLatest, map, switchMap } from "rxjs";
+import { catchError, combineLatest, map, of, startWith, switchMap } from "rxjs";
 import { ButtonModule } from "primeng/button";
 import { CardModule } from "primeng/card";
-import { ChipModule } from "primeng/chip";
 import { DividerModule } from "primeng/divider";
 import { ImageModule } from "primeng/image";
 import { PanelModule } from "primeng/panel";
 import { RatingModule } from "primeng/rating";
 import { TabsModule } from "primeng/tabs";
 import { TagModule } from "primeng/tag";
-import { Attraction, County } from "../../../models/explore.models";
+import { AttractionDetail, County } from "../../../models/explore.models";
 import { ExploreService } from "../../../services/explore.service";
+import { buildExploreErrorMessage } from "../explore.utils";
+
+interface AttractionDetailVm {
+  loading: boolean;
+  error: string | null;
+  county: County | undefined;
+  attraction: AttractionDetail | undefined;
+}
 
 @Component({
   selector: "app-attraction-details",
@@ -24,7 +31,6 @@ import { ExploreService } from "../../../services/explore.service";
     RouterLink,
     ButtonModule,
     CardModule,
-    ChipModule,
     DividerModule,
     ImageModule,
     PanelModule,
@@ -50,18 +56,47 @@ export class AttractionDetailsComponent {
         this.exploreService.getAttraction(countyId, attractionId),
       ]);
     }),
-    map(([county, attraction]) => ({ county, attraction })),
+    map(
+      ([county, attraction]): AttractionDetailVm => ({
+        loading: false,
+        error: null,
+        county,
+        attraction,
+      }),
+    ),
+    startWith({
+      loading: true,
+      error: null,
+      county: undefined,
+      attraction: undefined,
+    }),
+    catchError((error: unknown) =>
+      of({
+        loading: false,
+        error: buildExploreErrorMessage(error),
+        county: undefined,
+        attraction: undefined,
+      }),
+    ),
   );
 
   ratingStars(rating: number): number {
     return Math.round(rating);
   }
 
-  planJourney(county: County, attraction: Attraction): void {
+  mapsUrl(attraction: AttractionDetail): string {
+    const query = attraction.address || attraction.name;
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+  }
+
+  planJourney(county: County | undefined, attraction: AttractionDetail): void {
+    const origin = county?.name || "Stockholm";
+    const destination = attraction.city || attraction.name;
+
     this.router.navigate(["/transport"], {
       queryParams: {
-        from: county.defaultOrigin,
-        to: attraction.nearestStation || attraction.name,
+        from: origin,
+        to: destination,
       },
     });
   }

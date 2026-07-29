@@ -1,6 +1,22 @@
 <section class="explore-page">
   @if (vm$ | async; as vm) {
-    @if (vm.county && vm.attraction) {
+    @if (vm.loading) {
+      <p-card>
+        <div class="text-center py-6">
+          <i class="pi pi-spin pi-spinner text-4xl text-primary mb-3"></i>
+          <h2 class="mt-0">Loading attraction</h2>
+        </div>
+      </p-card>
+    } @else if (vm.error) {
+      <p-card>
+        <div class="text-center py-6">
+          <i class="pi pi-exclamation-circle text-5xl text-red-500 mb-3"></i>
+          <h2 class="mt-0">Could not load attraction</h2>
+          <p class="text-color-secondary mb-4">{{ vm.error }}</p>
+          <p-button label="Back to Explore" routerLink="/explore"></p-button>
+        </div>
+      </p-card>
+    } @else if (vm.county && vm.attraction) {
       <div class="mb-4">
         <p-button
           label="{{ vm.county.name }}"
@@ -35,7 +51,7 @@
                 <h1 class="m-0">{{ vm.attraction.name }}</h1>
 
                 <p class="text-color-secondary line-height-3">
-                  {{ vm.attraction.shortDescription }}
+                  {{ vm.attraction.description }}
                 </p>
               </div>
 
@@ -49,23 +65,19 @@
                 <span class="font-semibold">{{ vm.attraction.rating }}</span>
               </div>
 
-              <div class="flex flex-wrap gap-2">
-                @for (tag of vm.attraction.tags; track tag) {
-                  <p-chip [label]="tag"></p-chip>
-                }
-              </div>
-
               <p-divider></p-divider>
 
               <div class="grid">
                 <div class="col-12 sm:col-6">
-                  <span class="block text-sm text-color-secondary">Duration</span>
-                  <strong>{{ vm.attraction.estimatedVisitDuration }}</strong>
+                  <span class="block text-sm text-color-secondary">City</span>
+                  <strong>{{ vm.attraction.city || "Sweden" }}</strong>
                 </div>
 
                 <div class="col-12 sm:col-6">
-                  <span class="block text-sm text-color-secondary">Nearest station</span>
-                  <strong>{{ vm.attraction.nearestStation }}</strong>
+                  <span class="block text-sm text-color-secondary"
+                    >Category</span
+                  >
+                  <strong>{{ vm.attraction.category }}</strong>
                 </div>
               </div>
 
@@ -77,7 +89,7 @@
                 </p-button>
 
                 <a
-                  [href]="vm.attraction.googleMapsUrl"
+                  [href]="mapsUrl(vm.attraction)"
                   target="_blank"
                   rel="noopener">
                   <p-button
@@ -112,35 +124,20 @@
             <p-tabpanel value="visit">
               <div class="grid">
                 <div class="col-12 md:col-6">
-                  <p-panel header="Opening hours">
-                    <p class="m-0">{{ vm.attraction.openingHours }}</p>
+                  <p-panel header="Website">
+                    <a
+                      [href]="vm.attraction.website"
+                      target="_blank"
+                      rel="noopener"
+                      class="visit-link">
+                      {{ vm.attraction.website }}
+                    </a>
                   </p-panel>
                 </div>
 
                 <div class="col-12 md:col-6">
-                  <p-panel header="Entry fee">
-                    <p class="m-0">{{ vm.attraction.entryFee }}</p>
-                  </p-panel>
-                </div>
-
-                <div class="col-12">
                   <p-panel header="Address">
-                    <div
-                      class="flex justify-content-between align-items-center flex-wrap gap-3">
-                      <p class="m-0">{{ vm.attraction.address }}</p>
-
-                      <a
-                        [href]="vm.attraction.officialWebsite"
-                        target="_blank"
-                        rel="noopener">
-                        <p-button
-                          label="Official website"
-                          icon="pi pi-external-link"
-                          severity="secondary"
-                          variant="outlined">
-                        </p-button>
-                      </a>
-                    </div>
+                    <p class="m-0">{{ vm.attraction.address }}</p>
                   </p-panel>
                 </div>
               </div>

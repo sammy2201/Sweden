@@ -9,10 +9,12 @@ namespace SwedenStart;
 public class ExploreController : ControllerBase
 {
      private readonly IExploreService _exploreService;
+     private readonly string? _publicBaseUrl;
 
-     public ExploreController(IExploreService exploreService)
+     public ExploreController(IExploreService exploreService, IConfiguration configuration)
      {
           _exploreService = exploreService;
+          _publicBaseUrl = configuration["Api:BaseUrl"];
      }
 
      [HttpGet("counties")]
@@ -22,8 +24,44 @@ public class ExploreController : ControllerBase
 
           return Ok(new ExploreCountiesResponseDto
           {
-               Counties = counties.ToList()
+               Counties = counties.Select(c => new CountyDto
+               {
+                    Id = c.Id,
+                    Name = c.Name,
+                    Description = c.Description,
+                    ImageUrl = BuildAbsoluteImageUrl(c.ImageUrl)
+               }).ToList()
           });
+     }
+
+     private string BuildAbsoluteImageUrl(string imageUrl)
+     {
+          if (string.IsNullOrWhiteSpace(imageUrl))
+          {
+               return imageUrl;
+          }
+
+            if (Uri.TryCreate(imageUrl, UriKind.Absolute, out var parsedUri)
+                 && (parsedUri.Scheme == Uri.UriSchemeHttp || parsedUri.Scheme == Uri.UriSchemeHttps))
+          {
+               return imageUrl;
+          }
+
+          var baseUri = ResolveBaseUri();
+          var normalizedPath = imageUrl.StartsWith('/') ? imageUrl : $"/{imageUrl}";
+
+          return new Uri(baseUri, normalizedPath).ToString();
+     }
+
+     private Uri ResolveBaseUri()
+     {
+          if (!string.IsNullOrWhiteSpace(_publicBaseUrl)
+              && Uri.TryCreate(_publicBaseUrl, UriKind.Absolute, out var configuredBaseUri))
+          {
+               return configuredBaseUri;
+          }
+
+          return new Uri($"{Request.Scheme}://{Request.Host}{Request.PathBase}/");
      }
 
      [HttpGet("attractions")]

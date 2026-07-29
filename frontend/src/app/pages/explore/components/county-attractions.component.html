@@ -1,7 +1,24 @@
 <section class="explore-page">
   @if (vm$ | async; as vm) {
-    @if (vm.county; as county) {
-      <div class="flex align-items-start justify-content-between flex-wrap gap-3 mb-4">
+    @if (vm.loading) {
+      <p-card>
+        <div class="text-center py-6">
+          <i class="pi pi-spin pi-spinner text-4xl text-primary mb-3"></i>
+          <h2 class="mt-0">Loading attractions</h2>
+        </div>
+      </p-card>
+    } @else if (vm.error) {
+      <p-card>
+        <div class="text-center py-6">
+          <i class="pi pi-exclamation-circle text-5xl text-red-500 mb-3"></i>
+          <h2 class="mt-0">Could not load attractions</h2>
+          <p class="text-color-secondary mb-4">{{ vm.error }}</p>
+          <p-button label="Sign in" routerLink="/login"></p-button>
+        </div>
+      </p-card>
+    } @else if (vm.county; as county) {
+      <div
+        class="flex align-items-start justify-content-between flex-wrap gap-3 mb-4">
         <div>
           <p-button
             label="All counties"
@@ -18,15 +35,13 @@
           </p>
         </div>
 
-        <p-tag
-          severity="info"
-          [value]="county.featuredAttractionCount + ' featured places'">
+        <p-tag severity="info" [value]="vm.paged.totalCount + ' attractions'">
         </p-tag>
       </div>
 
-      @if (vm.attractions.length) {
+      @if (vm.paged.items.length) {
         <div class="grid">
-          @for (attraction of vm.attractions; track attraction.id) {
+          @for (attraction of vm.paged.items; track attraction.id) {
             <div class="col-12 md:col-6 xl:col-4">
               <p-card styleClass="h-full overflow-hidden attraction-card">
                 <ng-template pTemplate="header">
@@ -37,7 +52,8 @@
                 </ng-template>
 
                 <div class="flex flex-column gap-3 h-full">
-                  <div class="flex justify-content-between align-items-start gap-3">
+                  <div
+                    class="flex justify-content-between align-items-start gap-3">
                     <div>
                       <h2 class="m-0 text-xl">{{ attraction.name }}</h2>
 
@@ -51,7 +67,7 @@
                   </div>
 
                   <p class="line-height-3 text-color-secondary m-0">
-                    {{ attraction.shortDescription }}
+                    Discover this place in {{ attraction.city || county.name }}.
                   </p>
 
                   <div class="flex align-items-center gap-2">
@@ -62,17 +78,6 @@
                     </p-rating>
 
                     <span class="font-semibold">{{ attraction.rating }}</span>
-                  </div>
-
-                  <div class="flex align-items-center gap-2 text-sm text-color-secondary">
-                    <i class="pi pi-clock"></i>
-                    <span>{{ attraction.estimatedVisitDuration }}</span>
-                  </div>
-
-                  <div class="flex flex-wrap gap-2">
-                    @for (tag of attraction.tags; track tag) {
-                      <p-chip [label]="tag"></p-chip>
-                    }
                   </div>
 
                   <p-divider></p-divider>
@@ -89,13 +94,39 @@
                     <p-button
                       label="Plan Journey"
                       icon="pi pi-directions"
-                      (onClick)="planJourney(county, attraction)">
+                      (onClick)="planJourney(vm.county, attraction)">
                     </p-button>
                   </div>
                 </div>
               </p-card>
             </div>
           }
+        </div>
+
+        <div
+          class="flex justify-content-between align-items-center flex-wrap gap-3 mt-4">
+          <span class="text-color-secondary text-sm">
+            Page {{ vm.paged.page }} of {{ vm.paged.totalPages || 1 }}
+          </span>
+
+          <div class="flex gap-2">
+            <p-button
+              label="Previous"
+              icon="pi pi-arrow-left"
+              severity="secondary"
+              variant="outlined"
+              [disabled]="!vm.paged.hasPreviousPage"
+              (onClick)="goToPreviousPage(vm.paged.page)">
+            </p-button>
+
+            <p-button
+              label="Next"
+              icon="pi pi-arrow-right"
+              iconPos="right"
+              [disabled]="!vm.paged.hasNextPage"
+              (onClick)="goToNextPage(vm.paged.page)">
+            </p-button>
+          </div>
         </div>
       } @else {
         <p-card>
@@ -105,8 +136,7 @@
             <h2 class="mt-0">Attractions coming soon</h2>
 
             <p class="text-color-secondary mb-4">
-              This county is ready in the browser, and detailed places can be
-              added through the Explore service.
+              No attractions matched this county yet.
             </p>
 
             <p-button label="Choose another county" routerLink="/explore">
