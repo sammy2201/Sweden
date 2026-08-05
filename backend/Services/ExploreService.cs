@@ -18,13 +18,13 @@ public class ExploreService : IExploreService
          string county,
          int page,
          int pageSize,
-         string category)
+           string? category)
      {
           var attractions = await _attractionRepository.GetAttractionsAsync(
               county,
               page,
               pageSize,
-              category);
+                 category ?? string.Empty);
 
           return new PagedResponse<AttractionDto>
           {

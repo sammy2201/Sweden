@@ -41,8 +41,8 @@ public class ExploreController : ControllerBase
                return imageUrl;
           }
 
-            if (Uri.TryCreate(imageUrl, UriKind.Absolute, out var parsedUri)
-                 && (parsedUri.Scheme == Uri.UriSchemeHttp || parsedUri.Scheme == Uri.UriSchemeHttps))
+          if (Uri.TryCreate(imageUrl, UriKind.Absolute, out var parsedUri)
+               && (parsedUri.Scheme == Uri.UriSchemeHttp || parsedUri.Scheme == Uri.UriSchemeHttps))
           {
                return imageUrl;
           }

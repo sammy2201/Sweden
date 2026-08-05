@@ -1,8 +1,17 @@
 import { CommonModule } from "@angular/common";
+import { HttpClient } from "@angular/common/http";
 import { Component, inject } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
-import { catchError, combineLatest, map, of, startWith, switchMap } from "rxjs";
+import {
+  catchError,
+  combineLatest,
+  map,
+  of,
+  startWith,
+  switchMap,
+  take,
+} from "rxjs";
 import { ButtonModule } from "primeng/button";
 import { CardModule } from "primeng/card";
 import { DividerModule } from "primeng/divider";
@@ -12,8 +21,17 @@ import { RatingModule } from "primeng/rating";
 import { TabsModule } from "primeng/tabs";
 import { TagModule } from "primeng/tag";
 import { AttractionDetail, County } from "../../../models/explore.models";
-import { ExploreService } from "../../../services/explore.service";
 import { buildExploreErrorMessage } from "../explore.utils";
+import { AuthService } from "../../../services/auth.service";
+import { environment } from "../../../../environments/environment";
+
+interface ExploreCountiesResponseDto {
+  counties: County[];
+}
+
+interface ExploreAttractionDetailResponseDto {
+  attraction: AttractionDetail;
+}
 
 interface AttractionDetailVm {
   loading: boolean;
@@ -44,7 +62,8 @@ interface AttractionDetailVm {
 export class AttractionDetailsComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
-  private readonly exploreService = inject(ExploreService);
+  private readonly http = inject(HttpClient);
+  private readonly authService = inject(AuthService);
 
   readonly vm$ = this.route.paramMap.pipe(
     switchMap((params) => {
@@ -52,8 +71,8 @@ export class AttractionDetailsComponent {
       const attractionId = params.get("attractionId") ?? "";
 
       return combineLatest([
-        this.exploreService.getCounty(countyId),
-        this.exploreService.getAttraction(countyId, attractionId),
+        this.getCounty(countyId),
+        this.getAttraction(attractionId),
       ]);
     }),
     map(
@@ -90,14 +109,52 @@ export class AttractionDetailsComponent {
   }
 
   planJourney(county: County | undefined, attraction: AttractionDetail): void {
-    const origin = county?.name || "Stockholm";
+    const fallbackOrigin = county?.name || "Stockholm";
     const destination = attraction.city || attraction.name;
 
+    const cachedAddress = this.authService.user()?.address?.trim();
+    if (cachedAddress) {
+      this.navigateToJourney(cachedAddress, destination);
+      return;
+    }
+
+    this.authService
+      .loadUserProfile()
+      .pipe(take(1))
+      .subscribe({
+        next: (profile) => {
+          const origin = profile.address?.trim() || fallbackOrigin;
+          this.navigateToJourney(origin, destination);
+        },
+        error: () => {
+          this.navigateToJourney(fallbackOrigin, destination);
+        },
+      });
+  }
+
+  private navigateToJourney(from: string, to: string): void {
     this.router.navigate(["/transport"], {
       queryParams: {
-        from: origin,
-        to: destination,
+        from,
+        to,
       },
     });
+  }
+
+  private getCounty(countyId: string) {
+    return this.http
+      .get<ExploreCountiesResponseDto>(`${environment.apiUrl}/explore/counties`)
+      .pipe(
+        map((response) => response.counties ?? []),
+        map((counties) => counties.find((county) => county.id === countyId)),
+      );
+  }
+
+  private getAttraction(attractionId: string) {
+    return this.http
+      .get<ExploreAttractionDetailResponseDto>(
+        `${environment.apiUrl}/explore/attractions/${encodeURIComponent(attractionId)}`,
+      )
+      .pipe(map((response) => response.attraction));
   }
 }

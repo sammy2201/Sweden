@@ -10,6 +10,7 @@ import {
   of,
   startWith,
   switchMap,
+  take,
 } from "rxjs";
 import { ButtonModule } from "primeng/button";
 import { CardModule } from "primeng/card";
@@ -24,6 +25,7 @@ import {
 import { FormsModule } from "@angular/forms";
 import { buildExploreErrorMessage } from "../explore.utils";
 import { environment } from "../../../../environments/environment";
+import { AuthService } from "../../../services/auth.service";
 
 interface CountyAttractionsVm {
   loading: boolean;
@@ -76,6 +78,7 @@ export class CountyAttractionsComponent {
   private readonly http: HttpClient = inject(HttpClient);
   private readonly route: ActivatedRoute = inject(ActivatedRoute);
   private readonly router: Router = inject(Router);
+  private readonly authService: AuthService = inject(AuthService);
   private readonly requestState$ = new BehaviorSubject<{
     page: number;
     pageSize: number;
@@ -151,13 +154,34 @@ export class CountyAttractionsComponent {
   }
 
   planJourney(county: County | undefined, attraction: Attraction): void {
-    const origin = county?.name || "Stockholm";
+    const fallbackOrigin = county?.name || "Stockholm";
     const destination = attraction.city || attraction.name;
 
+    const cachedAddress = this.authService.user()?.address?.trim();
+    if (cachedAddress) {
+      this.navigateToJourney(cachedAddress, destination);
+      return;
+    }
+
+    this.authService
+      .loadUserProfile()
+      .pipe(take(1))
+      .subscribe({
+        next: (profile) => {
+          const origin = profile.address?.trim() || fallbackOrigin;
+          this.navigateToJourney(origin, destination);
+        },
+        error: () => {
+          this.navigateToJourney(fallbackOrigin, destination);
+        },
+      });
+  }
+
+  private navigateToJourney(from: string, to: string): void {
     this.router.navigate(["/transport"], {
       queryParams: {
-        from: origin,
-        to: destination,
+        from,
+        to,
       },
     });
   }

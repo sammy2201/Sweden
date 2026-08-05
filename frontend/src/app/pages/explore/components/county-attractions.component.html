@@ -43,46 +43,42 @@
         <div class="grid">
           @for (attraction of vm.paged.items; track attraction.id) {
             <div class="col-12 md:col-6 xl:col-4">
-              <p-card styleClass="h-full overflow-hidden attraction-card">
-                <ng-template pTemplate="header">
-                  <img
-                    class="attraction-image"
-                    [src]="attraction.imageUrl"
-                    [alt]="attraction.name" />
-                </ng-template>
+              <div class="custom-card">
+                <img
+                  class="attraction-image"
+                  [src]="attraction.imageUrl"
+                  [alt]="attraction.name" />
 
-                <div class="flex flex-column gap-3 h-full">
-                  <div
-                    class="flex justify-content-between align-items-start gap-3">
+                <div class="card-content">
+                  <div class="card-header">
                     <div>
-                      <h2 class="m-0 text-xl">{{ attraction.name }}</h2>
-
-                      <span class="text-color-secondary text-sm">
-                        {{ attraction.city }}
-                      </span>
+                      <h2>{{ attraction.name }}</h2>
+                      <span class="city">{{ attraction.city }}</span>
                     </div>
 
                     <p-tag severity="secondary" [value]="attraction.category">
                     </p-tag>
                   </div>
 
-                  <p class="line-height-3 text-color-secondary m-0">
+                  <p class="description">
                     Discover this place in {{ attraction.city || county.name }}.
                   </p>
 
-                  <div class="flex align-items-center gap-2">
+                  <div class="rating-row">
                     <p-rating
                       [ngModel]="ratingStars(attraction.rating)"
                       [readonly]="true"
                       [stars]="5">
                     </p-rating>
 
-                    <span class="font-semibold">{{ attraction.rating }}</span>
+                    <span class="rating-value">
+                      {{ attraction.rating }}
+                    </span>
                   </div>
 
                   <p-divider></p-divider>
 
-                  <div class="flex gap-2 flex-wrap mt-auto">
+                  <div class="card-footer">
                     <p-button
                       label="View Details"
                       icon="pi pi-info-circle"
@@ -98,7 +94,7 @@
                     </p-button>
                   </div>
                 </div>
-              </p-card>
+              </div>
             </div>
           }
         </div>
