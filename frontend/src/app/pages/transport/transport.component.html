@@ -1,0 +1,242 @@
+<div class="transport-page">
+  <!-- Hero -->
+  <div class="mb-5">
+    <h1 class="m-0">Transport Planner</h1>
+    <p class="text-color-secondary mt-2">
+      Search trains and buses across Sweden.
+    </p>
+  </div>
+
+  <!-- Search -->
+  <p-card styleClass="mb-5">
+    <div class="grid">
+      <div class="col-12 md:col-5">
+        <label class="block mb-2 font-semibold"> From </label>
+
+        <span class="p-input-icon-left w-full">
+          <i class="pi pi-map-marker"></i>
+
+          <input
+            pInputText
+            class="w-full"
+            [(ngModel)]="from"
+            placeholder="Malmö C" />
+        </span>
+      </div>
+
+      <div class="col-12 md:col-2 flex align-items-end justify-content-center">
+        <button
+          pButton
+          icon="pi pi-arrow-right-arrow-left"
+          severity="secondary"
+          rounded
+          outlined
+          (click)="swapLocations()"></button>
+      </div>
+
+      <div class="col-12 md:col-5">
+        <label class="block mb-2 font-semibold"> To </label>
+
+        <span class="p-input-icon-left w-full">
+          <i class="pi pi-flag"></i>
+
+          <input
+            pInputText
+            class="w-full"
+            [(ngModel)]="to"
+            placeholder="Stockholm C" />
+        </span>
+      </div>
+
+      <div class="col-12 md:col-4">
+        <label class="block mb-2 font-semibold"> Departure </label>
+
+        <p-datepicker
+          [(ngModel)]="departureTime"
+          [minDate]="minDateTime"
+          [showTime]="true"
+          hourFormat="24"
+          (onFocus)="onDatePickerOpen()"
+          appendTo="body"
+          styleClass="w-full">
+        </p-datepicker>
+      </div>
+
+      <div class="col-12 md:col-4">
+        <label class="block mb-2 font-semibold"> Arrival </label>
+
+        <p-datepicker
+          [(ngModel)]="arrivalTime"
+          [minDate]="minDateTime"
+          [showTime]="true"
+          hourFormat="24"
+          (onFocus)="onDatePickerOpen()"
+          appendTo="body"
+          styleClass="w-full">
+        </p-datepicker>
+      </div>
+
+      <div class="col-12 md:col-4 flex align-items-end">
+        <button
+          pButton
+          label="Search"
+          icon="pi pi-search"
+          class="w-full"
+          (click)="searchTrips()"></button>
+      </div>
+
+      <div class="col-12" *ngIf="timeValidationError">
+        <small class="text-red-500">{{ timeValidationError }}</small>
+      </div>
+    </div>
+  </p-card>
+
+  <!-- Loading -->
+
+  <div *ngIf="loading" class="flex justify-content-center py-6">
+    <p-progressSpinner strokeWidth="4"> </p-progressSpinner>
+  </div>
+
+  <!-- Empty -->
+
+  <p-card *ngIf="!loading && trips.length === 0">
+    <div class="text-center py-5">
+      <i class="pi pi-map text-5xl text-primary mb-3"> </i>
+
+      <h3>No journeys found</h3>
+
+      <p class="text-color-secondary">
+        Search for a journey to see available routes.
+      </p>
+    </div>
+  </p-card>
+
+  <!-- Results -->
+
+  <div *ngIf="!loading && trips.length">
+    <p-card *ngFor="let trip of trips" styleClass="mb-4">
+      <!-- Header -->
+
+      <div
+        class="flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+          <h3 class="m-0">
+            {{ trip.operator }}
+          </h3>
+
+          <small class="text-color-secondary">
+            {{ trip.transportType }}
+          </small>
+        </div>
+
+        <div class="flex gap-2">
+          <p-tag severity="info" [value]="trip.duration"> </p-tag>
+
+          <p-tag *ngIf="trip.isDirect" severity="success" value="Direct">
+          </p-tag>
+
+          <p-tag
+            *ngIf="!trip.isDirect"
+            severity="warn"
+            [value]="trip.numberOfChanges + ' Changes'">
+          </p-tag>
+
+          <p-tag *ngIf="trip.isCancelled" severity="danger" value="Cancelled">
+          </p-tag>
+        </div>
+      </div>
+
+      <p-divider></p-divider>
+
+      <!-- Journey -->
+
+      <div class="grid text-center align-items-center">
+        <div class="col">
+          <h2 class="m-0">
+            {{ trip.departureTime | date: "HH:mm" }}
+          </h2>
+
+          <small class="text-color-secondary">
+            {{ trip.departureTime | date: "dd MMM yyyy" }}
+          </small>
+
+          <div class="mt-3 font-semibold">
+            {{ trip.origin.name }}
+          </div>
+
+          <small *ngIf="trip.originPlatform">
+            Platform {{ trip.originPlatform }}
+          </small>
+        </div>
+
+        <div class="col-12 md:col-2">
+          <i class="pi pi-arrow-right text-2xl"> </i>
+        </div>
+
+        <div class="col">
+          <h2 class="m-0">
+            {{ trip.arrivalTime | date: "HH:mm" }}
+          </h2>
+
+          <small class="text-color-secondary">
+            {{ trip.arrivalTime | date: "dd MMM yyyy" }}
+          </small>
+
+          <div class="mt-3 font-semibold">
+            {{ trip.destination.name }}
+          </div>
+
+          <small *ngIf="trip.destinationPlatform">
+            Platform {{ trip.destinationPlatform }}
+          </small>
+        </div>
+      </div>
+
+      <p-divider></p-divider>
+
+      <!-- Journey Details -->
+
+      <p-accordion>
+        <p-accordion-panel value="0">
+          <p-accordion-header> Journey Details </p-accordion-header>
+
+          <p-accordion-content>
+            <div *ngFor="let leg of trip.legs" class="mb-4">
+              <div
+                class="flex justify-content-between align-items-center flex-wrap">
+                <strong>
+                  {{ leg.operator }}
+                </strong>
+
+                <p-tag severity="secondary" [value]="leg.transportType">
+                </p-tag>
+              </div>
+
+              <div class="mt-2">
+                {{ leg.from }}
+
+                <i class="pi pi-arrow-right mx-2"></i>
+
+                {{ leg.to }}
+              </div>
+
+              <div class="mt-2 text-sm text-color-secondary">
+                {{ leg.departureTime | date: "dd MMM HH:mm" }}
+
+                -
+
+                {{ leg.arrivalTime | date: "HH:mm" }}
+              </div>
+
+              <div *ngIf="leg.originPlatform" class="mt-1 text-sm">
+                Platform {{ leg.originPlatform }}
+              </div>
+
+              <p-divider></p-divider>
+            </div>
+          </p-accordion-content>
+        </p-accordion-panel>
+      </p-accordion>
+    </p-card>
+  </div>
+</div>

@@ -1,0 +1,53 @@
+.transport-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+h1 {
+  color: var(--app-heading);
+}
+
+.text-primary {
+  color: var(--app-primary);
+}
+
+:host ::ng-deep .p-card {
+  border-radius: 16px;
+}
+
+:host ::ng-deep .p-button {
+  border-radius: 10px;
+}
+
+:host ::ng-deep .p-inputtext,
+:host ::ng-deep .p-datepicker,
+:host ::ng-deep .p-datepicker input {
+  width: 100%;
+}
+
+:host ::ng-deep .p-tag {
+  font-size: 0.8rem;
+}
+
+:host ::ng-deep .p-divider {
+  margin: 1.25rem 0;
+}
+
+:host ::ng-deep .p-accordion-header {
+  font-weight: 600;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .transport-page {
+    padding: 1rem;
+  }
+
+  h1 {
+    font-size: 1.8rem;
+  }
+}

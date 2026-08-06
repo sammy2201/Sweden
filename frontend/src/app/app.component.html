@@ -24,6 +24,14 @@
   <div class="nav-actions">
     @if (authService.isAuthenticated()) {
       <p-button
+        label="Profile"
+        severity="secondary"
+        variant="text"
+        icon="pi pi-user"
+        routerLink="/profile">
+      </p-button>
+
+      <p-button
         label="Logout"
         severity="secondary"
         variant="outlined"

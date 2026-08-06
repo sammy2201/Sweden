@@ -12,8 +12,8 @@ using SwedenStart;
 namespace SwedenStart.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260707132059_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260724115245_CheckChanges")]
+    partial class CheckChanges
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,61 @@ namespace SwedenStart.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("SwedenStart.Attraction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Address")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Category")
+                        .HasColumnType("text");
+
+                    b.Property<string>("City")
+                        .HasColumnType("text");
+
+                    b.Property<string>("County")
+                        .HasColumnType("text");
+
+                    b.Property<string>("DescriptionEn")
+                        .HasColumnType("text");
+
+                    b.Property<string>("DescriptionSv")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ExternalId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("LastSynced")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<double?>("Latitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<double?>("Longitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Website")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExternalId")
+                        .IsUnique();
+
+                    b.ToTable("Attractions", (string)null);
+                });
 
             modelBuilder.Entity("SwedenStart.Roadmap", b =>
                 {
@@ -86,13 +141,14 @@ namespace SwedenStart.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Roadmaps");
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Roadmaps", (string)null);
                 });
 
             modelBuilder.Entity("SwedenStart.RoadmapTask", b =>
@@ -119,7 +175,7 @@ namespace SwedenStart.Migrations
 
                     b.HasIndex("RoadmapId");
 
-                    b.ToTable("RoadmapTasks");
+                    b.ToTable("RoadmapTasks", (string)null);
                 });
 
             modelBuilder.Entity("SwedenStart.User", b =>
@@ -127,6 +183,14 @@ namespace SwedenStart.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("City")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -162,7 +226,24 @@ namespace SwedenStart.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.HasIndex("Username")
+                        .IsUnique();
+
+                    b.ToTable("Users", (string)null);
+                });
+
+            modelBuilder.Entity("SwedenStart.Roadmap", b =>
+                {
+                    b.HasOne("SwedenStart.User", "User")
+                        .WithMany("Roadmaps")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SwedenStart.RoadmapTask", b =>
@@ -175,6 +256,11 @@ namespace SwedenStart.Migrations
             modelBuilder.Entity("SwedenStart.Roadmap", b =>
                 {
                     b.Navigation("Tasks");
+                });
+
+            modelBuilder.Entity("SwedenStart.User", b =>
+                {
+                    b.Navigation("Roadmaps");
                 });
 #pragma warning restore 612, 618
         }

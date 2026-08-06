@@ -12,12 +12,14 @@ export interface MenuItem {
 export class MenuService {
   private readonly menuItems: MenuItem[] = [
     { label: "Home", path: "/" },
-    { label: "P Number", path: "/p-number" },
+    { label: "Personal Number", path: "/p-number" },
     { label: "Housing", path: "/housing" },
+    { label: "Explore", path: "/explore" },
     { label: "Roadmap", path: "/roadmap" },
     { label: "Digital ID", path: "/digital-id" },
     { label: "Banking", path: "/banking" },
     { label: "Tax Info", path: "/tax-info" },
+    { label: "Transport", path: "/transport" },
   ];
 
   getMenuItems(): MenuItem[] {

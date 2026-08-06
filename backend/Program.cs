@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.OpenApi;
 using Npgsql;
 using Scalar.AspNetCore;
@@ -9,6 +9,9 @@ using System.Text;
 using SwedenStart;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Logging.AddFilter("System.Net.Http.HttpClient.IVisitSwedenService", LogLevel.Warning);
+
 
 var jwtKey = builder.Configuration["Jwt:Key"] ?? builder.Configuration["Jwt:Secret"];
 
@@ -23,6 +26,12 @@ builder.Configuration["Jwt:Secret"] = jwtKey;
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddAuthorization();
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("frontend", policy =>
@@ -72,7 +81,7 @@ builder.Services.AddAuthentication(options =>
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(options =>
 {
-    options.RequireHttpsMetadata = false;
+    options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
     options.SaveToken = true;
 
     options.TokenValidationParameters = new TokenValidationParameters
@@ -86,7 +95,6 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
     };
 
-    options.Events = new JwtBearerEvents();
 });
 builder.Services.AddScoped<IRoadmapRepository, RoadmapRepository>();
 builder.Services.AddScoped<IRoadmapService, RoadmapService>();
@@ -94,6 +102,36 @@ builder.Services.AddScoped<IBankService, BankService>();
 builder.Services.AddSingleton<IHealthService, HealthService>();
 builder.Services.AddSingleton<TaxDataProvider>();
 builder.Services.AddScoped<ITaxService, TaxService>();
+builder.Services.AddHttpClient<ITransportService, TransportService>((sp, client) =>
+{
+    var config = sp.GetRequiredService<IConfiguration>();
+    var baseUrl = config["ResRobot:BaseUrl"] ?? "https://api.resrobot.se/v2.1/";
+
+    if (!baseUrl.EndsWith('/'))
+    {
+        baseUrl += "/";
+    }
+
+    client.BaseAddress = new Uri(baseUrl);
+    client.Timeout = TimeSpan.FromSeconds(20);
+});
+builder.Services.AddScoped<IExploreService, ExploreService>();
+builder.Services.AddScoped<IAttractionRepository, AttractionRepository>();
+builder.Services.AddScoped<IVisitSwedenRepository, VisitSwedenRepository>();
+builder.Services.AddSingleton<ICountyLookupService, CountyLookupService>();
+builder.Services.AddHttpClient<IVisitSwedenService, VisitSwedenService>((sp, client) =>
+{
+    var config = sp.GetRequiredService<IConfiguration>();
+    var baseUrl = config["VisitSweden:BaseUrl"] ?? "https://data.visitsweden.com/store/";
+
+    if (!baseUrl.EndsWith('/'))
+    {
+        baseUrl += "/";
+    }
+
+    client.BaseAddress = new Uri(baseUrl);
+    client.Timeout = TimeSpan.FromSeconds(20);
+});
 
 
 var defaultConnection = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -131,11 +169,12 @@ if (app.Environment.IsDevelopment())
         options.EnablePersistentAuthentication();
     });
     app.MapGet("/docs", () => Results.Redirect("/scalar"));
-    app.MapGet("/swager", () => Results.Redirect("/scalar"));
+    app.MapGet("/swagger", () => Results.Redirect("/scalar"));
 }
 
+app.UseForwardedHeaders();
 app.UseHttpsRedirection();
-
+app.UseStaticFiles();
 app.UseCors("frontend");
 app.UseAuthentication();
 app.UseAuthorization();
@@ -158,5 +197,4 @@ app.Lifetime.ApplicationStarted.Register(() =>
 app.MapControllers();
 
 app.Run();
-
 

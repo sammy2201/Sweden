@@ -1,0 +1,158 @@
+<section class="explore-page">
+  @if (vm$ | async; as vm) {
+    @if (vm.loading) {
+      <p-card>
+        <div class="text-center py-6">
+          <i class="pi pi-spin pi-spinner text-4xl text-primary mb-3"></i>
+          <h2 class="mt-0">Loading attraction</h2>
+        </div>
+      </p-card>
+    } @else if (vm.error) {
+      <p-card>
+        <div class="text-center py-6">
+          <i class="pi pi-exclamation-circle text-5xl text-red-500 mb-3"></i>
+          <h2 class="mt-0">Could not load attraction</h2>
+          <p class="text-color-secondary mb-4">{{ vm.error }}</p>
+          <p-button label="Back to Explore" routerLink="/explore"></p-button>
+        </div>
+      </p-card>
+    } @else if (vm.county && vm.attraction) {
+      <div class="mb-4">
+        <p-button
+          label="{{ vm.county.name }}"
+          icon="pi pi-arrow-left"
+          severity="secondary"
+          variant="text"
+          [routerLink]="['/explore', vm.county.id]">
+        </p-button>
+      </div>
+
+      <div class="grid">
+        <div class="col-12 lg:col-7">
+          <p-image
+            [src]="vm.attraction.imageUrl"
+            [alt]="vm.attraction.name"
+            imageClass="details-image"
+            [preview]="true">
+          </p-image>
+        </div>
+
+        <div class="col-12 lg:col-5">
+          <p-card styleClass="h-full">
+            <div class="flex flex-column gap-4">
+              <div>
+                <div class="flex gap-2 flex-wrap mb-3">
+                  <p-tag severity="secondary" [value]="vm.attraction.category">
+                  </p-tag>
+
+                  <p-tag severity="info" [value]="vm.attraction.city"></p-tag>
+                </div>
+
+                <h1 class="m-0">{{ vm.attraction.name }}</h1>
+
+                <p class="text-color-secondary line-height-3">
+                  {{ vm.attraction.description }}
+                </p>
+              </div>
+
+              <div class="flex align-items-center gap-2">
+                <p-rating
+                  [ngModel]="ratingStars(vm.attraction.rating)"
+                  [readonly]="true"
+                  [stars]="5">
+                </p-rating>
+
+                <span class="font-semibold">{{ vm.attraction.rating }}</span>
+              </div>
+
+              <p-divider></p-divider>
+
+              <div class="grid">
+                <div class="col-12 sm:col-6">
+                  <span class="block text-sm text-color-secondary">City</span>
+                  <strong>{{ vm.attraction.city || "Sweden" }}</strong>
+                </div>
+
+                <div class="col-12 sm:col-6">
+                  <span class="block text-sm text-color-secondary"
+                    >Category</span
+                  >
+                  <strong>{{ vm.attraction.category }}</strong>
+                </div>
+              </div>
+
+              <div class="flex gap-2 flex-wrap">
+                <p-button
+                  label="Plan Journey"
+                  icon="pi pi-directions"
+                  (onClick)="planJourney(vm.county, vm.attraction)">
+                </p-button>
+
+                <a
+                  [href]="mapsUrl(vm.attraction)"
+                  target="_blank"
+                  rel="noopener">
+                  <p-button
+                    label="Google Maps"
+                    icon="pi pi-map-marker"
+                    severity="secondary"
+                    variant="outlined">
+                  </p-button>
+                </a>
+              </div>
+            </div>
+          </p-card>
+        </div>
+      </div>
+
+      <div class="mt-4">
+        <p-tabs value="overview">
+          <p-tablist>
+            <p-tab value="overview">Overview</p-tab>
+            <p-tab value="visit">Visit</p-tab>
+          </p-tablist>
+
+          <p-tabpanels>
+            <p-tabpanel value="overview">
+              <p-panel header="About">
+                <p class="line-height-3 m-0">
+                  {{ vm.attraction.description }}
+                </p>
+              </p-panel>
+            </p-tabpanel>
+
+            <p-tabpanel value="visit">
+              <div class="grid">
+                <div class="col-12 md:col-6">
+                  <p-panel header="Website">
+                    <a
+                      [href]="vm.attraction.website"
+                      target="_blank"
+                      rel="noopener"
+                      class="visit-link">
+                      {{ vm.attraction.website }}
+                    </a>
+                  </p-panel>
+                </div>
+
+                <div class="col-12 md:col-6">
+                  <p-panel header="Address">
+                    <p class="m-0">{{ vm.attraction.address }}</p>
+                  </p-panel>
+                </div>
+              </div>
+            </p-tabpanel>
+          </p-tabpanels>
+        </p-tabs>
+      </div>
+    } @else {
+      <p-card>
+        <div class="text-center py-6">
+          <h1>Attraction not found</h1>
+
+          <p-button label="Back to Explore" routerLink="/explore"></p-button>
+        </div>
+      </p-card>
+    }
+  }
+</section>

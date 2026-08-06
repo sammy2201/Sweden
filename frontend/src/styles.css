@@ -1,3 +1,4 @@
+@import "primeflex/primeflex.css";
 :root {
   /* Backgrounds */
 
@@ -21,7 +22,6 @@
 
   /* Brand */
 
-  --app-primary: #0f766e;
   --app-primary-dark: #115e59;
   --app-accent: #14b8a6;
   --app-accent-soft: #ccfbf1;

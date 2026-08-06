@@ -7,7 +7,6 @@ public class Roadmap
     public Guid UserId { get; set; }
     public User User { get; set; } = null!;
     public DateTime CreatedAt { get; set; }
-
     public string Origin { get; set; } = string.Empty;
     public string ResidencePermit { get; set; } = string.Empty;
     public string LiveInSweden { get; set; } = string.Empty;

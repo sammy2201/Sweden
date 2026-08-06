@@ -1,0 +1,177 @@
+:host {
+  display: block;
+}
+
+.page {
+  width: min(1200px, 100%);
+  margin: 0 auto;
+  padding: 3rem 1.5rem 5rem;
+}
+
+.hero {
+  margin-bottom: 3rem;
+  padding-bottom: 3rem;
+  border-bottom: 1px solid var(--app-border);
+}
+
+.hero h1 {
+  margin: 1rem 0;
+  font-size: clamp(2.8rem, 5vw, 4rem);
+  line-height: 1.05;
+  letter-spacing: -2px;
+  color: var(--app-heading);
+}
+
+.hero-text {
+  max-width: 720px;
+  margin: 0;
+  font-size: 1.15rem;
+  line-height: 1.8;
+  color: var(--app-text-soft);
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  height: 100%;
+  padding: 1.5rem;
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius);
+  transition: transform 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+}
+
+.stat-card i {
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: var(--app-accent-soft);
+  color: var(--app-primary-dark);
+  font-size: 1.35rem;
+}
+
+.stat-card strong {
+  display: block;
+  color: var(--app-heading);
+  font-size: 1.5rem;
+}
+
+.stat-card span {
+  display: block;
+  margin-top: 0.3rem;
+  color: var(--app-text-muted);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.section-title {
+  margin: 0;
+  font-size: 2rem;
+  color: var(--app-heading);
+}
+
+.section-subtitle {
+  margin-top: 0.5rem;
+  color: var(--app-text-muted);
+}
+
+.county-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  height: 100%;
+}
+
+:host ::ng-deep .county-card {
+  overflow: hidden;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius);
+  background: var(--app-surface);
+  transition: transform 0.25s ease;
+}
+
+:host ::ng-deep .county-link:hover .county-card {
+  transform: translateY(-5px);
+}
+
+.county-image {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  display: block;
+}
+
+.county-content {
+  padding: 1.25rem;
+}
+
+.county-content h3 {
+  margin: 0;
+  color: var(--app-heading);
+  font-size: 1.35rem;
+}
+
+.county-content p {
+  margin: 1rem 0 1.5rem;
+  color: var(--app-text-soft);
+  line-height: 1.7;
+}
+
+.county-bottom i {
+  transition: transform 0.2s ease;
+}
+
+.county-card:hover .county-bottom i {
+  transform: translateX(5px);
+}
+
+:host ::ng-deep .empty-state {
+  max-width: 600px;
+  margin: 3rem auto;
+  text-align: center;
+  border-radius: var(--app-radius);
+  border: 1px solid var(--app-border);
+}
+
+.empty-icon {
+  width: 72px;
+  height: 72px;
+  margin: auto;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--app-accent-soft);
+  color: var(--app-primary-dark);
+  font-size: 2rem;
+}
+
+@media (max-width: 900px) {
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 700px) {
+  .page {
+    padding: 2rem 1rem 4rem;
+  }
+
+  .hero h1 {
+    font-size: 2.7rem;
+    letter-spacing: -1px;
+  }
+}

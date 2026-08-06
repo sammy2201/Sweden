@@ -13,20 +13,25 @@ export interface RegisterPayload {
   lastName: string;
   username: string;
   email: string;
+  city: string;
+  address: string;
   password: string;
 }
 
-interface AuthResponse {
-  accessToken: string;
-  expiresAt: string;
-}
-
-interface UserProfile {
+export interface UserProfile {
   id: string;
   firstName: string;
   lastName: string;
   username: string;
   email: string;
+  city: string;
+  address: string;
+  age?: number | null;
+}
+
+interface AuthResponse {
+  accessToken: string;
+  expiresAt: string;
 }
 
 @Injectable({ providedIn: "root" })
@@ -48,6 +53,12 @@ export class AuthService {
 
   register(payload: RegisterPayload): Observable<void> {
     return this.http.post<void>(`${environment.apiUrl}/auth/register`, payload);
+  }
+
+  loadUserProfile(): Observable<UserProfile> {
+    return this.http
+      .get<UserProfile>(`${environment.apiUrl}/auth/user`)
+      .pipe(tap((profile) => this.user.set(profile)));
   }
 
   logout(): void {
