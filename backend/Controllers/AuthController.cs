@@ -53,15 +53,45 @@ public class AuthController : ControllerBase
     [Authorize]
     public async Task<IActionResult> GetUser()
     {
-        var sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (string.IsNullOrEmpty(sub)) return Unauthorized();
-
-        if (!Guid.TryParse(sub, out var id)) return Unauthorized();
+        if (!TryGetCurrentUserId(out var id)) return Unauthorized();
 
         var user = await _authService.GetUserAsync(id);
         if (user == null) return NotFound();
 
-        var dto = new UserDto
+        var dto = MapUserDto(user);
+
+        return Ok(dto);
+    }
+
+    [HttpPut("user")]
+    [Authorize]
+    public async Task<IActionResult> UpdateUser([FromBody] UpdateUserProfileRequestDto request)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        if (!TryGetCurrentUserId(out var id)) return Unauthorized();
+
+        var user = await _authService.UpdateUserProfileAsync(
+            id,
+            request.FirstName,
+            request.LastName,
+            request.City,
+            request.Address);
+
+        if (user == null) return NotFound();
+
+        return Ok(MapUserDto(user));
+    }
+
+    private bool TryGetCurrentUserId(out Guid id)
+    {
+        var sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        return Guid.TryParse(sub, out id);
+    }
+
+    private static UserDto MapUserDto(User user)
+    {
+        return new UserDto
         {
             Id = user.Id,
             FirstName = user.FirstName,
@@ -71,7 +101,5 @@ public class AuthController : ControllerBase
             City = user.City,
             Address = user.Address
         };
-
-        return Ok(dto);
     }
 }

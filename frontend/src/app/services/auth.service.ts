@@ -29,6 +29,13 @@ export interface UserProfile {
   age?: number | null;
 }
 
+export interface UpdateUserProfilePayload {
+  firstName: string;
+  lastName: string;
+  city: string;
+  address: string;
+}
+
 interface AuthResponse {
   accessToken: string;
   expiresAt: string;
@@ -58,6 +65,14 @@ export class AuthService {
   loadUserProfile(): Observable<UserProfile> {
     return this.http
       .get<UserProfile>(`${environment.apiUrl}/auth/user`)
+      .pipe(tap((profile) => this.user.set(profile)));
+  }
+
+  updateUserProfile(
+    payload: UpdateUserProfilePayload,
+  ): Observable<UserProfile> {
+    return this.http
+      .put<UserProfile>(`${environment.apiUrl}/auth/user`, payload)
       .pipe(tap((profile) => this.user.set(profile)));
   }
 

@@ -7,4 +7,6 @@ public interface IAuthService
     Task<string> GenerateJwtToken(User user);
 
     Task<User?> GetUserAsync(Guid id);
+
+    Task<User?> UpdateUserProfileAsync(Guid id, string firstName, string lastName, string city, string address);
 }
