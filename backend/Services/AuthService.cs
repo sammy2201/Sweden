@@ -70,6 +70,23 @@ public class AuthService : IAuthService
         return _repo.GetUserByIdAsync(id);
     }
 
+    public async Task<User?> UpdateUserProfileAsync(Guid id, string firstName, string lastName, string city, string address)
+    {
+        var user = await _repo.GetUserByIdAsync(id);
+        if (user is null)
+        {
+            return null;
+        }
+
+        user.FirstName = firstName.Trim();
+        user.LastName = lastName.Trim();
+        user.City = city.Trim();
+        user.Address = address.Trim();
+
+        await _repo.UpdateUserAsync(user);
+        return user;
+    }
+
     public Task<string> GenerateJwtToken(User user)
     {
         var key = _config["Jwt:Key"] ?? _config["Jwt:Secret"] ?? throw new InvalidOperationException("JWT key is not configured.");
