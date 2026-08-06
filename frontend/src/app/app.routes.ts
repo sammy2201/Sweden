@@ -14,6 +14,7 @@ import { TransportComponent } from "./pages/transport/transport.component";
 import { AttractionDetailsComponent } from "./pages/explore/components/attraction-details.component";
 import { CountyAttractionsComponent } from "./pages/explore/components/county-attractions.component";
 import { ExploreCountiesComponent } from "./pages/explore/components/explore-counties.component";
+import { ProfileComponent } from "./pages/profile/profile.component";
 
 export const routes: Routes = [
   { path: "p-number", component: PNumberComponent },
@@ -29,6 +30,7 @@ export const routes: Routes = [
   { path: "login", component: LoginComponent },
   { path: "register", component: RegisterComponent },
   { path: "banking", component: BankingComponent, canActivate: [authGuard] },
+  { path: "profile", component: ProfileComponent, canActivate: [authGuard] },
   { path: "tax-info", component: TaxInfoComponent, canActivate: [authGuard] },
   { path: "digital-id", component: DigitalIDComponent },
   {

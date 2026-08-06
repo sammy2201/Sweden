@@ -1,0 +1,113 @@
+<section class="profile-page">
+  @if (loading()) {
+    <div class="profile-layout">
+      <p-card styleClass="identity-card">
+        <p-skeleton shape="circle" size="6rem"></p-skeleton>
+        <p-skeleton width="70%" height="2rem"></p-skeleton>
+        <p-skeleton width="45%" height="1rem"></p-skeleton>
+      </p-card>
+
+      <p-card styleClass="details-card">
+        <p-skeleton height="2rem"></p-skeleton>
+        <div class="details-grid">
+          @for (item of [1, 2, 3, 4, 5, 6]; track item) {
+            <p-skeleton height="72px"></p-skeleton>
+          }
+        </div>
+      </p-card>
+    </div>
+  } @else if (errorMessage()) {
+    <div class="profile-error">
+      <i class="pi pi-exclamation-circle"></i>
+      <h1>Profile unavailable</h1>
+      <p>{{ errorMessage() }}</p>
+      <p-button
+        label="Try again"
+        icon="pi pi-refresh"
+        (onClick)="ngOnInit()">
+      </p-button>
+    </div>
+  } @else if (profile(); as user) {
+    <div class="profile-layout">
+      <p-card styleClass="identity-card">
+        <div class="avatar">{{ initials() }}</div>
+
+        <div>
+          <p-tag value="Active account" severity="success"></p-tag>
+          <h1>{{ user.firstName }} {{ user.lastName }}</h1>
+          <p>{{ "@" + user.username }}</p>
+        </div>
+
+        <p-divider></p-divider>
+
+        <div class="quick-facts">
+          <div>
+            <i class="pi pi-map-marker"></i>
+            <span>{{ user.city }}</span>
+          </div>
+
+          @if (user.age) {
+            <div>
+              <i class="pi pi-calendar"></i>
+              <span>{{ user.age }} years old</span>
+            </div>
+          }
+        </div>
+      </p-card>
+
+      <p-card styleClass="details-card">
+        <div class="details-header">
+          <div>
+            <span class="eyebrow">User profile</span>
+            <h2>Account details</h2>
+          </div>
+
+          <p-button
+            label="Roadmap"
+            icon="pi pi-list-check"
+            routerLink="/roadmap">
+          </p-button>
+        </div>
+
+        <div class="details-grid">
+          <div class="detail-item">
+            <span>First name</span>
+            <strong>{{ user.firstName }}</strong>
+          </div>
+
+          <div class="detail-item">
+            <span>Last name</span>
+            <strong>{{ user.lastName }}</strong>
+          </div>
+
+          <div class="detail-item">
+            <span>Email</span>
+            <strong>{{ user.email }}</strong>
+          </div>
+
+          <div class="detail-item">
+            <span>Username</span>
+            <strong>{{ user.username }}</strong>
+          </div>
+
+          <div class="detail-item">
+            <span>City</span>
+            <strong>{{ user.city }}</strong>
+          </div>
+
+          <div class="detail-item">
+            <span>Address</span>
+            <strong>{{ user.address }}</strong>
+          </div>
+
+          @if (user.age) {
+            <div class="detail-item">
+              <span>Age</span>
+              <strong>{{ user.age }}</strong>
+            </div>
+          }
+        </div>
+      </p-card>
+    </div>
+  }
+</section>

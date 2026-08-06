@@ -26,6 +26,7 @@ export interface UserProfile {
   email: string;
   city: string;
   address: string;
+  age?: number | null;
 }
 
 interface AuthResponse {
