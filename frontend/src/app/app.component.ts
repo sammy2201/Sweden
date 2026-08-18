@@ -8,10 +8,17 @@ import {
 import { MenuService } from "./services/menu.service";
 import { AuthService } from "./services/auth.service";
 import { ButtonModule } from "primeng/button";
+import { ChatWidgetComponent } from "./components/chat-widget/chat-widget.component";
 
 @Component({
   selector: "app-root",
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, ButtonModule],
+  imports: [
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
+    ButtonModule,
+    ChatWidgetComponent,
+  ],
   templateUrl: "./app.component.html",
   styleUrl: "./app.component.css",
 })

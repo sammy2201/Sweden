@@ -1,0 +1,63 @@
+<section class="chat-fab-wrap" aria-label="Chat assistant">
+  @if (!isChatOpen) {
+    <p-button
+      styleClass="chat-launch-btn"
+      icon="pi pi-comments"
+      label="Chat"
+      (onClick)="openChat()">
+    </p-button>
+  } @else {
+    <div class="chat-panel" role="dialog" aria-modal="false">
+      <div class="chat-panel-header">
+        <div class="chat-title-block">
+          <span class="chat-title">Sweden Start AI</span>
+          <span class="chat-subtitle">Custom backend integration ready</span>
+        </div>
+
+        <p-button
+          styleClass="chat-minimize-btn"
+          icon="pi pi-minus"
+          severity="secondary"
+          variant="text"
+          [rounded]="true"
+          [text]="true"
+          (onClick)="minimizeChat()">
+        </p-button>
+      </div>
+
+      <div class="chat-messages">
+        @for (message of chatMessages; track $index) {
+          <article
+            class="chat-bubble"
+            [class.user]="message.role === 'user'"
+            [class.assistant]="message.role === 'assistant'">
+            <p class="chat-text">{{ message.text }}</p>
+            <span class="chat-time">{{ message.time }}</span>
+          </article>
+        }
+      </div>
+
+      <div class="chat-compose">
+        <textarea
+          rows="2"
+          [value]="draftMessage"
+          placeholder="Ask anything about moving to Sweden..."
+          (input)="onChatInput($event)"
+          (keydown)="onChatEnter($event)">
+        </textarea>
+
+        <div class="chat-compose-actions">
+          <span class="chat-hint">Enter to send, Shift+Enter for new line</span>
+
+          <p-button
+            label="Send"
+            icon="pi pi-send"
+            [disabled]="!draftMessage.trim() || isSending"
+            [loading]="isSending"
+            (onClick)="sendChatMessage()">
+          </p-button>
+        </div>
+      </div>
+    </div>
+  }
+</section>
