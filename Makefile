@@ -86,6 +86,12 @@ frontend_install: ## Install frontend npm packages
 frontend_build: ## Build Angular frontend
 	cd $(FRONTEND_DIR) && npm run build
 
+frontend_publish: ## Build Angular and copy it to backend/wwwroot
+	cd $(FRONTEND_DIR) && npm run build
+	rm -rf $(BACKEND_DIR)/wwwroot/*
+	cp -R $(FRONTEND_DIR)/dist/sweden-start/browser/* $(BACKEND_DIR)/wwwroot/
+	@printf "Frontend published to backend/wwwroot\n"
+	
 frontend_start: ## Run Angular dev server
 	cd $(FRONTEND_DIR) && npm start -- --host $(FRONTEND_HOST) --port $(FRONTEND_PORT)
 

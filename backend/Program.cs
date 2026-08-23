@@ -174,6 +174,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseForwardedHeaders();
 app.UseHttpsRedirection();
+app.UseDefaultFiles();
 app.UseStaticFiles();
 app.UseCors("frontend");
 app.UseAuthentication();
@@ -195,6 +196,7 @@ app.Lifetime.ApplicationStarted.Register(() =>
 });
 
 app.MapControllers();
+app.MapFallbackToFile("index.html");
 
 app.Run();
 
