@@ -57,7 +57,7 @@
           class="secondary"
           type="button"
           (click)="previous()"
-          [disabled]="currentIndex === 0">
+          [disabled]="currentIndex === 0 || isGenerating">
           Previous
         </button>
 
@@ -65,7 +65,7 @@
           class="primary"
           type="button"
           (click)="next()"
-          [disabled]="!answers[question.id]">
+          [disabled]="!answers[question.id] || isGenerating">
           {{ isComplete ? "Generate My Roadmap" : "Next" }}
         </button>
       </div>
@@ -82,10 +82,19 @@
           roadmap.
         </p>
 
-        <button class="primary large" (click)="generateRoadmap()">
-          Generate My Roadmap
+        <button
+          class="primary large"
+          (click)="generateRoadmap()"
+          [disabled]="isGenerating">
+          {{ isGenerating ? "Generating..." : "Generate My Roadmap" }}
         </button>
       </div>
+    </section>
+  }
+
+  @if (generationError) {
+    <section class="error-banner" role="alert">
+      {{ generationError }}
     </section>
   }
 

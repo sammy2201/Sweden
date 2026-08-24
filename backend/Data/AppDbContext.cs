@@ -23,5 +23,15 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Roadmap>().ToTable("Roadmaps");
         modelBuilder.Entity<RoadmapTask>().ToTable("RoadmapTasks");
         modelBuilder.Entity<Attraction>().ToTable("Attractions");
+
+        modelBuilder.Entity<Roadmap>()
+            .HasIndex(r => r.UserId)
+            .IsUnique();
+
+        modelBuilder.Entity<Roadmap>()
+            .HasOne(r => r.User)
+            .WithMany(u => u.Roadmaps)
+            .HasForeignKey(r => r.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

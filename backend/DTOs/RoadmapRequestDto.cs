@@ -2,7 +2,6 @@ namespace SwedenStart;
 
 public class RoadmapRequestDto
 {
-    public string UserId { get; set; } = "anonymous";
     public string Origin { get; set; } = string.Empty;
     public string ResidencePermit { get; set; } = string.Empty;
     public string LiveInSweden { get; set; } = string.Empty;

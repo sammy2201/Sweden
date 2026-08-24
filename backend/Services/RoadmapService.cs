@@ -37,6 +37,7 @@ public class RoadmapService : IRoadmapService
         return new RoadmapResponseDto
         {
             Id = savedRoadmap.Id,
+            UserId = savedRoadmap.UserId.ToString(),
             Origin = savedRoadmap.Origin,
             ResidencePermit = savedRoadmap.ResidencePermit,
             LiveInSweden = savedRoadmap.LiveInSweden,

@@ -143,7 +143,8 @@ namespace SwedenStart.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("Roadmaps", (string)null);
                 });

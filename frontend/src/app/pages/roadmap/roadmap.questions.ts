@@ -58,7 +58,7 @@ export const QUESTIONS: FlowQuestion[] = [
   },
 
   {
-    id: "bankid",
+    id: "bankId",
     title: "Do you have BankID?",
     options: YES_NO,
     showIf: (a) => a["bankAccount"] === "Yes",

@@ -26,7 +26,7 @@ export const routes: Routes = [
     component: AttractionDetailsComponent,
   },
   { path: "explore/:countyId", component: CountyAttractionsComponent },
-  { path: "roadmap", component: RoadmapComponent },
+  { path: "roadmap", component: RoadmapComponent, canActivate: [authGuard] },
   { path: "login", component: LoginComponent },
   { path: "register", component: RegisterComponent },
   { path: "banking", component: BankingComponent, canActivate: [authGuard] },

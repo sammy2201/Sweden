@@ -229,6 +229,16 @@ button:disabled {
   line-height: 1.7;
 }
 
+.error-banner {
+  margin-top: 20px;
+  padding: 14px 16px;
+  border: 1px solid rgba(220, 38, 38, 0.28);
+  border-radius: 12px;
+  background: #fff1f2;
+  color: #991b1b;
+  font-weight: 600;
+}
+
 /* ---------- Roadmap ---------- */
 
 .roadmap {
