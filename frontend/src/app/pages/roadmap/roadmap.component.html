@@ -8,7 +8,13 @@
     </p>
   </section>
 
-  @if (!isComplete && currentQuestion; as question) {
+  @if (isLoadingExistingRoadmap) {
+    <section class="finish">
+      <div class="finish-card">
+        <h2>Loading your roadmap...</h2>
+      </div>
+    </section>
+  } @else if (shouldShowWizard && currentQuestion; as question) {
     <section class="wizard">
       <div class="progress-header">
         <div>
@@ -66,11 +72,21 @@
           type="button"
           (click)="next()"
           [disabled]="!answers[question.id] || isGenerating">
-          {{ isComplete ? "Generate My Roadmap" : "Next" }}
+          {{ isGenerating ? "Saving..." : primaryActionLabel }}
         </button>
       </div>
+
+      @if (isEditingExistingRoadmap) {
+        <button
+          class="secondary cancel-update"
+          type="button"
+          (click)="cancelRoadmapUpdate()"
+          [disabled]="isGenerating">
+          Cancel update
+        </button>
+      }
     </section>
-  } @else {
+  } @else if (!hasExistingRoadmap) {
     <section class="finish">
       <div class="finish-card">
         <div class="emoji">🎉</div>
@@ -98,12 +114,29 @@
     </section>
   }
 
+  @if (successMessage) {
+    <section class="success-banner" role="status">
+      {{ successMessage }}
+    </section>
+  }
+
   @if (tasks.length) {
     <section class="roadmap">
       <div class="roadmap-header">
-        <h2>Your Sweden Checklist</h2>
+        <div>
+          <h2>Your Sweden Checklist</h2>
 
-        <p>Follow these steps to settle in Sweden.</p>
+          <p>Follow these steps to settle in Sweden.</p>
+        </div>
+
+        @if (hasExistingRoadmap && !isEditingExistingRoadmap) {
+          <button
+            class="secondary"
+            type="button"
+            (click)="startRoadmapUpdate()">
+            Update roadmap
+          </button>
+        }
       </div>
 
       <div class="timeline">

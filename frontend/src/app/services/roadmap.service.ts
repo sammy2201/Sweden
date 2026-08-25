@@ -48,8 +48,21 @@ export interface RoadmapResponse {
 export class RoadmapService {
   constructor(private readonly http: HttpClient) {}
 
+  getRoadmap(): Observable<RoadmapResponse | null> {
+    return this.http.get<RoadmapResponse | null>(
+      `${environment.apiUrl}/roadmap`,
+    );
+  }
+
   generateRoadmap(request: RoadmapRequest): Observable<RoadmapResponse> {
     return this.http.post<RoadmapResponse>(
+      `${environment.apiUrl}/roadmap`,
+      request,
+    );
+  }
+
+  updateRoadmap(request: RoadmapRequest): Observable<RoadmapResponse> {
+    return this.http.put<RoadmapResponse>(
       `${environment.apiUrl}/roadmap`,
       request,
     );

@@ -33,5 +33,10 @@ public class AppDbContext : DbContext
             .WithMany(u => u.Roadmaps)
             .HasForeignKey(r => r.UserId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Roadmap>()
+            .HasMany(r => r.Tasks)
+            .WithOne(t => t.Roadmap)
+            .HasForeignKey(t => t.RoadmapId);
     }
 }

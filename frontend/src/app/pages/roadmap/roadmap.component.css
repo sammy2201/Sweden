@@ -198,6 +198,11 @@ button:disabled {
   color: var(--app-primary);
 }
 
+.cancel-update {
+  width: 100%;
+  margin-top: 16px;
+}
+
 .large {
   width: 100%;
   margin-top: 24px;
@@ -239,6 +244,16 @@ button:disabled {
   font-weight: 600;
 }
 
+.success-banner {
+  margin-top: 20px;
+  padding: 14px 16px;
+  border: 1px solid rgba(22, 163, 74, 0.25);
+  border-radius: 12px;
+  background: #f0fdf4;
+  color: #166534;
+  font-weight: 600;
+}
+
 /* ---------- Roadmap ---------- */
 
 .roadmap {
@@ -246,6 +261,10 @@ button:disabled {
 }
 
 .roadmap-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
   margin-bottom: 30px;
 }
 
@@ -334,6 +353,11 @@ button:disabled {
   }
 
   .timeline-item {
+    flex-direction: column;
+  }
+
+  .roadmap-header {
+    align-items: flex-start;
     flex-direction: column;
   }
 }

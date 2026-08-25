@@ -34,24 +34,65 @@ public class RoadmapService : IRoadmapService
 
         var savedRoadmap = await _roadmapRepository.SaveAsync(roadmap);
 
+        return MapToResponse(savedRoadmap);
+    }
+
+    public async Task<RoadmapResponseDto> GetRoadmapAsync(Guid userId)
+    {
+        var roadmap = await _roadmapRepository.GetByUserIdAsync(userId);
+
+        if (roadmap == null)
+            return null!;
+
+        return MapToResponse(roadmap);
+    }
+
+    public async Task<RoadmapResponseDto> UpdateRoadmapAsync(RoadmapRequestDto request, Guid userId)
+    {
+        var roadmap = new Roadmap
+        {
+            UserId = userId,
+            Origin = request.Origin,
+            ResidencePermit = request.ResidencePermit,
+            LiveInSweden = request.LiveInSweden,
+            Personnummer = request.Personnummer,
+            AppliedPersonnummer = request.AppliedPersonnummer,
+            IdCard = request.IdCard,
+            BankAccount = request.BankAccount,
+            BankId = request.BankId,
+            Housing = request.Housing,
+            PlanToDrive = request.PlanToDrive,
+            DrivingLicenceType = request.DrivingLicenceType,
+            Purpose = request.Purpose,
+            Insurance = request.Insurance,
+            Tasks = BuildTasks(request),
+        };
+
+        var updatedRoadmap = await _roadmapRepository.UpdateAsync(roadmap);
+        return MapToResponse(updatedRoadmap);
+
+    }
+
+    private static RoadmapResponseDto MapToResponse(Roadmap roadmap)
+    {
         return new RoadmapResponseDto
         {
-            Id = savedRoadmap.Id,
-            UserId = savedRoadmap.UserId.ToString(),
-            Origin = savedRoadmap.Origin,
-            ResidencePermit = savedRoadmap.ResidencePermit,
-            LiveInSweden = savedRoadmap.LiveInSweden,
-            Personnummer = savedRoadmap.Personnummer,
-            AppliedPersonnummer = savedRoadmap.AppliedPersonnummer,
-            IdCard = savedRoadmap.IdCard,
-            BankAccount = savedRoadmap.BankAccount,
-            BankId = savedRoadmap.BankId,
-            Housing = savedRoadmap.Housing,
-            PlanToDrive = savedRoadmap.PlanToDrive,
-            DrivingLicenceType = savedRoadmap.DrivingLicenceType,
-            Purpose = savedRoadmap.Purpose,
-            Insurance = savedRoadmap.Insurance,
-            Tasks = savedRoadmap.Tasks.Select(task => new RoadmapTaskDto
+            Id = roadmap.Id,
+            UserId = roadmap.UserId.ToString(),
+            Origin = roadmap.Origin,
+            ResidencePermit = roadmap.ResidencePermit,
+            LiveInSweden = roadmap.LiveInSweden,
+            Personnummer = roadmap.Personnummer,
+            AppliedPersonnummer = roadmap.AppliedPersonnummer,
+            IdCard = roadmap.IdCard,
+            BankAccount = roadmap.BankAccount,
+            BankId = roadmap.BankId,
+            Housing = roadmap.Housing,
+            PlanToDrive = roadmap.PlanToDrive,
+            DrivingLicenceType = roadmap.DrivingLicenceType,
+            Purpose = roadmap.Purpose,
+            Insurance = roadmap.Insurance,
+            Tasks = roadmap.Tasks.Select(task => new RoadmapTaskDto
             {
                 Title = task.Title,
                 Description = task.Description,
@@ -59,7 +100,6 @@ public class RoadmapService : IRoadmapService
             }).ToList(),
         };
     }
-
     private static List<RoadmapTask> BuildTasks(RoadmapRequestDto request)
     {
         var tasks = new List<RoadmapTask>
