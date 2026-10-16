@@ -91,6 +91,47 @@ public class RoadmapRepository : IRoadmapRepository
         return existing;
     }
 
+    public async Task<bool> DeleteAsync(Guid userId)
+    {
+        var existing = await _dbContext.Roadmaps
+            .FirstOrDefaultAsync(r => r.UserId == userId);
+
+        if (existing is null)
+        {
+            return false;
+        }
+
+        await _dbContext.RoadmapTasks
+            .Where(task => task.RoadmapId == existing.Id)
+            .ExecuteDeleteAsync();
+
+        _dbContext.Roadmaps.Remove(existing);
+        await _dbContext.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<Roadmap?> SetTaskCompletionAsync(Guid userId, Guid taskId, bool completed)
+    {
+        var roadmap = await _dbContext.Roadmaps
+            .Include(r => r.Tasks)
+            .FirstOrDefaultAsync(r => r.UserId == userId);
+
+        if (roadmap is null)
+        {
+            return null;
+        }
+
+        var task = roadmap.Tasks.FirstOrDefault(t => t.Id == taskId);
+        if (task is null)
+        {
+            return null;
+        }
+
+        task.Completed = completed;
+        await _dbContext.SaveChangesAsync();
+        return roadmap;
+    }
+
     private async Task SaveChangesOrThrowConflictAsync()
     {
         try

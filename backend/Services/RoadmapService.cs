@@ -37,14 +37,11 @@ public class RoadmapService : IRoadmapService
         return MapToResponse(savedRoadmap);
     }
 
-    public async Task<RoadmapResponseDto> GetRoadmapAsync(Guid userId)
+    public async Task<RoadmapResponseDto?> GetRoadmapAsync(Guid userId)
     {
         var roadmap = await _roadmapRepository.GetByUserIdAsync(userId);
 
-        if (roadmap == null)
-            return null!;
-
-        return MapToResponse(roadmap);
+        return roadmap == null ? null : MapToResponse(roadmap);
     }
 
     public async Task<RoadmapResponseDto> UpdateRoadmapAsync(RoadmapRequestDto request, Guid userId)
@@ -73,6 +70,17 @@ public class RoadmapService : IRoadmapService
 
     }
 
+    public async Task<bool> DeleteRoadmapAsync(Guid userId)
+        => await _roadmapRepository.DeleteAsync(userId);
+
+    public async Task<RoadmapResponseDto> SetTaskCompletionAsync(Guid userId, Guid taskId, bool completed)
+    {
+        var roadmap = await _roadmapRepository.SetTaskCompletionAsync(userId, taskId, completed)
+            ?? throw new RoadmapNotFoundException("Roadmap or task not found for this user.");
+
+        return MapToResponse(roadmap);
+    }
+
     private static RoadmapResponseDto MapToResponse(Roadmap roadmap)
     {
         return new RoadmapResponseDto
@@ -94,6 +102,7 @@ public class RoadmapService : IRoadmapService
             Insurance = roadmap.Insurance,
             Tasks = roadmap.Tasks.Select(task => new RoadmapTaskDto
             {
+                Id = task.Id,
                 Title = task.Title,
                 Description = task.Description,
                 Completed = task.Completed,

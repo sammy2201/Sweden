@@ -3,69 +3,72 @@
 }
 
 .page {
-  width: min(1200px, 100%);
+  width: min(var(--content-wide), 100%);
   margin: 0 auto;
-  padding: 3rem 1.5rem 5rem;
+  padding: var(--space-12) var(--page-gutter) var(--space-16);
 }
 
 .hero {
-  margin-bottom: 3rem;
-  padding-bottom: 3rem;
-  border-bottom: 1px solid var(--app-border);
+  margin-bottom: var(--space-12);
+  padding-bottom: var(--space-12);
+  border-bottom: var(--border-width) solid var(--app-border);
 }
 
 .hero h1 {
-  margin: 1rem 0;
-  font-size: clamp(2.8rem, 5vw, 4rem);
-  line-height: 1.05;
-  letter-spacing: -2px;
+  margin: var(--space-4) 0;
+  font-size: var(--font-size-page-title);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-display);
   color: var(--app-heading);
 }
 
 .hero-text {
-  max-width: 720px;
+  max-width: var(--content-reading);
   margin: 0;
-  font-size: 1.15rem;
-  line-height: 1.8;
+  font-size: var(--font-size-lead);
+  line-height: var(--line-height-relaxed);
   color: var(--app-text-soft);
 }
 
 .stat-card {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: var(--space-4);
   height: 100%;
-  padding: 1.5rem;
+  padding: var(--space-6);
   background: var(--app-surface);
   border: 1px solid var(--app-border);
   border-radius: var(--app-radius);
-  transition: transform 0.2s ease;
+  transition:
+    transform var(--app-transition),
+    box-shadow var(--app-transition);
 }
 
 .stat-card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-1px);
+  box-shadow: var(--app-shadow-card);
 }
 
 .stat-card i {
-  width: 54px;
-  height: 54px;
+  width: var(--icon-size-large);
+  height: var(--icon-size-large);
   display: grid;
   place-items: center;
-  border-radius: 16px;
+  border-radius: var(--radius-card);
   background: var(--app-accent-soft);
   color: var(--app-primary-dark);
-  font-size: 1.35rem;
+  font-size: var(--font-size-lg);
 }
 
 .stat-card strong {
   display: block;
   color: var(--app-heading);
-  font-size: 1.5rem;
+  font-size: var(--font-size-xl);
 }
 
 .stat-card span {
   display: block;
-  margin-top: 0.3rem;
+  margin-top: var(--space-1);
   color: var(--app-text-muted);
 }
 
@@ -73,8 +76,8 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
 }
 
 .section-title {
@@ -84,7 +87,7 @@
 }
 
 .section-subtitle {
-  margin-top: 0.5rem;
+  margin-top: var(--space-2);
   color: var(--app-text-muted);
 }
 
@@ -100,62 +103,64 @@
   border: 1px solid var(--app-border);
   border-radius: var(--app-radius);
   background: var(--app-surface);
-  transition: transform 0.25s ease;
+  transition:
+    transform var(--app-transition),
+    border-color var(--app-transition);
 }
 
 :host ::ng-deep .county-link:hover .county-card {
-  transform: translateY(-5px);
+  transform: translateY(-2px);
 }
 
 .county-image {
   width: 100%;
-  height: 220px;
+  height: var(--county-image-height);
   object-fit: cover;
   display: block;
 }
 
 .county-content {
-  padding: 1.25rem;
+  padding: var(--space-5);
 }
 
 .county-content h3 {
   margin: 0;
   color: var(--app-heading);
-  font-size: 1.35rem;
+  font-size: var(--font-size-lg);
 }
 
 .county-content p {
-  margin: 1rem 0 1.5rem;
+  margin: var(--space-4) 0 var(--space-6);
   color: var(--app-text-soft);
   line-height: 1.7;
 }
 
 .county-bottom i {
-  transition: transform 0.2s ease;
+  transition: transform var(--app-transition);
 }
 
 .county-card:hover .county-bottom i {
-  transform: translateX(5px);
+  transform: translateX(var(--space-1));
 }
 
 :host ::ng-deep .empty-state {
-  max-width: 600px;
-  margin: 3rem auto;
+  max-width: var(--content-small);
+  margin: var(--space-12) auto;
   text-align: center;
   border-radius: var(--app-radius);
   border: 1px solid var(--app-border);
 }
 
 .empty-icon {
-  width: 72px;
-  height: 72px;
+  width: var(--icon-size-xl);
+  height: var(--icon-size-xl);
   margin: auto;
   display: grid;
   place-items: center;
   border-radius: 50%;
   background: var(--app-accent-soft);
   color: var(--app-primary-dark);
-  font-size: 2rem;
+  font-size: var(--font-size-2xl);
 }
 
 @media (max-width: 900px) {
@@ -167,11 +172,11 @@
 
 @media (max-width: 700px) {
   .page {
-    padding: 2rem 1rem 4rem;
+    padding: var(--space-8) var(--space-4) var(--space-12);
   }
 
   .hero h1 {
-    font-size: 2.7rem;
-    letter-spacing: -1px;
+    font-size: var(--font-size-display);
+    letter-spacing: var(--letter-spacing-mobile-display);
   }
 }

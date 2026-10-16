@@ -1,275 +1,262 @@
 import { CommonModule } from "@angular/common";
-import { Component, OnInit, inject } from "@angular/core";
-import { FormsModule } from "@angular/forms";
 import { HttpErrorResponse } from "@angular/common/http";
-import { QUESTIONS, FlowQuestion } from "./roadmap.questions";
+import { Component, DestroyRef, OnInit, inject } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { FormsModule } from "@angular/forms";
+import { ConfirmationService } from "primeng/api";
+import { ButtonModule } from "primeng/button";
+import { CheckboxModule } from "primeng/checkbox";
+import { ConfirmDialogModule } from "primeng/confirmdialog";
+import { DialogModule } from "primeng/dialog";
+import { ProgressBarModule } from "primeng/progressbar";
+import { SelectModule } from "primeng/select";
+import { TableModule } from "primeng/table";
 import {
   RoadmapRequest,
   RoadmapResponse,
   RoadmapService,
   RoadmapTaskResponse,
 } from "../../services/roadmap.service";
+import { getApiErrorMessage } from "../../utils/api-error";
+
+interface RoadmapField {
+  id: keyof RoadmapRequest;
+  label: string;
+  options: string[];
+}
+
+interface RoadmapValue {
+  label: string;
+  value: string;
+}
 
 interface Task {
+  id: string;
   title: string;
   description: string;
-  status: "done" | "current" | "todo";
+  completed: boolean;
 }
 
 @Component({
   selector: "app-roadmap",
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ButtonModule,
+    CheckboxModule,
+    ConfirmDialogModule,
+    DialogModule,
+    ProgressBarModule,
+    SelectModule,
+    TableModule,
+  ],
+  providers: [ConfirmationService],
   templateUrl: "./roadmap.component.html",
   styleUrls: ["./roadmap.component.css"],
 })
 export class RoadmapComponent implements OnInit {
   private readonly roadmapService = inject(RoadmapService);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly confirmationService = inject(ConfirmationService);
 
-  questions: FlowQuestion[] = QUESTIONS;
+  readonly fields: RoadmapField[] = [
+    { id: "origin", label: "Origin", options: ["EU", "Non-EU"] },
+    {
+      id: "residencePermit",
+      label: "Residence permit",
+      options: ["Yes", "No"],
+    },
+    { id: "liveInSweden", label: "Living in Sweden", options: ["Yes", "No"] },
+    { id: "personnummer", label: "Personnummer", options: ["Yes", "No"] },
+    {
+      id: "appliedPersonnummer",
+      label: "Applied for Personnummer",
+      options: ["Yes", "No", "Waiting for decision", "Not applicable"],
+    },
+    { id: "idCard", label: "Swedish ID card", options: ["Yes", "No"] },
+    {
+      id: "bankAccount",
+      label: "Swedish bank account",
+      options: ["Yes", "No"],
+    },
+    { id: "bankId", label: "BankID", options: ["Yes", "No"] },
+    {
+      id: "housing",
+      label: "Housing",
+      options: ["Permanent", "Temporary", "Still looking"],
+    },
+    { id: "planToDrive", label: "Plans to drive", options: ["Yes", "No"] },
+    {
+      id: "drivingLicenceType",
+      label: "Driving licence",
+      options: ["Swedish", "EU", "Other", "Not applicable"],
+    },
+    {
+      id: "purpose",
+      label: "Purpose",
+      options: ["Work", "Study", "Looking for work", "Family"],
+    },
+    {
+      id: "insurance",
+      label: "Registered with Försäkringskassan",
+      options: ["Yes", "No"],
+    },
+  ];
 
-  answers: Record<string, string> = {};
-
+  roadmapValues: RoadmapValue[] = [];
+  editAnswers: Partial<Record<keyof RoadmapRequest, string>> = {};
   tasks: Task[] = [];
   hasExistingRoadmap = false;
   isLoadingExistingRoadmap = true;
   isEditingExistingRoadmap = false;
+  isCreatingRoadmap = false;
   isGenerating = false;
+  isDeleting = false;
+  pendingTaskIds = new Set<string>();
   generationError = "";
   successMessage = "";
-  private readonly roadmapExistsMessage =
-    "Cannot create new roadmap. Go to profile and update your existing roadmap.";
 
-  currentIndex = 0;
+  get completedTaskCount(): number {
+    return this.tasks.filter((task) => task.completed).length;
+  }
+
+  get taskProgressPercent(): number {
+    if (this.tasks.length === 0) return 0;
+    return Math.round((this.completedTaskCount / this.tasks.length) * 100);
+  }
+
+  get isRoadmapDialogVisible(): boolean {
+    return this.isEditingExistingRoadmap || this.isCreatingRoadmap;
+  }
+
+  set isRoadmapDialogVisible(visible: boolean) {
+    if (!visible) {
+      this.cancelRoadmapUpdate();
+    }
+  }
 
   ngOnInit(): void {
     this.loadExistingRoadmap();
   }
 
-  get visibleQuestions(): FlowQuestion[] {
-    return this.questions.filter((q) =>
-      q.showIf ? q.showIf(this.answers) : true,
-    );
-  }
-
-  get currentQuestion(): FlowQuestion | undefined {
-    const questions = this.visibleQuestions;
-
-    if (questions.length === 0) {
-      return undefined;
-    }
-
-    if (this.currentIndex >= questions.length) {
-      this.currentIndex = questions.length - 1;
-    }
-
-    return questions[this.currentIndex];
-  }
-
-  get isComplete(): boolean {
-    return this.visibleQuestions.every((q) => Boolean(this.answers[q.id]));
-  }
-
-  get isLastQuestion(): boolean {
-    return this.currentIndex >= this.visibleQuestions.length - 1;
-  }
-
-  get shouldShowWizard(): boolean {
-    return this.isEditingExistingRoadmap || (!this.hasExistingRoadmap && !this.isComplete);
-  }
-
-  get primaryActionLabel(): string {
-    if (!this.isLastQuestion) {
-      return "Next";
-    }
-
-    return this.hasExistingRoadmap ? "Update Roadmap" : "Generate My Roadmap";
-  }
-
-  get progress(): number {
-    const questions = this.visibleQuestions;
-
-    if (!questions.length || questions.length === 1) {
-      return 100;
-    }
-
-    return Math.round((this.currentIndex / (questions.length - 1)) * 100);
-  }
-
-  previous(): void {
-    if (this.currentIndex > 0) {
-      this.currentIndex -= 1;
-    }
-  }
-
-  next(): void {
-    const question = this.currentQuestion;
-
-    if (!question || !this.answers[question.id]) {
-      return;
-    }
-
-    const nextIndex = this.currentIndex + 1;
-
-    if (nextIndex < this.visibleQuestions.length) {
-      this.currentIndex = nextIndex;
-      return;
-    }
-
-    this.generateRoadmap();
-  }
-
-  onAnswerChange(): void {
-    const unansweredIndex = this.visibleQuestions.findIndex(
-      (q) => !this.answers[q.id],
-    );
-
-    this.currentIndex =
-      unansweredIndex >= 0 ? unansweredIndex : this.visibleQuestions.length;
-  }
-
-  generateRoadmap(): void {
-    if (!this.isComplete || this.isGenerating) {
-      return;
-    }
-
-    this.isGenerating = true;
-    this.generationError = "";
-    this.successMessage = "";
-
-    const request = this.toRequest();
-    const wasUpdating = this.hasExistingRoadmap;
-    const saveRoadmap = wasUpdating
-      ? this.roadmapService.updateRoadmap(request)
-      : this.roadmapService.generateRoadmap(request);
-
-    saveRoadmap.subscribe({
-      next: (response) => {
-        this.applyRoadmapAnswers(response);
-        this.tasks = this.mapTasks(response.tasks ?? []);
-        this.hasExistingRoadmap = true;
-        this.isEditingExistingRoadmap = false;
-        this.isGenerating = false;
-        this.currentIndex = 0;
-        this.successMessage = wasUpdating ? "Your roadmap has been updated." : "";
-      },
-      error: (error: HttpErrorResponse) => {
-        this.generationError = this.getGenerationErrorMessage(error);
-
-        this.isGenerating = false;
-      },
-    });
-  }
-
   startRoadmapUpdate(): void {
-    this.isEditingExistingRoadmap = true;
-    this.currentIndex = 0;
+    this.editAnswers = {};
+    for (const field of this.fields) {
+      const item = this.roadmapValues.find(
+        (value) => value.label === field.label,
+      );
+      this.editAnswers[field.id] = item?.value ?? "";
+    }
     this.generationError = "";
     this.successMessage = "";
+    this.isEditingExistingRoadmap = true;
+    this.isCreatingRoadmap = false;
+  }
+
+  startRoadmapCreation(): void {
+    this.editAnswers = {};
+    for (const field of this.fields) {
+      this.editAnswers[field.id] = "";
+    }
+    this.generationError = "";
+    this.successMessage = "";
+    this.isCreatingRoadmap = true;
   }
 
   cancelRoadmapUpdate(): void {
     this.isEditingExistingRoadmap = false;
-    this.currentIndex = 0;
+    this.isCreatingRoadmap = false;
     this.generationError = "";
   }
 
-  private loadExistingRoadmap(): void {
-    this.roadmapService.getRoadmap().subscribe({
+  saveRoadmap(): void {
+    if (this.isGenerating) return;
+
+    this.isGenerating = true;
+    this.generationError = "";
+    this.successMessage = "";
+    const saveRequest = this.hasExistingRoadmap
+      ? this.roadmapService.updateRoadmap(this.toRequest())
+      : this.roadmapService.generateRoadmap(this.toRequest());
+    saveRequest.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
-        if (response?.id) {
-          this.applyRoadmapAnswers(response);
-          this.tasks = this.mapTasks(response.tasks ?? []);
-          this.hasExistingRoadmap = true;
-        }
-
-        this.isLoadingExistingRoadmap = false;
+        this.setRoadmapValues(response);
+        this.tasks = this.mapTasks(response.tasks ?? []);
+        this.hasExistingRoadmap = true;
+        this.isEditingExistingRoadmap = false;
+        this.isCreatingRoadmap = false;
+        this.isGenerating = false;
+        this.successMessage = "Your roadmap has been saved.";
       },
-      error: (error: HttpErrorResponse) => {
-        if (error.status !== 404) {
-          this.generationError = this.getGenerationErrorMessage(error);
-        }
-
-        this.isLoadingExistingRoadmap = false;
+      error: (error: unknown) => {
+        this.generationError = getApiErrorMessage(
+          error,
+          "We could not save your roadmap right now. Please try again.",
+        );
+        this.isGenerating = false;
       },
     });
   }
 
-  private getGenerationErrorMessage(error: HttpErrorResponse): string {
-    const code = error?.error?.code;
-    const backendMessage =
-      typeof error?.error?.message === "string"
-        ? error.error.message
-        : undefined;
-
-    if (error.status === 409 && code === "ROADMAP_ALREADY_EXISTS") {
-      return this.roadmapExistsMessage;
-    }
-
-    if (error.status === 401) {
-      return "Your session expired. Please log in again and retry.";
-    }
-
-    if (error.status === 403) {
-      return "You are not allowed to create a roadmap for this account.";
-    }
-
-    if (error.status === 0) {
-      return "Cannot reach the server. Make sure backend is running on http://localhost:5195.";
-    }
-
-    if (backendMessage) {
-      return backendMessage;
-    }
-
-    return "We could not generate your roadmap right now. Please try again.";
+  private loadExistingRoadmap(): void {
+    this.roadmapService
+      .getRoadmap()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          if (response?.id) {
+            this.setRoadmapValues(response);
+            this.tasks = this.mapTasks(response.tasks ?? []);
+            this.hasExistingRoadmap = true;
+          }
+          this.isLoadingExistingRoadmap = false;
+        },
+        error: (error: unknown) => {
+          this.generationError =
+            error instanceof HttpErrorResponse && error.status === 404
+              ? ""
+              : getApiErrorMessage(
+                  error,
+                  "We could not load your roadmap right now.",
+                );
+          this.isLoadingExistingRoadmap = false;
+        },
+      });
   }
 
-  private applyRoadmapAnswers(response: RoadmapResponse): void {
-    this.answers = {
-      origin: response.origin,
-      residencePermit: response.residencePermit,
-      liveInSweden: response.liveInSweden,
-      personnummer: response.personnummer,
-      appliedPersonnummer: response.appliedPersonnummer,
-      idCard: response.idCard,
-      bankAccount: response.bankAccount,
-      bankId: response.bankId,
-      housing: response.housing,
-      planToDrive: response.planToDrive,
-      drivingLicenceType: response.drivingLicenceType,
-      purpose: response.purpose,
-      insurance: response.insurance,
-    };
+  private setRoadmapValues(response: RoadmapResponse): void {
+    this.roadmapValues = [
+      { label: "Roadmap ID", value: response.id },
+      { label: "User ID", value: response.userId },
+      ...this.fields.map((field) => ({
+        label: field.label,
+        value: response[field.id],
+      })),
+    ];
   }
 
   private toRequest(): RoadmapRequest {
-    const origin = this.answers["origin"] ?? "";
+    const origin = this.editAnswers.origin ?? "";
     const residencePermit =
-      origin === "EU" ? "No" : (this.answers["residencePermit"] ?? "No");
-
-    const liveInSweden = this.answers["liveInSweden"] ?? "No";
+      origin === "EU" ? "No" : (this.editAnswers.residencePermit ?? "No");
+    const liveInSweden = this.editAnswers.liveInSweden ?? "No";
     const personnummer =
-      liveInSweden === "Yes" ? (this.answers["personnummer"] ?? "No") : "No";
-
+      liveInSweden === "Yes" ? (this.editAnswers.personnummer ?? "No") : "No";
     const appliedPersonnummer =
       personnummer === "No"
-        ? (this.answers["appliedPersonnummer"] ?? "No")
+        ? (this.editAnswers.appliedPersonnummer ?? "No")
         : "Not applicable";
-
     const idCard =
-      personnummer === "Yes" ? (this.answers["idCard"] ?? "No") : "No";
-
+      personnummer === "Yes" ? (this.editAnswers.idCard ?? "No") : "No";
     const bankAccount =
-      idCard === "Yes" ? (this.answers["bankAccount"] ?? "No") : "No";
-
+      idCard === "Yes" ? (this.editAnswers.bankAccount ?? "No") : "No";
     const bankId =
-      bankAccount === "Yes" ? (this.answers["bankId"] ?? "No") : "No";
-
-    const planToDrive = this.answers["planToDrive"] ?? "No";
+      bankAccount === "Yes" ? (this.editAnswers.bankId ?? "No") : "No";
+    const planToDrive = this.editAnswers.planToDrive ?? "No";
     const drivingLicenceType =
       planToDrive === "Yes"
-        ? (this.answers["drivingLicenceType"] ?? "Other")
+        ? (this.editAnswers.drivingLicenceType ?? "Other")
         : "Not applicable";
 
     return {
@@ -281,41 +268,89 @@ export class RoadmapComponent implements OnInit {
       idCard,
       bankAccount,
       bankId,
-      housing: this.answers["housing"] ?? "",
+      housing: this.editAnswers.housing ?? "",
       planToDrive,
       drivingLicenceType,
-      purpose: this.answers["purpose"] ?? "",
+      purpose: this.editAnswers.purpose ?? "",
       insurance:
-        liveInSweden === "Yes" ? (this.answers["insurance"] ?? "No") : "No",
+        liveInSweden === "Yes" ? (this.editAnswers.insurance ?? "No") : "No",
     };
   }
 
-  private mapTasks(tasks: RoadmapTaskResponse[]): Task[] {
-    let currentMarked = false;
+  toggleTask(task: Task): void {
+    if (this.pendingTaskIds.has(task.id)) return;
 
-    return tasks.map((task) => {
-      if (task.completed) {
-        return {
-          title: task.title,
-          description: task.description,
-          status: "done" as const,
-        };
-      }
+    const previousState = task.completed;
+    const nextState = !previousState;
+    task.completed = nextState;
+    this.pendingTaskIds.add(task.id);
+    this.generationError = "";
 
-      if (!currentMarked) {
-        currentMarked = true;
-        return {
-          title: task.title,
-          description: task.description,
-          status: "current" as const,
-        };
-      }
+    this.roadmapService
+      .updateTaskCompletion(task.id, nextState)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          this.tasks = this.mapTasks(response.tasks ?? []);
+          this.pendingTaskIds.delete(task.id);
+        },
+        error: (error: unknown) => {
+          task.completed = previousState;
+          this.pendingTaskIds.delete(task.id);
+          this.generationError = getApiErrorMessage(
+            error,
+            "We could not update this task right now.",
+          );
+        },
+      });
+  }
 
-      return {
-        title: task.title,
-        description: task.description,
-        status: "todo" as const,
-      };
+  confirmDeleteRoadmap(): void {
+    this.confirmationService.confirm({
+      header: "Delete roadmap",
+      message:
+        "This will permanently delete your roadmap and checklist. Are you sure?",
+      acceptLabel: "Delete",
+      rejectLabel: "Cancel",
+      acceptButtonProps: { severity: "danger" },
+      rejectButtonProps: { severity: "secondary", outlined: true },
+      accept: () => this.deleteRoadmap(),
     });
+  }
+
+  private deleteRoadmap(): void {
+    if (this.isDeleting) return;
+
+    this.isDeleting = true;
+    this.generationError = "";
+    this.successMessage = "";
+    this.roadmapService
+      .deleteRoadmap()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.hasExistingRoadmap = false;
+          this.roadmapValues = [];
+          this.tasks = [];
+          this.isDeleting = false;
+          this.successMessage = "Your roadmap has been deleted.";
+        },
+        error: (error: unknown) => {
+          this.generationError = getApiErrorMessage(
+            error,
+            "We could not delete your roadmap right now.",
+          );
+          this.isDeleting = false;
+        },
+      });
+  }
+
+  private mapTasks(tasks: RoadmapTaskResponse[]): Task[] {
+    return tasks.map((task) => ({
+      id: task.id,
+      title: task.title,
+      description: task.description,
+      completed: task.completed,
+    }));
   }
 }

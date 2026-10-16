@@ -1,12 +1,12 @@
 .explore-page {
-  max-width: 1200px;
+  max-width: var(--content-wide);
   margin: 0 auto;
-  padding: 3rem 1.5rem;
+  padding: var(--space-12) var(--page-gutter);
 }
 
 :host ::ng-deep .details-image {
   width: 100%;
-  height: 420px;
+  height: var(--details-image-height);
   object-fit: cover;
   border-radius: var(--app-radius);
   display: block;
@@ -18,6 +18,6 @@ a {
 
 @media (max-width: 640px) {
   :host ::ng-deep .details-image {
-    height: 280px;
+    height: var(--details-image-height-mobile);
   }
 }

@@ -4,24 +4,24 @@
 
 .chat-fab-wrap {
   position: fixed;
-  right: 1.25rem;
-  bottom: 1.25rem;
+  right: var(--space-5);
+  bottom: var(--space-5);
   z-index: 1200;
 }
 
 :host ::ng-deep .chat-launch-btn.p-button {
-  border-radius: 999px;
-  padding-inline: 1rem;
-  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.2);
+  border-radius: var(--radius-pill);
+  padding-inline: var(--space-4);
+  box-shadow: var(--app-shadow-raised);
 }
 
 .chat-panel {
-  width: min(380px, calc(100vw - 1.5rem));
-  height: min(560px, calc(100vh - 6rem));
+  width: min(var(--chat-width), calc(100vw - var(--space-6)));
+  height: min(var(--chat-height), calc(100vh - var(--space-12)));
   background: var(--app-surface);
   border: 1px solid var(--app-border);
-  border-radius: 16px;
-  box-shadow: 0 20px 44px rgba(15, 23, 42, 0.22);
+  border-radius: var(--radius-card);
+  box-shadow: var(--app-shadow-overlay);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -31,8 +31,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0.9rem 0.95rem;
+  gap: var(--space-3);
+  padding: var(--space-3-5) var(--space-4);
   background: linear-gradient(
     140deg,
     var(--app-accent-soft),
@@ -49,29 +49,29 @@
 
 .chat-title {
   color: var(--app-heading);
-  font-size: 0.95rem;
-  font-weight: 700;
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-bold);
 }
 
 .chat-subtitle {
   color: var(--app-text-muted);
-  font-size: 0.76rem;
+  font-size: var(--font-size-xs);
 }
 
 .chat-messages {
   flex: 1;
-  padding: 0.9rem;
+  padding: var(--space-3-5);
   display: flex;
   flex-direction: column;
-  gap: 0.65rem;
+  gap: var(--space-2-5);
   overflow-y: auto;
   background: var(--app-bg);
 }
 
 .chat-bubble {
   max-width: 88%;
-  border-radius: 12px;
-  padding: 0.65rem 0.75rem;
+  border-radius: var(--radius-md);
+  padding: var(--space-2-5) var(--space-3);
   border: 1px solid var(--app-border);
 }
 
@@ -83,38 +83,38 @@
 .chat-bubble.user {
   align-self: flex-end;
   background: var(--app-accent-soft);
-  border-color: #99f6e4;
+  border-color: var(--app-accent);
 }
 
 .chat-text {
   margin: 0;
   color: var(--app-text);
   line-height: 1.4;
-  font-size: 0.91rem;
+  font-size: var(--font-size-caption);
 }
 
 .chat-time {
-  margin-top: 0.35rem;
+  margin-top: var(--space-1-5);
   display: inline-block;
   color: var(--app-text-muted);
-  font-size: 0.72rem;
+  font-size: var(--font-size-xs);
 }
 
 .chat-compose {
   border-top: 1px solid var(--app-border);
   background: var(--app-surface);
-  padding: 0.75rem;
+  padding: var(--space-3);
   display: flex;
   flex-direction: column;
-  gap: 0.55rem;
+  gap: var(--space-2);
 }
 
 .chat-compose textarea {
   width: 100%;
   resize: none;
   border: 1px solid var(--app-border-strong);
-  border-radius: 10px;
-  padding: 0.6rem 0.7rem;
+  border-radius: var(--radius-control);
+  padding: var(--space-2-5) var(--space-3);
   font: inherit;
   color: var(--app-text);
   background: var(--app-surface);
@@ -123,34 +123,34 @@
 .chat-compose textarea:focus {
   outline: none;
   border-color: var(--app-primary);
-  box-shadow: 0 0 0 2px rgba(15, 118, 110, 0.14);
+  box-shadow: var(--app-shadow-focus);
 }
 
 .chat-compose-actions {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.6rem;
+  gap: var(--space-2-5);
 }
 
 .chat-hint {
   color: var(--app-text-muted);
-  font-size: 0.72rem;
+  font-size: var(--font-size-xs);
 }
 
 :host ::ng-deep .chat-minimize-btn.p-button {
-  width: 2rem;
-  height: 2rem;
+  width: var(--icon-size-control);
+  height: var(--icon-size-control);
 }
 
 @media (max-width: 900px) {
   .chat-fab-wrap {
-    right: 0.7rem;
-    bottom: 0.7rem;
+    right: var(--space-3);
+    bottom: var(--space-3);
   }
 
   .chat-panel {
-    width: min(360px, calc(100vw - 1rem));
-    height: min(540px, calc(100vh - 5rem));
+    width: min(var(--chat-width-mobile), calc(100vw - var(--space-4)));
+    height: min(var(--chat-height-mobile), calc(100vh - var(--space-10)));
   }
 }

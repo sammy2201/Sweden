@@ -7,6 +7,7 @@ import { ButtonModule } from "primeng/button";
 import { CardModule } from "primeng/card";
 import { DividerModule } from "primeng/divider";
 import { PasswordModule } from "primeng/password";
+import { getApiErrorMessage } from "../../utils/api-error";
 
 @Component({
   selector: "app-register",
@@ -62,10 +63,12 @@ export class RegisterComponent {
         this.form.reset();
         setTimeout(() => this.router.navigate(["/login"]), 800);
       },
-      error: () => {
+      error: (error: unknown) => {
         this.isSubmitting = false;
-        this.errorMessage =
-          "We could not create your account. Please try again.";
+        this.errorMessage = getApiErrorMessage(
+          error,
+          "We could not create your account. Please try again.",
+        );
       },
     });
   }

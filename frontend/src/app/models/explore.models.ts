@@ -29,3 +29,21 @@ export interface PagedResponse<T> {
   hasNextPage: boolean;
   hasPreviousPage: boolean;
 }
+
+export interface ExploreCountiesResponse {
+  counties: County[];
+}
+
+export interface ExploreAttractionsResponse {
+  attractions: Attraction[];
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
+
+export interface ExploreAttractionDetailResponse {
+  attraction: AttractionDetail;
+}

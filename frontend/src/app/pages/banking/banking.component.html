@@ -1,7 +1,11 @@
 <section class="page">
+  @if (errorMessage()) {
+    <div class="api-error" role="alert">{{ errorMessage() }}</div>
+  }
+
   <app-banking-intro></app-banking-intro>
 
-  <app-banking-banks [banks]="banks"></app-banking-banks>
+  <app-banking-banks [banks]="banks()"></app-banking-banks>
 
   <app-banking-setup></app-banking-setup>
 

@@ -20,6 +20,7 @@ export interface RoadmapRequest {
 }
 
 export interface RoadmapTaskResponse {
+  id: string;
   title: string;
   description: string;
   completed: boolean;
@@ -65,6 +66,20 @@ export class RoadmapService {
     return this.http.put<RoadmapResponse>(
       `${environment.apiUrl}/roadmap`,
       request,
+    );
+  }
+
+  deleteRoadmap(): Observable<void> {
+    return this.http.delete<void>(`${environment.apiUrl}/roadmap`);
+  }
+
+  updateTaskCompletion(
+    taskId: string,
+    completed: boolean,
+  ): Observable<RoadmapResponse> {
+    return this.http.patch<RoadmapResponse>(
+      `${environment.apiUrl}/roadmap/tasks/${taskId}`,
+      { completed },
     );
   }
 }

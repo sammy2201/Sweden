@@ -17,33 +17,31 @@ public class AuthController : ControllerBase
 
     [HttpPost("login")]
     [AllowAnonymous]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
     {
-        if (!ModelState.IsValid) return BadRequest(ModelState);
-
-        try
+        var token = await _authService.LoginAsync(request.Email, request.Password);
+        return Ok(new AuthResponseDto
         {
-            var token = await _authService.LoginAsync(request.Email, request.Password);
-            return Ok(new AuthResponseDto
-            {
-                AccessToken = token,
-                ExpiresAt = DateTime.UtcNow.AddHours(1)
-            });
-        }
-        catch (UnauthorizedAccessException)
-        {
-            return Unauthorized(new { message = "Invalid email or password" });
-        }
+            AccessToken = token,
+            ExpiresAt = DateTime.UtcNow.AddHours(1)
+        });
     }
 
     [HttpPost("register")]
     [AllowAnonymous]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
     public async Task<IActionResult> Register([FromBody] RegisterRequestDto request)
     {
-        if (!ModelState.IsValid) return BadRequest(ModelState);
-
         var created = await _authService.RegisterAsync(request.FirstName, request.LastName, request.Username, request.Email, request.City, request.Address, request.Password);
-        if (!created) return Conflict(new { message = "User with that username or email already exists" });
+        if (!created)
+        {
+            return Conflict(ApiProblemDetails.Create(
+                StatusCodes.Status409Conflict,
+                "Account already exists",
+                "A user with that username or email already exists.",
+                "ACCOUNT_ALREADY_EXISTS"));
+        }
 
         return CreatedAtAction(nameof(Register), new { username = request.Username });
     }
@@ -51,12 +49,16 @@ public class AuthController : ControllerBase
 
     [HttpGet("user")]
     [Authorize]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetUser()
     {
-        if (!TryGetCurrentUserId(out var id)) return Unauthorized();
+        if (!TryGetCurrentUserId(out var id))
+            return Unauthorized(ApiProblemDetails.Create(StatusCodes.Status401Unauthorized, "Unauthorized", "The authenticated user could not be identified."));
 
         var user = await _authService.GetUserAsync(id);
-        if (user == null) return NotFound();
+        if (user == null)
+            return NotFound(ApiProblemDetails.Create(StatusCodes.Status404NotFound, "User not found", "The requested user profile was not found."));
 
         var dto = MapUserDto(user);
 
@@ -65,11 +67,12 @@ public class AuthController : ControllerBase
 
     [HttpPut("user")]
     [Authorize]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateUser([FromBody] UpdateUserProfileRequestDto request)
     {
-        if (!ModelState.IsValid) return BadRequest(ModelState);
-
-        if (!TryGetCurrentUserId(out var id)) return Unauthorized();
+        if (!TryGetCurrentUserId(out var id))
+            return Unauthorized(ApiProblemDetails.Create(StatusCodes.Status401Unauthorized, "Unauthorized", "The authenticated user could not be identified."));
 
         var user = await _authService.UpdateUserProfileAsync(
             id,
@@ -78,7 +81,8 @@ public class AuthController : ControllerBase
             request.City,
             request.Address);
 
-        if (user == null) return NotFound();
+        if (user == null)
+            return NotFound(ApiProblemDetails.Create(StatusCodes.Status404NotFound, "User not found", "The requested user profile was not found."));
 
         return Ok(MapUserDto(user));
     }

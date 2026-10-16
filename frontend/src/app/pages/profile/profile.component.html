@@ -21,10 +21,7 @@
       <i class="pi pi-exclamation-circle"></i>
       <h1>Profile unavailable</h1>
       <p>{{ errorMessage() }}</p>
-      <p-button
-        label="Try again"
-        icon="pi pi-refresh"
-        (onClick)="ngOnInit()">
+      <p-button label="Try again" icon="pi pi-refresh" (onClick)="ngOnInit()">
       </p-button>
     </div>
   } @else if (profile(); as user) {
@@ -88,7 +85,10 @@
         }
 
         @if (isEditing()) {
-          <form class="profile-form" [formGroup]="form" (ngSubmit)="saveProfile()">
+          <form
+            class="profile-form"
+            [formGroup]="form"
+            (ngSubmit)="saveProfile()">
             <div class="form-grid">
               <div class="field">
                 <label for="firstName">First name</label>
@@ -143,45 +143,127 @@
           </form>
         } @else {
           <div class="details-grid">
-          <div class="detail-item">
-            <span>First name</span>
-            <strong>{{ user.firstName }}</strong>
-          </div>
-
-          <div class="detail-item">
-            <span>Last name</span>
-            <strong>{{ user.lastName }}</strong>
-          </div>
-
-          <div class="detail-item">
-            <span>Email</span>
-            <strong>{{ user.email }}</strong>
-          </div>
-
-          <div class="detail-item">
-            <span>Username</span>
-            <strong>{{ user.username }}</strong>
-          </div>
-
-          <div class="detail-item">
-            <span>City</span>
-            <strong>{{ user.city }}</strong>
-          </div>
-
-          <div class="detail-item">
-            <span>Address</span>
-            <strong>{{ user.address }}</strong>
-          </div>
-
-          @if (user.age) {
             <div class="detail-item">
-              <span>Age</span>
-              <strong>{{ user.age }}</strong>
+              <span>First name</span>
+              <strong>{{ user.firstName }}</strong>
             </div>
-          }
+
+            <div class="detail-item">
+              <span>Last name</span>
+              <strong>{{ user.lastName }}</strong>
+            </div>
+
+            <div class="detail-item">
+              <span>Email</span>
+              <strong>{{ user.email }}</strong>
+            </div>
+
+            <div class="detail-item">
+              <span>Username</span>
+              <strong>{{ user.username }}</strong>
+            </div>
+
+            <div class="detail-item">
+              <span>City</span>
+              <strong>{{ user.city }}</strong>
+            </div>
+
+            <div class="detail-item">
+              <span>Address</span>
+              <strong>{{ user.address }}</strong>
+            </div>
+
+            @if (user.age) {
+              <div class="detail-item">
+                <span>Age</span>
+                <strong>{{ user.age }}</strong>
+              </div>
+            }
           </div>
         }
       </p-card>
     </div>
+
+    <section class="roadmap-overview" aria-labelledby="profile-roadmap-title">
+      <div class="roadmap-overview-header">
+        <div>
+          <span class="eyebrow">Your moving plan</span>
+          <h2 id="profile-roadmap-title">Roadmap progress</h2>
+        </div>
+        @if (roadmap()) {
+          <p-button
+            label="Edit answers"
+            icon="pi pi-pencil"
+            severity="secondary"
+            variant="outlined"
+            (onClick)="openRoadmap()">
+          </p-button>
+        } @else if (!roadmapLoading() && !roadmapError()) {
+          <p-button
+            label="Create roadmap"
+            icon="pi pi-plus"
+            (onClick)="openRoadmap()">
+          </p-button>
+        }
+      </div>
+
+      @if (roadmapLoading()) {
+        <p class="roadmap-empty-state">Loading your roadmap progress...</p>
+      } @else if (roadmapError()) {
+        <div class="api-error" role="alert">{{ roadmapError() }}</div>
+      } @else if (roadmap(); as currentRoadmap) {
+        <div class="roadmap-progress-summary">
+          <div>
+            <strong
+              >{{ completedRoadmapTasks() }} /
+              {{ currentRoadmap.tasks.length }}</strong
+            >
+            <span>steps completed</span>
+          </div>
+          <strong>{{ roadmapProgress() }}%</strong>
+        </div>
+        <p-progressBar
+          [value]="roadmapProgress()"
+          [showValue]="false"
+          styleClass="profile-roadmap-progress">
+        </p-progressBar>
+
+        @if (currentRoadmap.tasks.length) {
+          <ul class="roadmap-task-list">
+            @for (task of currentRoadmap.tasks; track task.id) {
+              <li [class.completed]="task.completed">
+                <p-checkbox
+                  [binary]="true"
+                  [ngModel]="task.completed"
+                  [disabled]="pendingRoadmapTaskIds().has(task.id)"
+                  [ngModelOptions]="{ standalone: true }"
+                  (ngModelChange)="toggleRoadmapTask(task.id, $event)">
+                </p-checkbox>
+                <div>
+                  <strong>{{ task.title }}</strong>
+                  <span>{{ task.description }}</span>
+                </div>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="roadmap-empty-state">
+            Your roadmap has no checklist steps yet.
+          </p>
+        }
+
+        <p-button
+          label="Open full roadmap"
+          icon="pi pi-arrow-right"
+          iconPos="right"
+          variant="text"
+          (onClick)="openRoadmap()">
+        </p-button>
+      } @else {
+        <p class="roadmap-empty-state">
+          Create a personalized roadmap to track your Sweden setup tasks here.
+        </p>
+      }
+    </section>
   }
 </section>

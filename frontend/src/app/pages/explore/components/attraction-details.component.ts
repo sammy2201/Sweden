@@ -1,5 +1,4 @@
 import { CommonModule } from "@angular/common";
-import { HttpClient } from "@angular/common/http";
 import { Component, inject } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
@@ -23,15 +22,7 @@ import { TagModule } from "primeng/tag";
 import { AttractionDetail, County } from "../../../models/explore.models";
 import { buildExploreErrorMessage } from "../explore.utils";
 import { AuthService } from "../../../services/auth.service";
-import { environment } from "../../../../environments/environment";
-
-interface ExploreCountiesResponseDto {
-  counties: County[];
-}
-
-interface ExploreAttractionDetailResponseDto {
-  attraction: AttractionDetail;
-}
+import { ExploreService } from "../../../services/explore.service";
 
 interface AttractionDetailVm {
   loading: boolean;
@@ -62,7 +53,7 @@ interface AttractionDetailVm {
 export class AttractionDetailsComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
-  private readonly http = inject(HttpClient);
+  private readonly exploreService = inject(ExploreService);
   private readonly authService = inject(AuthService);
 
   readonly vm$ = this.route.paramMap.pipe(
@@ -71,8 +62,8 @@ export class AttractionDetailsComponent {
       const attractionId = params.get("attractionId") ?? "";
 
       return combineLatest([
-        this.getCounty(countyId),
-        this.getAttraction(attractionId),
+        this.exploreService.getCounty(countyId),
+        this.exploreService.getAttraction(attractionId),
       ]);
     }),
     map(
@@ -139,22 +130,5 @@ export class AttractionDetailsComponent {
         to,
       },
     });
-  }
-
-  private getCounty(countyId: string) {
-    return this.http
-      .get<ExploreCountiesResponseDto>(`${environment.apiUrl}/explore/counties`)
-      .pipe(
-        map((response) => response.counties ?? []),
-        map((counties) => counties.find((county) => county.id === countyId)),
-      );
-  }
-
-  private getAttraction(attractionId: string) {
-    return this.http
-      .get<ExploreAttractionDetailResponseDto>(
-        `${environment.apiUrl}/explore/attractions/${encodeURIComponent(attractionId)}`,
-      )
-      .pipe(map((response) => response.attraction));
   }
 }

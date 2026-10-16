@@ -32,51 +32,104 @@
       <form [formGroup]="form" (ngSubmit)="submit()">
         <div class="name-row">
           <div class="field">
-            <label>First name</label>
-            <input pInputText formControlName="firstName" placeholder="John" />
+            <label for="register-first-name">First name</label>
+            <input
+              id="register-first-name"
+              pInputText
+              formControlName="firstName"
+              placeholder="John" />
+            @if (
+              form.controls.firstName.invalid &&
+              (form.controls.firstName.dirty || form.controls.firstName.touched)
+            ) {
+              <small class="field-error">Enter at least 2 characters.</small>
+            }
           </div>
 
           <div class="field">
-            <label>Last name</label>
-            <input pInputText formControlName="lastName" placeholder="Doe" />
+            <label for="register-last-name">Last name</label>
+            <input
+              id="register-last-name"
+              pInputText
+              formControlName="lastName"
+              placeholder="Doe" />
+            @if (
+              form.controls.lastName.invalid &&
+              (form.controls.lastName.dirty || form.controls.lastName.touched)
+            ) {
+              <small class="field-error">Enter at least 2 characters.</small>
+            }
           </div>
         </div>
 
         <div class="field">
-          <label>Username</label>
-
-          <input pInputText formControlName="username" placeholder="johndoe" />
+          <label for="register-username">Username</label>
+          <input
+            id="register-username"
+            pInputText
+            formControlName="username"
+            placeholder="johndoe" />
+          @if (
+            form.controls.username.invalid &&
+            (form.controls.username.dirty || form.controls.username.touched)
+          ) {
+            <small class="field-error">Enter at least 3 characters.</small>
+          }
         </div>
 
         <div class="field">
-          <label>Email</label>
+          <label for="register-email">Email</label>
 
           <input
             pInputText
+            id="register-email"
             type="email"
             formControlName="email"
             placeholder="john@email.com" />
+          @if (
+            form.controls.email.invalid &&
+            (form.controls.email.dirty || form.controls.email.touched)
+          ) {
+            <small class="field-error">Enter a valid email address.</small>
+          }
         </div>
 
         <div class="field">
-          <label>City</label>
-
-          <input pInputText formControlName="city" placeholder="Stockholm" />
+          <label for="register-city">City</label>
+          <input
+            id="register-city"
+            pInputText
+            formControlName="city"
+            placeholder="Stockholm" />
+          @if (
+            form.controls.city.invalid &&
+            (form.controls.city.dirty || form.controls.city.touched)
+          ) {
+            <small class="field-error">Enter at least 2 characters.</small>
+          }
         </div>
 
         <div class="field">
-          <label>Address</label>
+          <label for="register-address">Address</label>
 
           <input
             pInputText
+            id="register-address"
             formControlName="address"
             placeholder="Sveavagen 1" />
+          @if (
+            form.controls.address.invalid &&
+            (form.controls.address.dirty || form.controls.address.touched)
+          ) {
+            <small class="field-error">Enter at least 3 characters.</small>
+          }
         </div>
 
         <div class="field">
-          <label>Password</label>
+          <label for="register-password">Password</label>
 
           <p-password
+            inputId="register-password"
             formControlName="password"
             [feedback]="false"
             [toggleMask]="true"
@@ -84,16 +137,22 @@
             styleClass="w-full"
             inputStyleClass="w-full">
           </p-password>
+          @if (
+            form.controls.password.invalid &&
+            (form.controls.password.dirty || form.controls.password.touched)
+          ) {
+            <small class="field-error">Use at least 8 characters.</small>
+          }
         </div>
 
         @if (errorMessage) {
-          <small class="error-message">
+          <small class="error-message" role="alert" aria-live="polite">
             {{ errorMessage }}
           </small>
         }
 
         @if (successMessage) {
-          <small class="success-message">
+          <small class="success-message" role="status" aria-live="polite">
             {{ successMessage }}
           </small>
         }

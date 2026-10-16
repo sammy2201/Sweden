@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace SwedenStart;
 
 [ApiController]
 [Route("api/visitsweden")]
+[Authorize]
 public class VisitSwedenController : ControllerBase
 {
      private readonly IVisitSwedenService _visitSwedenService;

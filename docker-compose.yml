@@ -3,6 +3,24 @@ services:
     image: postgres:16-alpine
     container_name: sweden-start-postgres
     restart: unless-stopped
+    mem_limit: ${POSTGRES_MEMORY_LIMIT:-256m}
+    cpus: ${POSTGRES_CPUS:-1.0}
+    command:
+      - postgres
+      - -c
+      - shared_buffers=32MB
+      - -c
+      - work_mem=2MB
+      - -c
+      - maintenance_work_mem=16MB
+      - -c
+      - autovacuum_work_mem=16MB
+      - -c
+      - max_connections=10
+      - -c
+      - effective_cache_size=128MB
+      - -c
+      - max_wal_size=256MB
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-sweden_start}
       POSTGRES_USER: ${POSTGRES_USER:-sweden_start}

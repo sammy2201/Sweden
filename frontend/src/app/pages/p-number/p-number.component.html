@@ -13,13 +13,22 @@
     </p>
 
     <div class="hero-actions">
-      <p-button label="Start your roadmap" icon="pi pi-arrow-right"> </p-button>
-
       <p-button
-        label="Visit Skatteverket"
-        severity="secondary"
-        variant="outlined">
+        label="Track my steps"
+        icon="pi pi-arrow-right"
+        routerLink="/profile">
       </p-button>
+
+      <a
+        pButton
+        label="Skatteverket"
+        severity="secondary"
+        [outlined]="true"
+        href="https://www.skatteverket.se/"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Visit the Swedish Tax Agency website in a new tab">
+      </a>
     </div>
   </section>
 
@@ -112,11 +121,12 @@
 
     <div class="office-layout">
       <div class="office-sidebar">
-        <label>City</label>
+        <label for="office-search">City or address</label>
 
         <div class="search-box">
           <input
             pInputText
+            id="office-search"
             #locationInput
             placeholder="Stockholm, Malmö, Göteborg..." />
 
@@ -131,6 +141,8 @@
           icon="pi pi-map-marker"
           severity="secondary"
           class="current-location"
+          [loading]="isLocating"
+          [disabled]="isLocating"
           (onClick)="useCurrentLocation()">
         </p-button>
 
@@ -158,7 +170,22 @@
       </div>
 
       <div class="office-map">
-        <iframe class="map-frame" [src]="mapUrl" loading="lazy"> </iframe>
+        <iframe
+          class="map-frame"
+          [src]="mapUrl"
+          [title]="'Skatteverket offices near ' + currentSearchLabel"
+          loading="lazy">
+        </iframe>
+        <a
+          pButton
+          class="map-link"
+          label="Open map"
+          icon="pi pi-external-link"
+          iconPos="right"
+          [href]="externalMapUrl"
+          target="_blank"
+          rel="noopener noreferrer">
+        </a>
       </div>
     </div>
   </section>

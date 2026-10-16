@@ -1,29 +1,120 @@
 .profile-page {
-  min-height: calc(100vh - 76px);
-  padding: 3rem 2rem;
+  min-height: calc(100vh - var(--header-height));
+  padding: var(--space-12) var(--space-8);
   background: var(--app-bg);
 }
 
 .profile-layout {
-  width: min(1120px, 100%);
-  margin: 0 auto;
   display: grid;
-  grid-template-columns: 360px 1fr;
-  gap: 1.5rem;
+  grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+  gap: var(--space-6);
   align-items: start;
+  width: min(var(--content-standard), 100%);
+  margin: 0 auto;
+}
+
+.roadmap-overview {
+  width: min(var(--content-standard), 100%);
+  margin: var(--space-8) auto 0;
+  padding: var(--space-8);
+  border: var(--border-width) solid var(--app-border);
+  border-radius: var(--app-radius);
+  background: var(--app-surface);
+  box-shadow: var(--app-shadow);
+}
+
+.roadmap-overview-header,
+.roadmap-progress-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.roadmap-overview-header {
+  margin-bottom: var(--space-6);
+}
+
+.roadmap-overview-header h2 {
+  margin: 0;
+  color: var(--app-heading);
+  font-size: var(--font-size-xl);
+}
+
+.roadmap-progress-summary {
+  margin-bottom: var(--space-3);
+  color: var(--app-text-soft);
+}
+
+.roadmap-progress-summary div {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.roadmap-progress-summary strong {
+  color: var(--app-heading);
+}
+
+.roadmap-progress-summary span,
+.roadmap-task-list li span,
+.roadmap-empty-state {
+  color: var(--app-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.profile-roadmap-progress {
+  margin-bottom: var(--space-6);
+}
+
+.roadmap-task-list {
+  display: grid;
+  padding: 0;
+  margin: 0 0 var(--space-4);
+  gap: var(--space-2);
+  list-style: none;
+}
+
+.roadmap-task-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: var(--border-width) solid var(--app-border);
+  border-radius: var(--radius-md);
+  background: var(--app-surface-alt);
+}
+
+.roadmap-task-list li div {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.roadmap-task-list li strong {
+  color: var(--app-heading);
+  font-size: var(--font-size-base);
+}
+
+.roadmap-task-list li.completed strong {
+  color: var(--app-text-muted);
+  text-decoration: line-through;
+}
+
+.roadmap-empty-state {
+  margin: 0 0 var(--space-4);
 }
 
 :host ::ng-deep .identity-card,
 :host ::ng-deep .details-card {
-  border: 1px solid var(--app-border);
+  overflow: hidden;
+  border: var(--border-width) solid var(--app-border);
   border-radius: var(--app-radius);
   box-shadow: var(--app-shadow);
-  overflow: hidden;
 }
 
 :host ::ng-deep .identity-card .p-card-body,
 :host ::ng-deep .details-card .p-card-body {
-  padding: 2rem;
+  padding: var(--space-8);
 }
 
 :host ::ng-deep .identity-card .p-card-content,
@@ -32,50 +123,51 @@
 }
 
 .avatar {
-  width: 96px;
-  height: 96px;
-  margin-bottom: 1.5rem;
-  border-radius: 24px;
   display: grid;
+  width: var(--profile-avatar-size);
+  height: var(--profile-avatar-size);
+  margin-bottom: var(--space-6);
   place-items: center;
+  border-radius: var(--radius-xl);
   background: var(--app-accent-soft);
   color: var(--app-primary);
-  font-size: 2rem;
-  font-weight: 800;
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-extrabold);
 }
 
 .identity-card h1 {
-  margin: 0.9rem 0 0.35rem;
+  margin: var(--space-3-5) 0 var(--space-1-5);
   color: var(--app-heading);
-  font-size: 2rem;
+  font-size: var(--font-size-2xl);
   line-height: 1.1;
 }
 
 .identity-card p {
   margin: 0;
   color: var(--app-text-muted);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .quick-facts {
   display: grid;
-  gap: 0.9rem;
+  gap: var(--space-3-5);
 }
 
 .quick-facts div {
   display: flex;
   align-items: center;
-  gap: 0.85rem;
+  gap: var(--space-3-5);
   color: var(--app-text-soft);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .quick-facts i {
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
   display: grid;
+  width: var(--icon-size-small);
+  height: var(--icon-size-small);
+  flex: 0 0 auto;
   place-items: center;
+  border-radius: var(--radius-control);
   background: var(--app-surface-alt);
   color: var(--app-primary);
 }
@@ -84,96 +176,91 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
 }
 
 .eyebrow {
   display: block;
-  margin-bottom: 0.35rem;
+  margin-bottom: var(--space-1-5);
   color: var(--app-primary);
-  font-size: 0.85rem;
-  font-weight: 700;
-  text-transform: uppercase;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
   letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .details-header h2 {
   margin: 0;
   color: var(--app-heading);
-  font-size: 1.65rem;
+  font-size: var(--font-size-xl);
 }
 
-.details-grid {
+.details-grid,
+.form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
+  gap: var(--space-4);
 }
 
 .detail-item {
-  min-height: 82px;
-  padding: 1rem;
-  border: 1px solid var(--app-border);
-  border-radius: 12px;
-  background: var(--app-surface-alt);
   display: flex;
+  min-height: 82px;
   flex-direction: column;
   justify-content: center;
-  gap: 0.35rem;
+  gap: var(--space-1-5);
+  padding: var(--space-4);
+  border: var(--border-width) solid var(--app-border);
+  border-radius: var(--radius-md);
+  background: var(--app-surface-alt);
 }
 
 .detail-item span {
   color: var(--app-text-muted);
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
 }
 
 .detail-item strong {
   color: var(--app-heading);
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   overflow-wrap: anywhere;
 }
 
 .profile-form {
   display: grid;
-  gap: 1.5rem;
-}
-
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
+  gap: var(--space-6);
 }
 
 .field {
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
+  gap: var(--space-2);
 }
 
 .field label {
   color: var(--app-text-soft);
-  font-size: 0.88rem;
-  font-weight: 700;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
 }
 
 .field input,
 .field .p-inputtext {
-  width: 100%;
-  height: 48px;
-  padding: 0 1rem;
-  border: 1px solid var(--app-border);
-  border-radius: 10px;
-  background: #fff;
-  color: var(--app-text);
   box-sizing: border-box;
+  width: 100%;
+  height: var(--input-height);
+  padding: 0 var(--space-4);
+  border: var(--border-width) solid var(--app-border);
+  border-radius: var(--radius-control);
+  background: var(--app-surface);
+  color: var(--app-text);
 }
 
 .field input:focus,
 .field .p-inputtext:focus {
   outline: none;
   border-color: var(--app-primary);
-  box-shadow: 0 0 0 3px rgb(22 95 102 / 10%);
+  box-shadow: var(--app-shadow-focus);
 }
 
 .field small,
@@ -188,22 +275,22 @@
 .error-message,
 .success-message {
   display: block;
-  margin-bottom: 1rem;
-  font-size: 0.9rem;
-  font-weight: 600;
+  margin-bottom: var(--space-4);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semibold);
 }
 
 .form-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 0.75rem;
+  gap: var(--space-3);
 }
 
 .profile-error {
-  width: min(520px, 100%);
-  margin: 4rem auto;
-  padding: 2rem;
-  border: 1px solid var(--app-border);
+  width: min(var(--auth-login-layout-width), 100%);
+  margin: var(--space-16) auto;
+  padding: var(--space-8);
+  border: var(--border-width) solid var(--app-border);
   border-radius: var(--app-radius);
   background: var(--app-surface);
   box-shadow: var(--app-shadow);
@@ -212,16 +299,16 @@
 
 .profile-error i {
   color: var(--app-danger);
-  font-size: 2rem;
+  font-size: var(--font-size-2xl);
 }
 
 .profile-error h1 {
-  margin: 1rem 0 0.5rem;
+  margin: var(--space-4) 0 var(--space-2);
   color: var(--app-heading);
 }
 
 .profile-error p {
-  margin: 0 0 1.5rem;
+  margin: 0 0 var(--space-6);
   color: var(--app-text-soft);
 }
 
@@ -233,7 +320,7 @@
 
 @media (max-width: 640px) {
   .profile-page {
-    padding: 1.5rem;
+    padding: var(--space-6);
   }
 
   .details-header {
@@ -241,10 +328,22 @@
     flex-direction: column;
   }
 
-  .details-grid {
-    grid-template-columns: 1fr;
+  .roadmap-overview {
+    padding: var(--space-6);
   }
 
+  .roadmap-overview-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .roadmap-progress-summary {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .details-grid,
   .form-grid {
     grid-template-columns: 1fr;
   }

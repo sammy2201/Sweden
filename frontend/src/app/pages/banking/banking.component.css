@@ -328,13 +328,13 @@
 }
 
 .debit {
-  background: #dff7f2;
+  background: var(--app-positive-soft);
   color: var(--app-primary);
 }
 
 .credit {
-  background: #eef3ff;
-  color: #3157d5;
+  background: var(--app-info-soft);
+  color: var(--app-info);
 }
 
 .feature-list {

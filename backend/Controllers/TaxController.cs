@@ -25,37 +25,18 @@ public class TaxController : ControllerBase
 
      [HttpPost("calculate")]
      [ProducesResponseType(typeof(TaxCalculationResponse), StatusCodes.Status200OK)]
-     [ProducesResponseType(typeof(object), StatusCodes.Status400BadRequest)]
-     [ProducesResponseType(typeof(object), StatusCodes.Status404NotFound)]
+     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
      public ActionResult<TaxCalculationResponse> Calculate([FromBody] TaxCalculationRequest request)
      {
-          try
-          {
-               var result = _taxService.Calculate(request);
-
-               return Ok(result);
-          }
-          catch (ArgumentException ex)
-          {
-               return BadRequest(new { message = ex.Message });
-          }
-          catch (KeyNotFoundException ex)
-          {
-               return NotFound(new { message = ex.Message });
-          }
+          var result = _taxService.Calculate(request);
+          return Ok(result);
      }
 
      [HttpGet("municipality")]
      public IActionResult GetMunicipalities()
      {
-          try
-          {
-               return Ok(_taxService.GetMunicipalities());
-          }
-          catch (KeyNotFoundException ex)
-          {
-               return NotFound(new { message = ex.Message });
-          }
+          return Ok(_taxService.GetMunicipalities());
      }
 
 }

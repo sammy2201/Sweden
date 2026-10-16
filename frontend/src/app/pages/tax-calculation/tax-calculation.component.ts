@@ -1,4 +1,5 @@
-import { Component } from "@angular/core";
+import { Component, DestroyRef, inject } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { InputNumberModule } from "primeng/inputnumber";
@@ -11,6 +12,7 @@ import {
   TaxCalculationRequest,
   TaxCalculationResponse,
 } from "../../services/tax.service";
+import { getApiErrorMessage } from "../../utils/api-error";
 
 @Component({
   selector: "app-tax-calculation",
@@ -36,33 +38,49 @@ export class TaxCalculationComponent {
   };
   loading = false;
   result: TaxCalculationResponse | null = null;
+  errorMessage = "";
+
+  private readonly destroyRef = inject(DestroyRef);
 
   constructor(private taxService: TaxService) {}
 
   calculate(): void {
     this.loading = true;
-    this.taxService.calculateTax(this.request).subscribe({
-      next: (res) => {
-        this.result = res;
-        this.loading = false;
-      },
-      error: (err) => {
-        console.error(err);
-        this.loading = false;
-      },
-    });
+    this.errorMessage = "";
+    this.taxService
+      .calculateTax(this.request)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.result = res;
+          this.loading = false;
+        },
+        error: (error: unknown) => {
+          this.errorMessage = getApiErrorMessage(
+            error,
+            "We could not calculate your tax right now.",
+          );
+          this.loading = false;
+        },
+      });
   }
 
   municipalities: string[] = [];
 
   ngOnInit(): void {
-    this.taxService.getMunicipalities().subscribe({
-      next: (res) => {
-        this.municipalities = res;
-      },
-      error: (err) => {
-        console.error(err);
-      },
-    });
+    this.taxService
+      .getMunicipalities()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.municipalities = res;
+        },
+        error: (error: unknown) => {
+          this.errorMessage = getApiErrorMessage(
+            error,
+            "We could not load the municipality list right now.",
+          );
+        },
+      });
   }
 }

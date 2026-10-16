@@ -1,176 +1,163 @@
 <div class="roadmap-page">
-  <section class="hero">
-    <h1>Create Your Sweden Roadmap</h1>
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">Personal planning</span>
+      <h1>Your Sweden Roadmap</h1>
+      <p>Review your moving plan and keep each step up to date.</p>
+    </div>
+    @if (hasExistingRoadmap) {
+      <div class="header-actions">
+        <p-button
+          label="Edit roadmap"
+          icon="pi pi-pencil"
+          (onClick)="startRoadmapUpdate()"></p-button>
+        <p-button
+          label="Delete roadmap"
+          icon="pi pi-trash"
+          severity="danger"
+          [outlined]="true"
+          [loading]="isDeleting"
+          (onClick)="confirmDeleteRoadmap()"></p-button>
+      </div>
+    }
+  </header>
 
-    <p>
-      Answer a few questions and we'll generate a personalized checklist for
-      your move to Sweden.
-    </p>
-  </section>
+  <p-confirmDialog></p-confirmDialog>
 
   @if (isLoadingExistingRoadmap) {
-    <section class="finish">
-      <div class="finish-card">
-        <h2>Loading your roadmap...</h2>
-      </div>
-    </section>
-  } @else if (shouldShowWizard && currentQuestion; as question) {
-    <section class="wizard">
-      <div class="progress-header">
-        <div>
-          <span class="step-label">
-            Question {{ currentIndex + 1 }} of {{ visibleQuestions.length }}
-          </span>
-
-          <h2>{{ question.title }}</h2>
-        </div>
-
-        <span class="progress-percent"> {{ progress }}% </span>
-      </div>
-
-      <div class="progress">
-        <div class="progress-fill" [style.width.%]="progress"></div>
-      </div>
-
-      <div class="options">
-        @for (option of question.options; track option) {
-          <label
-            class="option-card"
-            [class.selected]="answers[question.id] === option">
-            <input
-              type="radio"
-              [name]="question.id"
-              [value]="option"
-              [(ngModel)]="answers[question.id]" />
-
-            <div class="option-content">
-              <div class="circle">
-                @if (answers[question.id] === option) {
-                  ✓
-                }
-              </div>
-
-              <span>
-                {{ option }}
-              </span>
-            </div>
-          </label>
-        }
-      </div>
-
-      <div class="actions">
-        <button
-          class="secondary"
-          type="button"
-          (click)="previous()"
-          [disabled]="currentIndex === 0 || isGenerating">
-          Previous
-        </button>
-
-        <button
-          class="primary"
-          type="button"
-          (click)="next()"
-          [disabled]="!answers[question.id] || isGenerating">
-          {{ isGenerating ? "Saving..." : primaryActionLabel }}
-        </button>
-      </div>
-
-      @if (isEditingExistingRoadmap) {
-        <button
-          class="secondary cancel-update"
-          type="button"
-          (click)="cancelRoadmapUpdate()"
-          [disabled]="isGenerating">
-          Cancel update
-        </button>
-      }
-    </section>
+    <div class="state-panel">
+      <i class="pi pi-spin pi-spinner"></i><span>Loading your roadmap...</span>
+    </div>
   } @else if (!hasExistingRoadmap) {
-    <section class="finish">
-      <div class="finish-card">
-        <div class="emoji">🎉</div>
-
-        <h2>You're all set!</h2>
-
-        <p>
-          We've collected everything we need. Generate your personalized
-          roadmap.
-        </p>
-
-        <button
-          class="primary large"
-          (click)="generateRoadmap()"
-          [disabled]="isGenerating">
-          {{ isGenerating ? "Generating..." : "Generate My Roadmap" }}
-        </button>
-      </div>
-    </section>
+    <div class="state-panel">
+      <i class="pi pi-file"></i
+      ><span>No roadmap has been created for this account yet.</span
+      ><p-button
+        label="Create roadmap"
+        icon="pi pi-plus"
+        (onClick)="startRoadmapCreation()"></p-button>
+    </div>
   }
 
   @if (generationError) {
-    <section class="error-banner" role="alert">
-      {{ generationError }}
-    </section>
+    <div class="message error-message" role="alert">{{ generationError }}</div>
   }
-
   @if (successMessage) {
-    <section class="success-banner" role="status">
+    <div class="message success-message" role="status">
       {{ successMessage }}
-    </section>
+    </div>
   }
 
-  @if (tasks.length) {
-    <section class="roadmap">
-      <div class="roadmap-header">
+  @if (hasExistingRoadmap) {
+    <section class="roadmap-section">
+      <div class="section-heading">
         <div>
-          <h2>Your Sweden Checklist</h2>
-
-          <p>Follow these steps to settle in Sweden.</p>
+          <span class="eyebrow">Roadmap details</span>
+          <h2>Your answers</h2>
         </div>
-
-        @if (hasExistingRoadmap && !isEditingExistingRoadmap) {
-          <button
-            class="secondary"
-            type="button"
-            (click)="startRoadmapUpdate()">
-            Update roadmap
-          </button>
-        }
       </div>
+      <div
+        class="roadmap-table-scroll"
+        tabindex="0"
+        aria-label="Roadmap answers table">
+        <p-table
+          [value]="roadmapValues"
+          [tableStyle]="{ 'min-width': '30rem' }"
+          styleClass="roadmap-table">
+          <ng-template pTemplate="header"
+            ><tr>
+              <th>Field</th>
+              <th>Value</th>
+            </tr></ng-template
+          >
+          <ng-template pTemplate="body" let-item
+            ><tr>
+              <td class="field-name">{{ item.label }}</td>
+              <td>{{ item.value }}</td>
+            </tr></ng-template
+          >
+        </p-table>
+      </div>
+    </section>
 
-      <div class="timeline">
-        @for (task of tasks; track task.title) {
-          <div
-            class="timeline-item"
-            [class.done]="task.status === 'done'"
-            [class.current]="task.status === 'current'">
-            <div class="timeline-icon">
-              @if (task.status === "done") {
-                ✓
-              }
-
-              @if (task.status === "current") {
-                ⏳
-              }
-
-              @if (task.status === "todo") {
-                ○
-              }
-            </div>
-
-            <div>
-              <h3>
-                {{ task.title }}
-              </h3>
-
-              <p>
-                {{ task.description }}
-              </p>
-            </div>
-          </div>
-        }
+    <section class="roadmap-section">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">Next steps</span>
+          <h2>Checklist</h2>
+        </div>
+        <span class="progress-summary"
+          >{{ completedTaskCount }} / {{ tasks.length }} done</span
+        >
+      </div>
+      <p-progressBar
+        [value]="taskProgressPercent"
+        [showValue]="true"
+        styleClass="task-progress"></p-progressBar>
+      <div
+        class="roadmap-table-scroll"
+        tabindex="0"
+        aria-label="Roadmap task checklist">
+        <p-table
+          [value]="tasks"
+          [tableStyle]="{ 'min-width': '30rem' }"
+          styleClass="roadmap-table">
+          <ng-template pTemplate="header"
+            ><tr>
+              <th>Done</th>
+              <th>Task</th>
+              <th>Description</th>
+            </tr></ng-template
+          >
+          <ng-template pTemplate="body" let-task
+            ><tr>
+              <td>
+                <p-checkbox
+                  [binary]="true"
+                  [ngModel]="task.completed"
+                  [disabled]="pendingTaskIds.has(task.id)"
+                  [ariaLabel]="'Mark ' + task.title + ' as complete'"
+                  (ngModelChange)="toggleTask(task)"></p-checkbox>
+              </td>
+              <td class="field-name">{{ task.title }}</td>
+              <td>{{ task.description }}</td>
+            </tr></ng-template
+          >
+        </p-table>
       </div>
     </section>
   }
+
+  <p-dialog
+    [header]="isCreatingRoadmap ? 'Create roadmap' : 'Edit roadmap'"
+    [(visible)]="isRoadmapDialogVisible"
+    [modal]="true"
+    [style]="{ width: 'min(680px, 94vw)' }"
+    [closable]="!isGenerating">
+    <div class="edit-grid">
+      @for (field of fields; track field.id) {
+        <div class="field">
+          <label [for]="field.id">{{ field.label }}</label
+          ><p-select
+            [inputId]="field.id"
+            [options]="field.options"
+            [(ngModel)]="editAnswers[field.id]"
+            appendTo="body"></p-select>
+        </div>
+      }
+    </div>
+    <ng-template pTemplate="footer">
+      <p-button
+        label="Cancel"
+        severity="secondary"
+        variant="outlined"
+        [disabled]="isGenerating"
+        (onClick)="cancelRoadmapUpdate()"></p-button>
+      <p-button
+        [label]="isCreatingRoadmap ? 'Create roadmap' : 'Save changes'"
+        icon="pi pi-check"
+        [loading]="isGenerating"
+        (onClick)="saveRoadmap()"></p-button>
+    </ng-template>
+  </p-dialog>
 </div>

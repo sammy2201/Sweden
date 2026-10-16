@@ -87,13 +87,17 @@ public class ExploreController : ControllerBase
      }
 
      [HttpGet("attractions/{id}")]
+     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
      public async Task<ActionResult<ExploreAttractionDetailResponseDto>> GetAttraction(string id)
      {
           var attraction = await _exploreService.GetAttractionAsync(id);
 
           if (attraction == null)
           {
-               return NotFound();
+               return NotFound(ApiProblemDetails.Create(
+                    StatusCodes.Status404NotFound,
+                    "Attraction not found",
+                    "The requested attraction was not found."));
           }
 
           return Ok(new ExploreAttractionDetailResponseDto

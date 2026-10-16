@@ -13,6 +13,7 @@ import { ProgressSpinnerModule } from "primeng/progressspinner";
 import { DividerModule } from "primeng/divider";
 import { AccordionModule } from "primeng/accordion";
 import { InputTextModule } from "primeng/inputtext";
+import { getApiErrorMessage } from "../../utils/api-error";
 
 @Component({
   selector: "app-transport",
@@ -42,6 +43,7 @@ export class TransportComponent {
   arrivalTime: Date | null = null;
   minDateTime = new Date();
   timeValidationError = "";
+  apiErrorMessage = "";
 
   loading = false;
 
@@ -78,6 +80,7 @@ export class TransportComponent {
 
     this.minDateTime = new Date();
     this.timeValidationError = "";
+    this.apiErrorMessage = "";
 
     if (
       (this.departureTime && this.departureTime < this.minDateTime) ||
@@ -97,8 +100,11 @@ export class TransportComponent {
           this.trips = trips;
           this.loading = false;
         },
-        error: (error) => {
-          console.error(error);
+        error: (error: unknown) => {
+          this.apiErrorMessage = getApiErrorMessage(
+            error,
+            "We could not search transport right now.",
+          );
           this.loading = false;
         },
       });
@@ -119,6 +125,7 @@ export class TransportComponent {
     this.departureTime = null;
     this.arrivalTime = null;
     this.timeValidationError = "";
+    this.apiErrorMessage = "";
 
     this.trips = [];
   }

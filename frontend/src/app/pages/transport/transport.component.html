@@ -88,6 +88,9 @@
       <div class="col-12" *ngIf="timeValidationError">
         <small class="text-red-500">{{ timeValidationError }}</small>
       </div>
+      <div class="col-12" *ngIf="apiErrorMessage">
+        <div class="api-error" role="alert">{{ apiErrorMessage }}</div>
+      </div>
     </div>
   </p-card>
 
