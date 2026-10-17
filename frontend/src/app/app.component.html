@@ -1,52 +1,183 @@
-<header class="top-nav">
-  <a class="brand" routerLink="/">
-    <div class="brand-mark">
-      <i class="pi pi-map"></i>
-    </div>
+<header
+  class="top-nav"
+  [class.authenticated]="authService.isAuthenticated()"
+  [class.search-open]="mobileSearchOpen()"
+  [class.menu-open]="mobileMenuOpen()">
+  <div class="top-nav-inner">
+    <a class="brand" routerLink="/" aria-label="Sweden Start home">
+      <span class="brand-mark" aria-hidden="true">
+        <i class="pi pi-map"></i>
+      </span>
+      <span class="brand-text">
+        <span class="title">SwedenStart</span>
+        <span class="subtitle">Moving made easier</span>
+      </span>
+    </a>
 
-    <div class="brand-text">
-      <span class="title">Sweden Start</span>
-      <span class="subtitle">Moving made easier</span>
-    </div>
-  </a>
-
-  <nav class="nav-links">
-    @for (item of menuItems; track item.path) {
-      <a
-        [routerLink]="item.path"
-        routerLinkActive="active"
-        [routerLinkActiveOptions]="{ exact: true }">
-        {{ item.label }}
-      </a>
-    }
-  </nav>
-
-  <div class="nav-actions">
     @if (authService.isAuthenticated()) {
-      <p-button
-        label="Profile"
-        severity="secondary"
-        variant="text"
-        icon="pi pi-user"
-        routerLink="/profile">
-      </p-button>
+      <div id="global-search-region" class="header-search">
+        <div class="search-field">
+          <i class="pi pi-search search-icon" aria-hidden="true"></i>
+          <input
+            #globalSearchInput
+            id="global-guide-search"
+            type="search"
+            aria-label="What do you need help with?"
+            role="combobox"
+            aria-autocomplete="list"
+            aria-controls="global-guide-suggestions"
+            [attr.aria-expanded]="searchPanelVisible()"
+            [attr.aria-activedescendant]="activeSuggestionId()"
+            [value]="searchQuery()"
+            placeholder="What do you need help with?"
+            autocomplete="off"
+            (input)="onSearchInput(globalSearchInput.value)"
+            (focus)="onSearchFocus()"
+            (blur)="onSearchBlur()"
+            (keydown)="onSearchKeydown($event)" />
+          @if (searchQuery()) {
+            <button
+              class="search-clear"
+              type="button"
+              aria-label="Clear search"
+              (mousedown)="$event.preventDefault()"
+              (click)="clearSearch()">
+              <i class="pi pi-times" aria-hidden="true"></i>
+            </button>
+          }
+        </div>
 
-      <p-button
-        label="Logout"
-        severity="secondary"
-        variant="outlined"
-        icon="pi pi-sign-out"
-        (onClick)="logout()">
-      </p-button>
-    } @else {
-      <p-button
-        label="Login"
-        severity="secondary"
-        variant="text"
-        routerLink="/login">
-      </p-button>
+        @if (searchPanelVisible()) {
+          <div
+            id="global-guide-suggestions"
+            class="search-suggestions"
+            role="listbox"
+            aria-label="Guide suggestions"
+            animate.enter="suggestions-enter">
+            <p class="suggestions-heading">
+              {{ searchQuery().trim() ? "Matching guides" : "Popular topics" }}
+            </p>
+            @if (suggestions().length > 0) {
+              @for (
+                guide of suggestions();
+                track guide.route;
+                let index = $index
+              ) {
+                <button
+                  type="button"
+                  role="option"
+                  class="suggestion-option"
+                  [class.active]="activeSuggestionIndex() === index"
+                  [id]="'header-guide-suggestion-' + index"
+                  [attr.aria-selected]="activeSuggestionIndex() === index"
+                  (mousedown)="$event.preventDefault()"
+                  (mouseenter)="activeSuggestionIndex.set(index)"
+                  (click)="selectSuggestion(guide)">
+                  <span class="suggestion-icon" aria-hidden="true">
+                    <i [class]="guide.icon"></i>
+                  </span>
+                  <span class="suggestion-copy">
+                    <strong>{{ guide.title }}</strong>
+                    <small>{{ guide.category }}</small>
+                  </span>
+                  <i
+                    class="pi pi-arrow-up-right suggestion-arrow"
+                    aria-hidden="true"></i>
+                </button>
+              }
+            } @else {
+              <p class="suggestions-empty">
+                No guides found. Try another topic.
+              </p>
+            }
+          </div>
+        }
+      </div>
+    }
 
-      <p-button label="Get Started" routerLink="/register"> </p-button>
+    <nav class="desktop-actions" aria-label="Account navigation">
+      <a class="explore-guides-link" routerLink="/" fragment="guide-directory">
+        Explore guides
+      </a>
+      <span class="nav-separator" aria-hidden="true"></span>
+      @if (authService.isAuthenticated()) {
+        <p-button
+          label="Profile"
+          severity="secondary"
+          variant="text"
+          icon="pi pi-user"
+          routerLink="/profile">
+        </p-button>
+        <p-button
+          label="Logout"
+          severity="secondary"
+          variant="outlined"
+          icon="pi pi-sign-out"
+          (onClick)="logout()">
+        </p-button>
+      } @else {
+        <p-button
+          label="Log in"
+          severity="secondary"
+          variant="text"
+          routerLink="/login">
+        </p-button>
+        <p-button label="Get started" routerLink="/register"></p-button>
+      }
+    </nav>
+
+    <div class="mobile-controls">
+      @if (authService.isAuthenticated()) {
+        <button
+          class="mobile-icon-button"
+          type="button"
+          aria-label="Search guides"
+          [attr.aria-expanded]="mobileSearchOpen()"
+          aria-controls="global-search-region"
+          (click)="toggleMobileSearch()">
+          <i
+            [class]="mobileSearchOpen() ? 'pi pi-times' : 'pi pi-search'"
+            aria-hidden="true"></i>
+        </button>
+      }
+      <button
+        class="mobile-icon-button"
+        type="button"
+        aria-label="Toggle account menu"
+        [attr.aria-expanded]="mobileMenuOpen()"
+        aria-controls="mobile-account-menu"
+        (click)="toggleMobileMenu()">
+        <i
+          [class]="mobileMenuOpen() ? 'pi pi-times' : 'pi pi-bars'"
+          aria-hidden="true"></i>
+      </button>
+    </div>
+
+    @if (mobileMenuOpen()) {
+      <nav
+        id="mobile-account-menu"
+        class="mobile-menu"
+        aria-label="Account and guide navigation"
+        animate.enter="suggestions-enter">
+        <a
+          routerLink="/"
+          fragment="guide-directory"
+          (click)="closeMobileMenu()">
+          Explore guides <i class="pi pi-arrow-right" aria-hidden="true"></i>
+        </a>
+        @if (authService.isAuthenticated()) {
+          <a routerLink="/profile" (click)="closeMobileMenu()">Profile</a>
+          <button type="button" (click)="logout()">Log out</button>
+        } @else {
+          <a routerLink="/login" (click)="closeMobileMenu()">Log in</a>
+          <a
+            class="mobile-signup"
+            routerLink="/register"
+            (click)="closeMobileMenu()">
+            Get started
+          </a>
+        }
+      </nav>
     }
   </div>
 </header>
@@ -55,4 +186,4 @@
   <router-outlet />
 </main>
 
-<app-chat-widget></app-chat-widget>
+<app-site-footer></app-site-footer>

@@ -1,5 +1,4 @@
 import { CommonModule } from "@angular/common";
-import { HttpClient, HttpParams } from "@angular/common/http";
 import { Component, inject } from "@angular/core";
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
 import {
@@ -24,13 +23,18 @@ import {
 } from "../../../models/explore.models";
 import { FormsModule } from "@angular/forms";
 import { buildExploreErrorMessage } from "../explore.utils";
-import { environment } from "../../../../environments/environment";
 import { AuthService } from "../../../services/auth.service";
+import { ExploreService } from "../../../services/explore.service";
 
 interface CountyAttractionsVm {
   loading: boolean;
   error: string | null;
   county: County | undefined;
+  paged: PagedResponse<Attraction>;
+}
+
+interface AttractionsLoadState {
+  error: string | null;
   paged: PagedResponse<Attraction>;
 }
 
@@ -43,20 +47,6 @@ const EMPTY_PAGED_RESPONSE: PagedResponse<Attraction> = {
   hasNextPage: false,
   hasPreviousPage: false,
 };
-
-interface ExploreCountiesResponseDto {
-  counties: County[];
-}
-
-interface ExploreAttractionsResponseDto {
-  attractions: Attraction[];
-  page: number;
-  pageSize: number;
-  totalCount: number;
-  totalPages: number;
-  hasNextPage: boolean;
-  hasPreviousPage: boolean;
-}
 
 @Component({
   selector: "app-county-attractions",
@@ -75,7 +65,7 @@ interface ExploreAttractionsResponseDto {
   styleUrl: "./county-attractions.component.css",
 })
 export class CountyAttractionsComponent {
-  private readonly http: HttpClient = inject(HttpClient);
+  private readonly exploreService = inject(ExploreService);
   private readonly route: ActivatedRoute = inject(ActivatedRoute);
   private readonly router: Router = inject(Router);
   private readonly authService: AuthService = inject(AuthService);
@@ -95,28 +85,33 @@ export class CountyAttractionsComponent {
   ]).pipe(
     switchMap(([countyId, request]) =>
       combineLatest([
-        this.getCounty(countyId),
-        this.getAttractions(
+        this.exploreService.getCounty(countyId),
+        this.exploreService.getAttractions(
           countyId,
           request.page,
           request.pageSize,
           request.category || undefined,
+        ).pipe(
+          map(
+            (paged): AttractionsLoadState => ({
+              error: null,
+              paged,
+            }),
+          ),
+          catchError((error: unknown) =>
+            of<AttractionsLoadState>({
+              error: buildExploreErrorMessage(error),
+              paged: EMPTY_PAGED_RESPONSE,
+            }),
+          ),
         ),
       ]).pipe(
         map(
-          ([county, paged]): CountyAttractionsVm => ({
+          ([county, attractions]): CountyAttractionsVm => ({
             loading: false,
-            error: null,
+            error: attractions.error,
             county,
-            paged,
-          }),
-        ),
-        catchError((error: unknown) =>
-          of({
-            loading: false,
-            error: buildExploreErrorMessage(error),
-            county: undefined,
-            paged: EMPTY_PAGED_RESPONSE,
+            paged: attractions.paged,
           }),
         ),
       ),
@@ -131,6 +126,10 @@ export class CountyAttractionsComponent {
 
   ratingStars(rating: number): number {
     return Math.round(rating);
+  }
+
+  retry(): void {
+    this.requestState$.next({ ...this.requestState$.value });
   }
 
   goToPreviousPage(currentPage: number): void {
@@ -184,52 +183,5 @@ export class CountyAttractionsComponent {
         to,
       },
     });
-  }
-
-  private getCounty(countyId: string) {
-    return this.http
-      .get<ExploreCountiesResponseDto>(`${environment.apiUrl}/explore/counties`)
-      .pipe(
-        map((response) => response.counties ?? []),
-        map((counties) => counties.find((county) => county.id === countyId)),
-      );
-  }
-
-  private getAttractions(
-    county: string,
-    page: number,
-    pageSize: number,
-    category?: string,
-  ) {
-    let params = new HttpParams()
-      .set("county", county)
-      .set("page", page)
-      .set("pageSize", pageSize);
-
-    const cleanedCategory = category?.trim();
-    if (cleanedCategory) {
-      params = params.set("category", cleanedCategory);
-    }
-
-    return this.http
-      .get<ExploreAttractionsResponseDto>(
-        `${environment.apiUrl}/explore/attractions`,
-        {
-          params,
-        },
-      )
-      .pipe(
-        map(
-          (response): PagedResponse<Attraction> => ({
-            items: response.attractions ?? [],
-            page: response.page,
-            pageSize: response.pageSize,
-            totalCount: response.totalCount,
-            totalPages: response.totalPages,
-            hasNextPage: response.hasNextPage,
-            hasPreviousPage: response.hasPreviousPage,
-          }),
-        ),
-      );
   }
 }

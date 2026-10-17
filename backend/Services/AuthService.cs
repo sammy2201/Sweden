@@ -22,7 +22,7 @@ public class AuthService : IAuthService
     {
         email = email.Trim().ToLowerInvariant();
         var user = await _repo.GetUserByEmailAsync(email);
-        if (user is null || !PasswordHasher.Verify(password, user.PasswordHash))
+        if (user is null || !user.IsActive || !PasswordHasher.Verify(password, user.PasswordHash))
         {
             throw new UnauthorizedAccessException("Invalid credentials");
         }

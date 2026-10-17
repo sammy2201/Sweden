@@ -4,105 +4,107 @@
 }
 
 .page {
-  width: min(1120px, 100%);
-  margin: auto;
-  padding: 3rem 1.5rem 5rem;
+  width: min(var(--content-standard), 100%);
+  margin: 0 auto;
+  padding: var(--space-12) var(--page-gutter) var(--space-16);
 }
 
 /* ---------------- HERO ---------------- */
 
 .hero {
-  padding-bottom: 4rem;
-  border-bottom: 1px solid var(--app-border);
-  margin-bottom: 4rem;
+  padding-bottom: var(--space-12);
+  border-bottom: var(--border-width) solid var(--app-border);
+  margin-bottom: var(--space-12);
 }
 
 .hero h1 {
-  margin: 1rem 0;
-  font-size: clamp(2.8rem, 5vw, 4rem);
-  line-height: 1.05;
-  letter-spacing: -2px;
+  margin: var(--space-4) 0;
+  font-size: var(--font-size-page-title);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-display);
   color: var(--app-heading);
 }
 
 .hero-text {
-  max-width: 720px;
+  max-width: var(--content-reading);
   margin: 0;
-  font-size: 1.15rem;
-  line-height: 1.8;
+  font-size: var(--font-size-lead);
+  line-height: var(--line-height-relaxed);
   color: var(--app-text-soft);
 }
 
 .hero-actions {
   display: flex;
-  gap: 1rem;
-  margin-top: 2rem;
+  gap: var(--space-4);
+  margin-top: var(--space-8);
 }
 
 /* ---------------- SECTIONS ---------------- */
 
 section:not(.hero) {
-  margin-bottom: 5rem;
+  margin-bottom: var(--space-20);
 }
 
 .section-title {
   margin: 0;
-  font-size: 2rem;
+  font-size: var(--font-size-section-title);
   color: var(--app-heading);
 }
 
 .section-subtitle {
-  margin-top: 0.5rem;
+  margin-top: var(--space-2);
   color: var(--app-text-muted);
 }
 
 /* ---------------- CARDS ---------------- */
 
 .fact-grid {
-  margin-top: 2rem;
+  margin-top: var(--space-8);
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
+  gap: var(--space-6);
 }
 
 .fact-card {
-  padding: 2rem;
+  padding: var(--space-8);
   background: var(--app-surface);
   border: 1px solid var(--app-border);
-  border-radius: 18px;
-  transition: 0.2s;
+  border-radius: var(--radius-card);
+  transition:
+    transform var(--app-transition),
+    box-shadow var(--app-transition);
   display: flex;
   flex-direction: column;
 }
 
 .fact-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 30px rgb(22 95 102 / 8%);
+  transform: translateY(-1px);
+  box-shadow: var(--app-shadow-card);
 }
 
 .fact-icon {
-  width: 56px;
-  height: 56px;
+  width: var(--icon-size-large);
+  height: var(--icon-size-large);
   display: grid;
   place-items: center;
-  border-radius: 16px;
+  border-radius: var(--radius-card);
   background: var(--app-accent-soft);
-  margin-bottom: 1.25rem;
+  margin-bottom: var(--space-5);
 }
 
 .fact-icon i {
-  font-size: 1.4rem;
+  font-size: var(--font-size-lg);
   color: var(--app-primary);
 }
 
 .fact-card h3 {
-  margin: 0 0 0.75rem;
+  margin: 0 0 var(--space-3);
   color: var(--app-heading);
 }
 
 .fact-card p {
   margin: 0;
-  line-height: 1.7;
+  line-height: var(--line-height-relaxed);
   color: var(--app-text-soft);
 }
 
@@ -114,31 +116,31 @@ section:not(.hero) {
 /* ---------------- TIMELINE ---------------- */
 
 .section-header {
-  margin-bottom: 2rem;
+  margin-bottom: var(--space-8);
 }
 
 .timeline-marker {
-  width: 42px;
-  height: 42px;
+  width: var(--button-height);
+  height: var(--button-height);
   display: grid;
   place-items: center;
   border-radius: 50%;
   background: var(--app-primary);
-  color: white;
+  color: var(--app-white);
 }
 
 .timeline-content {
-  padding-bottom: 2rem;
+  padding-bottom: var(--space-8);
 }
 
 .timeline-content h3 {
-  margin: 0 0 0.5rem;
+  margin: 0 0 var(--space-2);
   color: var(--app-heading);
 }
 
 .timeline-content p {
   margin: 0;
-  line-height: 1.7;
+  line-height: var(--line-height-relaxed);
   color: var(--app-text-soft);
 }
 
@@ -147,29 +149,25 @@ section:not(.hero) {
 }
 
 :host ::ng-deep .p-timeline-event-content {
-  padding-left: 1.5rem;
+  padding-left: var(--space-6);
 }
 
 /* ---------------- FAQ ---------------- */
 
 :host ::ng-deep .p-accordion {
-  margin-top: 2rem;
+  margin-top: var(--space-8);
 }
 
 :host ::ng-deep .p-accordion-header-link {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 :host ::ng-deep .p-accordion-content {
-  line-height: 1.7;
+  line-height: var(--line-height-relaxed);
   color: var(--app-text-soft);
 }
 
 /* ---------------- BUTTONS ---------------- */
-
-:host ::ng-deep .p-button {
-  border-radius: 10px;
-}
 
 /* ---------------- RESPONSIVE ---------------- */
 
@@ -183,11 +181,11 @@ section:not(.hero) {
   }
 
   .hero h1 {
-    font-size: 2.8rem;
-    letter-spacing: -1px;
+    font-size: var(--font-size-display);
+    letter-spacing: var(--letter-spacing-mobile-display);
   }
 
   .section-title {
-    font-size: 1.7rem;
+    font-size: var(--font-size-section-title-mobile);
   }
 }

@@ -2,6 +2,31 @@ namespace SwedenStart;
 
 public static class CountyData
 {
+    private static readonly Dictionary<string, string[]> CountyAliases = new(StringComparer.Ordinal)
+    {
+        ["blekinge"] = ["Blekinge"],
+        ["dalarna"] = ["Dalarna"],
+        ["gavleborg"] = ["Gävleborg", "Gävleborgs"],
+        ["gotland"] = ["Gotland"],
+        ["halland"] = ["Halland", "Hallands"],
+        ["jamtlandharjedalen"] = ["Jämtland", "Jämtlands", "Jämtland Härjedalen"],
+        ["jonkoping"] = ["Jönköping", "Jönköpings"],
+        ["kalmar"] = ["Kalmar"],
+        ["kronoberg"] = ["Kronoberg", "Kronobergs"],
+        ["norrbotten"] = ["Norrbotten", "Norrbottens"],
+        ["orebro"] = ["Örebro"],
+        ["ostergotland"] = ["Östergötland", "Östergötlands"],
+        ["skane"] = ["Skåne"],
+        ["sormland"] = ["Sörmland", "Södermanland", "Södermanlands"],
+        ["stockholm"] = ["Stockholm", "Stockholms"],
+        ["uppsala"] = ["Uppsala"],
+        ["varmland"] = ["Värmland", "Värmlands"],
+        ["vasterbotten"] = ["Västerbotten", "Västerbottens"],
+        ["vasternorrland"] = ["Västernorrland", "Västernorrlands"],
+        ["vastmanland"] = ["Västmanland", "Västmanlands"],
+        ["vastragotaland"] = ["Västra Götaland", "Västra Götalands"]
+    };
+
     private static readonly List<CountyDto> Counties =
     [
         new()
@@ -156,5 +181,60 @@ public static class CountyData
     public static Task<IEnumerable<CountyDto>> GetCountiesAsync()
     {
         return Task.FromResult<IEnumerable<CountyDto>>(Counties);
+    }
+
+    public static string ResolveCountyId(string? value)
+    {
+        var key = Normalize(value);
+        if (string.IsNullOrWhiteSpace(key))
+        {
+            return string.Empty;
+        }
+
+        foreach (var (id, names) in CountyAliases)
+        {
+            if (Normalize(id) == key || names.Any(name => Normalize(name) == key))
+            {
+                return id;
+            }
+        }
+
+        return string.Empty;
+    }
+
+    public static string[] GetCountyFilterValues(string? value)
+    {
+        var countyId = ResolveCountyId(value);
+        if (string.IsNullOrWhiteSpace(countyId))
+        {
+            return [value?.Trim() ?? string.Empty];
+        }
+
+        var displayName = Counties.First(county => county.Id == countyId).Name;
+        return CountyAliases[countyId]
+            .SelectMany(name => new[] { name, $"{name} län" })
+            .Append(countyId)
+            .Append(displayName)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+    }
+
+    private static string Normalize(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return string.Empty;
+        }
+
+        var decomposed = value.Trim().Normalize(System.Text.NormalizationForm.FormD);
+        var normalized = new string(decomposed
+            .Where(character => System.Globalization.CharUnicodeInfo.GetUnicodeCategory(character) != System.Globalization.UnicodeCategory.NonSpacingMark)
+            .Where(char.IsLetterOrDigit)
+            .Select(char.ToLowerInvariant)
+            .ToArray());
+
+        return normalized.EndsWith("lan", StringComparison.Ordinal)
+            ? normalized[..^3]
+            : normalized;
     }
 }

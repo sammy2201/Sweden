@@ -23,7 +23,6 @@ obj/
 !.env.example
 
 # Local app settings (secrets)
-appsettings.json
 appsettings.Development.json
 
 # OS files

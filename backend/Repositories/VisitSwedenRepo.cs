@@ -11,7 +11,7 @@ public class VisitSwedenRepository : IVisitSwedenRepository
           _dbContext = dbContext;
      }
 
-     public async Task UpsertAttractionsAsync(IEnumerable<Attraction> attractions)
+     public async Task<VisitSwedenUpsertResult> UpsertAttractionsAsync(IEnumerable<Attraction> attractions, CancellationToken cancellationToken = default)
      {
           var incoming = attractions
                .Where(a => !string.IsNullOrWhiteSpace(a.ExternalId))
@@ -20,18 +20,21 @@ public class VisitSwedenRepository : IVisitSwedenRepository
                .ToList();
 
           if (incoming.Count == 0)
-               return;
+               return new VisitSwedenUpsertResult(0, 0);
 
           var externalIds = incoming.Select(a => a.ExternalId).ToList();
 
           var existingByExternalId = await _dbContext.Attractions
                .Where(a => externalIds.Contains(a.ExternalId))
-               .ToDictionaryAsync(a => a.ExternalId);
+               .ToDictionaryAsync(a => a.ExternalId, cancellationToken);
 
+          var inserted = 0;
+          var updated = 0;
           foreach (var item in incoming)
           {
                if (existingByExternalId.TryGetValue(item.ExternalId, out var existing))
                {
+                    updated++;
                     existing.Name = item.Name;
                     existing.DescriptionEn = item.DescriptionEn;
                     existing.DescriptionSv = item.DescriptionSv;
@@ -49,9 +52,11 @@ public class VisitSwedenRepository : IVisitSwedenRepository
                {
                     item.LastSynced = DateTime.UtcNow;
                     _dbContext.Attractions.Add(item);
+                    inserted++;
                }
           }
 
-          await _dbContext.SaveChangesAsync();
+          await _dbContext.SaveChangesAsync(cancellationToken);
+          return new VisitSwedenUpsertResult(inserted, updated);
      }
 }

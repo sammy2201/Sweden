@@ -1,88 +1,166 @@
-<section class="hero">
-  <div class="hero-content">
-    <p-tag severity="secondary" value="🇸🇪 Your relocation companion"></p-tag>
+<main class="landing-page">
+  <section class="hero" aria-labelledby="home-title">
+    <div class="hero-copy">
+      <p class="hero-kicker">
+        <span class="flag-mark" aria-hidden="true"></span>
+        <span>Practical guides for settling in</span>
+      </p>
 
-    <h1>
-      Everything you need
-      <span>to move to Sweden</span>
-    </h1>
+      <h1 id="home-title">Your new life in <span>Sweden</span> starts here.</h1>
 
-    <p class="hero-description">
-      Sweden Start guides you through every step of your relocation journey.
-      From finding housing and applying for a personnummer to opening a bank
-      account and starting your career.
-    </p>
+      <p class="hero-description">
+        Navigate the first big steps with clear guides to registration, housing,
+        everyday services, and life around the country.
+      </p>
 
-    <div class="hero-actions">
-      <p-button
-        label="Create your roadmap"
-        icon="pi pi-arrow-right"
-        routerLink="/roadmap">
-      </p-button>
+      <div class="hero-actions">
+        @if (isAuthenticated() && !roadmapLookupComplete()) {
+          <p-button
+            label="Checking your roadmap"
+            icon="pi pi-spin pi-spinner"
+            [disabled]="true">
+          </p-button>
+        } @else {
+          <p-button
+            [label]="
+              roadmapLookupFailed()
+                ? 'Open your roadmap'
+                : hasRoadmap()
+                  ? 'Update your roadmap'
+                  : 'Create your roadmap'
+            "
+            [icon]="hasRoadmap() ? 'pi pi-pencil' : 'pi pi-arrow-right'"
+            routerLink="/roadmap">
+          </p-button>
+        }
 
-      <p-button
-        label="Browse guides"
-        severity="secondary"
-        variant="outlined"
-        routerLink="/guides">
-      </p-button>
+        <a class="quiet-action" href="#guide-directory">
+          Browse all guides
+          <i class="pi pi-arrow-down" aria-hidden="true"></i>
+        </a>
+      </div>
+
+      <p class="hero-note">
+        Information and tools gathered in one place, so you can focus on your
+        next step.
+      </p>
     </div>
 
-    <div class="hero-stats">
-      <div class="stat">
-        <span class="value">12+</span>
-        <span class="label">Essential guides</span>
-      </div>
+    <figure class="hero-photo">
+      <img
+        src="/images/stockholm-waterfront.jpg"
+        srcset="/images/stockholm-waterfront.jpg 960w"
+        sizes="(max-width: 900px) 100vw, 48vw"
+        width="960"
+        height="540"
+        alt="Stockholm waterfront with Gamla Stan across the water"
+        fetchpriority="high"
+        decoding="async" />
+      <figcaption>
+        <span>Stockholm · Gamla Stan</span>
+        <a
+          href="https://commons.wikimedia.org/wiki/File:Skeppsbrokajen_Gamla_Stan_from_Skeppsholmen_Stockholm_2016_01.jpg"
+          target="_blank"
+          rel="noopener noreferrer">
+          Photo: Julian Herzog, CC BY 4.0
+        </a>
+      </figcaption>
+    </figure>
+  </section>
 
-      <div class="stat">
-        <span class="value">Step-by-step</span>
-        <span class="label">Personal roadmap</span>
+  <section class="essentials-section" aria-labelledby="essentials-title">
+    <div class="section-heading">
+      <div>
+        <p class="section-kicker">A useful place to begin</p>
+        <h2 id="essentials-title">Start with the essentials</h2>
       </div>
-
-      <div class="stat">
-        <span class="value">Free</span>
-        <span class="label">For everyone</span>
-      </div>
+      <p>Take the topics that matter to you, in the order that suits you.</p>
     </div>
-  </div>
 
-  <div class="hero-card">
-    <p-card>
-      <div class="checklist-header">
-        <h3>Start your journey</h3>
+    <div class="essentials-list">
+      @for (guide of essentials; track guide.route; let index = $index) {
+        <a class="essential-link" [routerLink]="guide.route">
+          <span class="essential-number">0{{ index + 1 }}</span>
+          <span class="essential-copy">
+            <span class="essential-category">{{ guide.category }}</span>
+            <strong>{{ guide.title }}</strong>
+            <span>{{ guide.description }}</span>
+          </span>
+          <i class="pi pi-arrow-up-right" aria-hidden="true"></i>
+        </a>
+      }
+    </div>
+  </section>
 
-        <p>Your personalized checklist updates as you complete each step.</p>
+  <section
+    id="guide-directory"
+    class="discovery-section"
+    aria-labelledby="guide-heading">
+    <div class="discovery-heading">
+      <div>
+        <p class="section-kicker">Find your next step</p>
+        <h2 id="guide-heading">
+          {{ isSearching() ? "Search results" : "Explore more of Sweden" }}
+        </h2>
+        <p>Browse by topic or search for something specific.</p>
       </div>
 
-      <div class="check-item completed">
-        <i class="pi pi-check-circle"></i>
-        <span>Create an account</span>
-      </div>
+      <label class="guide-search">
+        <i class="pi pi-search" aria-hidden="true"></i>
+        <input
+          pInputText
+          type="search"
+          aria-label="Search relocation guides"
+          placeholder="Try “BankID” or “rent”"
+          [ngModel]="searchQuery()"
+          [ngModelOptions]="{ standalone: true }"
+          (ngModelChange)="searchQuery.set($event)" />
+        @if (searchQuery()) {
+          <button
+            class="clear-search"
+            type="button"
+            aria-label="Clear guide search"
+            (click)="clearSearch()">
+            <i class="pi pi-times" aria-hidden="true"></i>
+          </button>
+        }
+      </label>
+    </div>
 
-      <div class="check-item">
-        <i class="pi pi-circle"></i>
-        <span>Generate your roadmap</span>
+    @if (filteredGuides().length > 0) {
+      <div class="guide-grid" [class.search-results]="isSearching()">
+        @for (guide of filteredGuides(); track guide.route) {
+          <a
+            class="guide-link"
+            [class.feature-guide]="guide.layout === 'feature'"
+            [routerLink]="guide.route">
+            <span class="guide-card-topline">
+              <span class="guide-category">{{ guide.category }}</span>
+              <i class="pi pi-arrow-up-right" aria-hidden="true"></i>
+            </span>
+            <span class="guide-icon" aria-hidden="true">
+              <i [class]="guide.icon"></i>
+            </span>
+            <span class="guide-card-copy">
+              <strong>{{ guide.title }}</strong>
+              <span>{{ guide.description }}</span>
+            </span>
+          </a>
+        }
       </div>
+    } @else {
+      <div class="empty-search" role="status">
+        <i class="pi pi-search" aria-hidden="true"></i>
+        <p>No guides match “{{ searchQuery() }}”.</p>
+        <p-button
+          label="Clear search"
+          severity="secondary"
+          variant="outlined"
+          (onClick)="clearSearch()">
+        </p-button>
+      </div>
+    }
+  </section>
+</main>
 
-      <div class="check-item">
-        <i class="pi pi-circle"></i>
-        <span>Apply for personnummer</span>
-      </div>
-
-      <div class="check-item">
-        <i class="pi pi-circle"></i>
-        <span>Open a bank account</span>
-      </div>
-
-      <div class="check-item">
-        <i class="pi pi-circle"></i>
-        <span>Find accommodation</span>
-      </div>
-
-      <div class="check-item">
-        <i class="pi pi-circle"></i>
-        <span>Start working in Sweden</span>
-      </div>
-    </p-card>
-  </div>
-</section>
+<app-chat-widget></app-chat-widget>

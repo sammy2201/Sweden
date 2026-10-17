@@ -53,7 +53,7 @@ export class ChatWidgetComponent {
     window.setTimeout(() => {
       this.chatMessages.push({
         role: "assistant",
-        text: "Thanks! UI captured your message. Connect your custom AI endpoint to replace this placeholder response.",
+        text: "Work In Progress....",
         time: this.formatNow(),
       });
       this.isSending = false;
@@ -61,8 +61,9 @@ export class ChatWidgetComponent {
   }
 
   onChatInput(event: Event): void {
-    const target = event.target as HTMLTextAreaElement;
-    this.draftMessage = target.value;
+    if (event.target instanceof HTMLTextAreaElement) {
+      this.draftMessage = event.target.value;
+    }
   }
 
   onChatEnter(event: KeyboardEvent): void {

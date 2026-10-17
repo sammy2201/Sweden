@@ -7,6 +7,7 @@ import { ButtonModule } from "primeng/button";
 import { CardModule } from "primeng/card";
 import { DividerModule } from "primeng/divider";
 import { PasswordModule } from "primeng/password";
+import { getApiErrorMessage } from "../../utils/api-error";
 
 @Component({
   selector: "app-login",
@@ -53,9 +54,12 @@ export class LoginComponent {
         const redirectTo = this.route.snapshot.queryParamMap.get("redirectTo");
         this.router.navigateByUrl(redirectTo || "/");
       },
-      error: () => {
+      error: (error: unknown) => {
         this.isSubmitting = false;
-        this.errorMessage = "Invalid email or password.";
+        this.errorMessage = getApiErrorMessage(
+          error,
+          "Invalid email or password.",
+        );
       },
     });
   }

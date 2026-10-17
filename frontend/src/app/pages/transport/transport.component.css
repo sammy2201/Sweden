@@ -1,7 +1,7 @@
 .transport-page {
-  max-width: 1200px;
+  max-width: var(--content-wide);
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding: var(--space-8) var(--page-gutter) var(--space-16);
 }
 
 h1 {
@@ -12,14 +12,6 @@ h1 {
   color: var(--app-primary);
 }
 
-:host ::ng-deep .p-card {
-  border-radius: 16px;
-}
-
-:host ::ng-deep .p-button {
-  border-radius: 10px;
-}
-
 :host ::ng-deep .p-inputtext,
 :host ::ng-deep .p-datepicker,
 :host ::ng-deep .p-datepicker input {
@@ -27,27 +19,27 @@ h1 {
 }
 
 :host ::ng-deep .p-tag {
-  font-size: 0.8rem;
+  font-size: var(--font-size-sm);
 }
 
 :host ::ng-deep .p-divider {
-  margin: 1.25rem 0;
+  margin: var(--space-5) 0;
 }
 
 :host ::ng-deep .p-accordion-header {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .font-semibold {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 @media (max-width: 768px) {
   .transport-page {
-    padding: 1rem;
+    padding: var(--space-4);
   }
 
   h1 {
-    font-size: 1.8rem;
+    font-size: var(--font-size-xl);
   }
 }

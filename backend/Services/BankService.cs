@@ -13,10 +13,8 @@ public class BankService : IBankService
           _banks = new Lazy<List<BankDto>>(LoadBanks, LazyThreadSafetyMode.ExecutionAndPublication);
      }
 
-     public async Task<IEnumerable<BankDto>> GetBanksAsync()
-     {
-          return await Task.FromResult(_banks.Value);
-     }
+     public Task<IEnumerable<BankDto>> GetBanksAsync()
+          => Task.FromResult<IEnumerable<BankDto>>(_banks.Value);
 
      private List<BankDto> LoadBanks()
      {

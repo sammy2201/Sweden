@@ -1,5 +1,5 @@
-<section class="register-page">
-  <div class="register-layout">
+<section class="login-page">
+  <div class="login-container">
     <div class="hero">
       <span class="hero-badge">Sweden Start</span>
 
@@ -31,19 +31,27 @@
     <p-card class="login-card">
       <form [formGroup]="form" (ngSubmit)="submit()">
         <div class="field">
-          <label>Email</label>
+          <label for="login-email">Email</label>
 
           <input
             pInputText
+            id="login-email"
             type="email"
             formControlName="email"
             placeholder="name@example.com" />
+          @if (
+            form.controls.email.invalid &&
+            (form.controls.email.dirty || form.controls.email.touched)
+          ) {
+            <small class="field-error">Enter a valid email address.</small>
+          }
         </div>
 
         <div class="field">
-          <label>Password</label>
+          <label for="login-password">Password</label>
 
           <p-password
+            inputId="login-password"
             formControlName="password"
             [feedback]="false"
             [toggleMask]="true"
@@ -51,10 +59,16 @@
             styleClass="w-full"
             inputStyleClass="w-full">
           </p-password>
+          @if (
+            form.controls.password.invalid &&
+            (form.controls.password.dirty || form.controls.password.touched)
+          ) {
+            <small class="field-error">Enter your password.</small>
+          }
         </div>
 
         @if (errorMessage) {
-          <small class="error-message">
+          <small class="error-message" role="alert" aria-live="polite">
             {{ errorMessage }}
           </small>
         }

@@ -11,6 +11,9 @@ public class AttractionRepository : IAttractionRepository
           _dbContext = dbContext;
      }
 
+     public Task<bool> HasAnyAttractionsAsync(CancellationToken cancellationToken = default)
+          => _dbContext.Attractions.AnyAsync(cancellationToken);
+
      public async Task<PagedResponse<Attraction>> GetAttractionsAsync(
          string? county,
          int page,
@@ -21,7 +24,11 @@ public class AttractionRepository : IAttractionRepository
 
           if (!string.IsNullOrWhiteSpace(county))
           {
-               query = query.Where(a => a.County == county);
+               var countyId = CountyData.ResolveCountyId(county);
+               var countyValues = CountyData.GetCountyFilterValues(county);
+               query = string.IsNullOrWhiteSpace(countyId)
+                    ? query.Where(a => countyValues.Contains(a.County ?? string.Empty))
+                    : query.Where(a => a.County == countyId || countyValues.Contains(a.County ?? string.Empty));
           }
 
 

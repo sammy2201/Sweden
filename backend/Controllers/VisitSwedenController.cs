@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace SwedenStart;
 
 [ApiController]
 [Route("api/visitsweden")]
+[Authorize]
 public class VisitSwedenController : ControllerBase
 {
      private readonly IVisitSwedenService _visitSwedenService;
@@ -14,9 +16,10 @@ public class VisitSwedenController : ControllerBase
      }
 
      [HttpPost("sync")]
-     public async Task<IActionResult> Sync()
+     [Authorize(Roles = "Admin")]
+     public async Task<ActionResult<VisitSwedenSyncResult>> Sync(CancellationToken cancellationToken)
      {
-          await _visitSwedenService.SyncAttractionsAsync();
-          return Ok(new { message = "Sync completed." });
+          var result = await _visitSwedenService.SyncAttractionsAsync(cancellationToken);
+          return Ok(result);
      }
 }

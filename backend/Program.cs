@@ -1,10 +1,12 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using Npgsql;
 using Scalar.AspNetCore;
+using System.Net;
 using System.Text;
 using SwedenStart;
 
@@ -24,21 +26,37 @@ builder.Configuration["Jwt:Key"] = jwtKey;
 builder.Configuration["Jwt:Secret"] = jwtKey;
 
 builder.Services.AddControllers();
+builder.Services.AddProblemDetails(options =>
+{
+    options.CustomizeProblemDetails = context =>
+    {
+        context.ProblemDetails.Instance ??= context.HttpContext.Request.Path;
+        context.ProblemDetails.Extensions["traceId"] = context.HttpContext.TraceIdentifier;
+    };
+});
+builder.Services.AddExceptionHandler<ApiExceptionHandler>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddAuthorization();
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-    options.KnownNetworks.Clear();
-    options.KnownProxies.Clear();
+    foreach (var proxyAddress in builder.Configuration.GetSection("ForwardedHeaders:KnownProxies").Get<string[]>() ?? [])
+    {
+        if (!IPAddress.TryParse(proxyAddress, out var proxy))
+        {
+            throw new InvalidOperationException($"Invalid forwarded-header proxy address '{proxyAddress}'.");
+        }
+
+        options.KnownProxies.Add(proxy);
+    }
 });
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("frontend", policy =>
     {
         policy.WithOrigins("http://localhost:4200", "http://localhost:3000")
-              .AllowAnyHeader()
-              .AllowAnyMethod();
+              .WithHeaders("Content-Type", "Authorization")
+              .WithMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS");
     });
 });
 builder.Services.AddOpenApi(options =>
@@ -70,11 +88,9 @@ builder.Services.AddOpenApi(options =>
     });
 });
 
-// Auth services and repos
 builder.Services.AddScoped<IAuthRepo, AuthRepo>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
-// Configure authentication
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -97,6 +113,7 @@ builder.Services.AddAuthentication(options =>
 
 });
 builder.Services.AddScoped<IRoadmapRepository, RoadmapRepository>();
+builder.Services.AddSingleton<RoadmapTaskGenerator>();
 builder.Services.AddScoped<IRoadmapService, RoadmapService>();
 builder.Services.AddScoped<IBankService, BankService>();
 builder.Services.AddSingleton<IHealthService, HealthService>();
@@ -119,6 +136,8 @@ builder.Services.AddScoped<IExploreService, ExploreService>();
 builder.Services.AddScoped<IAttractionRepository, AttractionRepository>();
 builder.Services.AddScoped<IVisitSwedenRepository, VisitSwedenRepository>();
 builder.Services.AddSingleton<ICountyLookupService, CountyLookupService>();
+builder.Services.AddSingleton<VisitSwedenSyncGate>();
+builder.Services.AddHostedService<VisitSwedenStartupSyncService>();
 builder.Services.AddHttpClient<IVisitSwedenService, VisitSwedenService>((sp, client) =>
 {
     var config = sp.GetRequiredService<IConfiguration>();
@@ -173,6 +192,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseForwardedHeaders();
+app.UseExceptionHandler();
+app.UseStatusCodePages();
 app.UseHttpsRedirection();
 app.UseDefaultFiles();
 app.UseStaticFiles();
@@ -196,7 +217,14 @@ app.Lifetime.ApplicationStarted.Register(() =>
 });
 
 app.MapControllers();
+app.MapMethods(
+        "/api/{**path}",
+        ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        (HttpContext context) => Results.Problem(
+            statusCode: StatusCodes.Status404NotFound,
+            title: "API endpoint not found",
+            detail: $"No API endpoint matches '{context.Request.Path}'."))
+    .ExcludeFromDescription();
 app.MapFallbackToFile("index.html");
 
 app.Run();
-

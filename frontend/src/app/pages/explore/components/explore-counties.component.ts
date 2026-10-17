@@ -1,7 +1,7 @@
 import { CommonModule } from "@angular/common";
 import { Component, inject } from "@angular/core";
 import { RouterLink } from "@angular/router";
-import { catchError, map, of, startWith } from "rxjs";
+import { Observable, catchError, map, of, startWith } from "rxjs";
 import { ButtonModule } from "primeng/button";
 import { CardModule } from "primeng/card";
 import { SkeletonModule } from "primeng/skeleton";
@@ -33,7 +33,7 @@ interface CountiesVm {
 export class ExploreCountiesComponent {
   private readonly exploreService = inject(ExploreService);
 
-  readonly vm$ = this.exploreService.getCounties().pipe(
+  readonly vm$: Observable<CountiesVm> = this.exploreService.getCounties().pipe(
     map(
       (counties): CountiesVm => ({
         loading: false,
@@ -41,16 +41,16 @@ export class ExploreCountiesComponent {
         counties,
       }),
     ),
-    startWith({
+    startWith<CountiesVm>({
       loading: true,
       error: null,
-      counties: [] as County[],
+      counties: [],
     }),
     catchError((error: unknown) =>
-      of({
+      of<CountiesVm>({
         loading: false,
         error: buildExploreErrorMessage(error),
-        counties: [] as County[],
+        counties: [],
       }),
     ),
   );

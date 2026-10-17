@@ -1,134 +1,303 @@
-<div class="roadmap-page">
-  <section class="hero">
-    <h1>Create Your Sweden Roadmap</h1>
-
-    <p>
-      Answer a few questions and we'll generate a personalized checklist for
-      your move to Sweden.
-    </p>
-  </section>
-
-  @if (!isComplete && currentQuestion; as question) {
-    <section class="wizard">
-      <div class="progress-header">
-        <div>
-          <span class="step-label">
-            Question {{ currentIndex + 1 }} of {{ visibleQuestions.length }}
-          </span>
-
-          <h2>{{ question.title }}</h2>
-        </div>
-
-        <span class="progress-percent"> {{ progress }}% </span>
+<main class="roadmap-page">
+  <header class="page-header">
+    <div class="heading-copy">
+      <span class="eyebrow">Personal planning</span>
+      <h1>Your Sweden roadmap</h1>
+      <p>A clear path through the next steps in your move.</p>
+    </div>
+    @if (hasExistingRoadmap) {
+      <div class="header-actions">
+        <p-button
+          label="Edit roadmap"
+          icon="pi pi-pencil"
+          severity="secondary"
+          [outlined]="true"
+          [disabled]="isLoadingQuestions || isGenerating"
+          (onClick)="startRoadmapUpdate()"></p-button>
+        <p-button
+          label="Delete roadmap"
+          icon="pi pi-trash"
+          severity="danger"
+          [outlined]="true"
+          [loading]="isDeleting"
+          (onClick)="confirmDeleteRoadmap()"></p-button>
       </div>
+    }
+  </header>
 
-      <div class="progress">
-        <div class="progress-fill" [style.width.%]="progress"></div>
-      </div>
+  <p-confirmDialog></p-confirmDialog>
 
-      <div class="options">
-        @for (option of question.options; track option) {
-          <label
-            class="option-card"
-            [class.selected]="answers[question.id] === option">
-            <input
-              type="radio"
-              [name]="question.id"
-              [value]="option"
-              [(ngModel)]="answers[question.id]" />
+  @if (generationError && !isRoadmapDialogVisible) {
+    <div class="message error-message" role="alert">{{ generationError }}</div>
+  }
+  @if (successMessage) {
+    <div class="message success-message" role="status">{{ successMessage }}</div>
+  }
 
-            <div class="option-content">
-              <div class="circle">
-                @if (answers[question.id] === option) {
-                  ✓
-                }
-              </div>
-
-              <span>
-                {{ option }}
-              </span>
-            </div>
-          </label>
-        }
-      </div>
-
-      <div class="actions">
-        <button
-          class="secondary"
-          type="button"
-          (click)="previous()"
-          [disabled]="currentIndex === 0">
-          Previous
-        </button>
-
-        <button
-          class="primary"
-          type="button"
-          (click)="next()"
-          [disabled]="!answers[question.id]">
-          {{ isComplete ? "Generate My Roadmap" : "Next" }}
-        </button>
-      </div>
+  @if (isLoadingExistingRoadmap) {
+    <div class="state-panel" role="status">
+      <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
+      <span>Loading your roadmap…</span>
+    </div>
+  } @else if (!hasExistingRoadmap) {
+    <section class="empty-state">
+      <span class="empty-icon" aria-hidden="true"><i class="pi pi-map"></i></span>
+      <span class="eyebrow">Your next chapter</span>
+      <h2>Build your personal moving plan</h2>
+      <p>Answer a few questions and get a roadmap shaped around your plans for Sweden.</p>
+      @if (isLoadingQuestions) {
+        <span class="loading-note"><i class="pi pi-spin pi-spinner" aria-hidden="true"></i> Loading questions…</span>
+      } @else {
+        <p-button label="Create my roadmap" icon="pi pi-arrow-right" iconPos="right" (onClick)="startRoadmapCreation()"></p-button>
+      }
     </section>
   } @else {
-    <section class="finish">
-      <div class="finish-card">
-        <div class="emoji">🎉</div>
-
-        <h2>You're all set!</h2>
-
-        <p>
-          We've collected everything we need. Generate your personalized
-          roadmap.
-        </p>
-
-        <button class="primary large" (click)="generateRoadmap()">
-          Generate My Roadmap
-        </button>
+    <section class="overview" aria-labelledby="progress-heading">
+      <div class="overview-main">
+        <div class="overview-heading">
+          <div>
+            <span class="eyebrow">Your progress</span>
+            <h2 id="progress-heading">{{ completedTaskCount }} of {{ applicableTasks.length }} steps complete</h2>
+          </div>
+          <span class="progress-percent">{{ taskProgressPercent }}%</span>
+        </div>
+        <p-progressBar
+          [value]="taskProgressPercent"
+          [showValue]="false"
+          ariaLabel="Roadmap completion progress"
+          styleClass="roadmap-progress"></p-progressBar>
+        <div class="progress-meta">
+          <span>{{ remainingTaskCount }} {{ remainingTaskCount === 1 ? 'action' : 'actions' }} remaining</span>
+          @if (waitingTaskCount > 0) {
+            <span class="waiting-count"><i class="pi pi-clock" aria-hidden="true"></i> {{ waitingTaskCount }} waiting or blocked</span>
+          }
+        </div>
       </div>
+      @if (nextTask; as next) {
+        <div class="next-action">
+          <span class="next-action-label"><i class="pi" [class.pi-clock]="next.state === 'Waiting'" [class.pi-arrow-down-right]="next.state !== 'Waiting'" aria-hidden="true"></i> {{ next.state === 'Waiting' ? 'Waiting on an update' : 'Your next step' }}</span>
+          <strong>{{ next.title }}</strong>
+          <span>{{ next.description }}</span>
+        </div>
+      } @else {
+        <div class="next-action all-done">
+          <span class="next-action-label"><i class="pi pi-check-circle" aria-hidden="true"></i> Roadmap complete</span>
+          <strong>You’ve reached your current milestones.</strong>
+          <span>You can update your circumstances any time to refresh your plan.</span>
+        </div>
+      }
+    </section>
+
+    <section class="journey-section" aria-labelledby="journey-heading">
+      <div class="journey-heading">
+        <div>
+          <span class="eyebrow">Your journey</span>
+          <h2 id="journey-heading">Steps along the way</h2>
+        </div>
+        <span class="step-total">{{ applicableTasks.length }} applicable {{ applicableTasks.length === 1 ? 'step' : 'steps' }}</span>
+      </div>
+
+      @if (phases.length === 0) {
+        <div class="state-panel">Your answers don’t currently require any roadmap steps. Edit your roadmap to update your circumstances.</div>
+      } @else {
+        <div class="journey-phases">
+          @for (phase of phases; track phase.id; let phaseIndex = $index) {
+            <section class="journey-phase" [attr.aria-labelledby]="'phase-' + phase.id">
+              <header class="phase-heading">
+                <span class="phase-number" aria-hidden="true">{{ phaseIndex + 1 }}</span>
+                <div class="phase-copy">
+                  <div class="phase-title-row">
+                    <h3 [id]="'phase-' + phase.id">{{ phase.title }}</h3>
+                    @if (phase.taskCount > 0) {
+                      <span class="phase-progress">{{ phase.completedCount }} / {{ phase.taskCount }}</span>
+                    }
+                  </div>
+                  <p>{{ phase.description }}</p>
+                </div>
+              </header>
+
+              <ol class="timeline-list">
+                @for (task of phase.tasks; track task.id; let taskIndex = $index) {
+                  <li
+                    class="timeline-item"
+                    [class.completed]="task.state !== 'NotApplicable' && (task.completed || task.state === 'Completed')"
+                    [class.current]="isCurrentTask(task)"
+                    [class.waiting]="task.state === 'Waiting' || isTaskBlocked(task)"
+                    [class.not-applicable]="task.state === 'NotApplicable'">
+                    <div class="timeline-rail" aria-hidden="true">
+                      <span class="timeline-node">
+                        @if (task.state === 'NotApplicable') {
+                          <i class="pi pi-minus"></i>
+                        } @else if (task.completed || task.state === 'Completed') {
+                          <i class="pi pi-check"></i>
+                        } @else if (task.state === 'Waiting') {
+                          <i class="pi pi-clock"></i>
+                        } @else {
+                          <span>{{ taskIndex + 1 }}</span>
+                        }
+                      </span>
+                    </div>
+
+                    <article class="step-card">
+                      <div class="step-topline">
+                        <div class="step-heading-copy">
+                          @if (isCurrentTask(task)) {
+                            <span class="current-label">Up next</span>
+                          }
+                          <h4>{{ task.title }}</h4>
+                        </div>
+                        <span
+                          class="status-pill"
+                          [class.status-completed]="task.completed || task.state === 'Completed'"
+                          [class.status-waiting]="task.state === 'Waiting'"
+                          [class.status-blocked]="isTaskBlocked(task)"
+                          [class.status-inactive]="task.state === 'NotApplicable'"
+                          [class.status-current]="isCurrentTask(task)">
+                          {{ statusLabel(task) }}
+                        </span>
+                      </div>
+
+                      <p class="step-description">{{ task.description }}</p>
+
+                      <div class="step-meta">
+                        @if (task.state !== 'NotApplicable') {
+                          <span class="priority-label" [class.priority-high]="task.priority <= 1">
+                            <i class="pi pi-flag" aria-hidden="true"></i>{{ priorityLabel(task.priority) }}
+                          </span>
+                        }
+                        @if (task.category) {
+                          <span class="category-label">{{ task.category }}</span>
+                        }
+                      </div>
+
+                      @if (task.ruleExplanation) {
+                        <p class="step-explanation"><i class="pi pi-info-circle" aria-hidden="true"></i>{{ task.ruleExplanation }}</p>
+                      }
+                      @if (task.prerequisites.length > 0) {
+                        <div class="prerequisite-list" aria-label="Prerequisites">
+                          @for (prerequisite of task.prerequisites; track prerequisite.ruleId) {
+                            <span class="prerequisite"><i class="pi pi-link" aria-hidden="true"></i>{{ prerequisite.explanation }}</span>
+                          }
+                        </div>
+                      }
+
+                      <footer class="step-footer">
+                        <div class="step-links">
+                          @if (guideForTask(task); as guide) {
+                            <a class="resource-link guide-link" [routerLink]="guide.route">
+                              <i [class]="guide.icon" aria-hidden="true"></i>Read guide
+                            </a>
+                          }
+                          @if (task.resourceUrl) {
+                            <a class="resource-link" [href]="task.resourceUrl" target="_blank" rel="noopener noreferrer">
+                              Official information <i class="pi pi-arrow-up-right" aria-hidden="true"></i>
+                            </a>
+                          }
+                        </div>
+                        <div class="completion-action-group">
+                          <label class="completion-control" [class.is-complete]="task.state !== 'NotApplicable' && (task.completed || task.state === 'Completed')">
+                          <p-checkbox
+                            #taskCompletionModel="ngModel"
+                            [binary]="true"
+                            [ngModel]="task.completed || task.state === 'Completed'"
+                            [ngModelOptions]="{ standalone: true }"
+                            [disabled]="pendingTaskIds.has(task.id) || !canChangeTask(task, !(task.completed || task.state === 'Completed'))"
+                            [ariaLabel]="((task.completed || task.state === 'Completed') ? 'Mark ' + task.title + ' as not done' : 'Mark ' + task.title + ' as done')"
+                            (ngModelChange)="toggleTaskCompletion(task, $event, taskCompletionModel)"></p-checkbox>
+                            <span>{{ task.state === 'NotApplicable' ? 'Not applicable' : (task.completed || task.state === 'Completed') ? 'Mark as not done' : 'Mark done' }}</span>
+                          </label>
+                          @if (task.state === 'Waiting' || (task.state !== 'NotApplicable' && !task.completed && unmetPrerequisiteTitles(task).length > 0) || ((task.completed || task.state === 'Completed') && completedDependentTitles(task).length > 0)) {
+                            <small class="completion-block-reason">{{ taskActionBlockReason(task) }}</small>
+                          }
+                        </div>
+                      </footer>
+                    </article>
+                  </li>
+                }
+              </ol>
+            </section>
+          }
+        </div>
+      }
     </section>
   }
 
-  @if (tasks.length) {
-    <section class="roadmap">
-      <div class="roadmap-header">
-        <h2>Your Sweden Checklist</h2>
-
-        <p>Follow these steps to settle in Sweden.</p>
-      </div>
-
-      <div class="timeline">
-        @for (task of tasks; track task.title) {
-          <div
-            class="timeline-item"
-            [class.done]="task.status === 'done'"
-            [class.current]="task.status === 'current'">
-            <div class="timeline-icon">
-              @if (task.status === "done") {
-                ✓
-              }
-
-              @if (task.status === "current") {
-                ⏳
-              }
-
-              @if (task.status === "todo") {
-                ○
-              }
-            </div>
-
-            <div>
-              <h3>
-                {{ task.title }}
-              </h3>
-
-              <p>
-                {{ task.description }}
-              </p>
-            </div>
+  <p-dialog
+    [header]="isCreatingRoadmap ? 'Create your roadmap' : 'Edit your roadmap'"
+    [(visible)]="isRoadmapDialogVisible"
+    [modal]="true"
+    [style]="{ width: 'min(720px, 94vw)' }"
+    [closable]="!isGenerating"
+    [dismissableMask]="!isGenerating">
+    <div class="dialog-intro">
+      <p>Update your answers below. Your saved roadmap won’t change until you save.</p>
+    </div>
+    @if (generationError && isRoadmapDialogVisible) {
+      <div class="message error-message" role="alert">{{ generationError }}</div>
+    }
+    @if (isLoadingQuestions) {
+      <div class="state-panel" role="status"><i class="pi pi-spin pi-spinner" aria-hidden="true"></i> Loading questions…</div>
+    } @else {
+      <div class="edit-grid">
+        @for (field of visibleFields; track field.id) {
+          <div class="edit-field">
+            <label [for]="field.id">{{ field.text }} <span aria-hidden="true">*</span></label>
+            <p-select
+              [inputId]="field.id"
+              [options]="field.options"
+              optionLabel="label"
+              optionValue="value"
+              [ngModel]="editAnswers[field.id]"
+              (ngModelChange)="editAnswers[field.id] = $event"
+              [disabled]="isGenerating"
+              [placeholder]="'Choose an answer'"
+              appendTo="body"></p-select>
+            @if (field.guidance) { <small class="field-guidance">{{ field.guidance }}</small> }
+            @for (message of clarificationMessages(field); track message) {
+              <small class="field-guidance clarification"><i class="pi pi-info-circle" aria-hidden="true"></i>{{ message }}</small>
+            }
           </div>
         }
       </div>
-    </section>
-  }
-</div>
+    }
+    <ng-template pTemplate="footer">
+      <p-button label="Cancel" severity="secondary" [outlined]="true" [disabled]="isGenerating" (onClick)="cancelRoadmapUpdate()"></p-button>
+      <p-button
+        [label]="isCreatingRoadmap ? 'Create roadmap' : 'Save changes'"
+        icon="pi pi-check"
+        [loading]="isGenerating"
+        [disabled]="isLoadingQuestions || fields.length === 0 || isGenerating"
+        (onClick)="saveRoadmap()"></p-button>
+    </ng-template>
+  </p-dialog>
+
+  <p-dialog
+    [visible]="selectedTask !== null"
+    (visibleChange)="!$event && closeTaskCompletionDialog()"
+    [modal]="true"
+    [closable]="!selectedTask || !pendingTaskIds.has(selectedTask.id)"
+    [dismissableMask]="!selectedTask || !pendingTaskIds.has(selectedTask.id)"
+    [style]="{ width: 'min(520px, 94vw)' }"
+    styleClass="task-completion-dialog"
+    [header]="selectedCompletion ? 'Confirm this step' : 'Update this step'">
+    @if (selectedTask; as task) {
+      <div class="completion-dialog-content">
+        <span class="completion-dialog-icon" aria-hidden="true"><i class="pi" [class.pi-check-circle]="selectedCompletion" [class.pi-undo]="!selectedCompletion"></i></span>
+        <h2>{{ task.title }}</h2>
+        <p>{{ selectedCompletion ? 'Marking this step complete updates your roadmap progress and may unlock a dependent step.' : 'This will return the step to your active roadmap and update your progress.' }}</p>
+        @if (selectedCompletion && guideForTask(task); as guide) {
+          <a class="dialog-resource-link guide-link" [routerLink]="guide.route"><i [class]="guide.icon" aria-hidden="true"></i>Read {{ guide.title }}<i class="pi pi-arrow-right" aria-hidden="true"></i></a>
+        }
+        @if (task.resourceUrl) {
+          <a class="dialog-resource-link" [href]="task.resourceUrl" target="_blank" rel="noopener noreferrer">Official information <i class="pi pi-arrow-up-right" aria-hidden="true"></i></a>
+        }
+        <h3>{{ selectedCompletion ? 'Have you completed this step?' : 'Would you like to mark this step as not done?' }}</h3>
+        @if (taskDialogError) { <div class="message error-message" role="alert">{{ taskDialogError }}</div> }
+        <div class="completion-dialog-actions">
+          <p-button label="Not yet" severity="secondary" [outlined]="true" [disabled]="pendingTaskIds.has(task.id)" (onClick)="closeTaskCompletionDialog()"></p-button>
+          <p-button [label]="selectedCompletion ? 'Yes, mark as done' : 'Yes, mark as not done'" [icon]="selectedCompletion ? 'pi pi-check' : 'pi pi-undo'" [loading]="pendingTaskIds.has(task.id)" [disabled]="pendingTaskIds.has(task.id)" (onClick)="confirmTaskCompletion()"></p-button>
+        </div>
+      </div>
+    }
+  </p-dialog>
+</main>

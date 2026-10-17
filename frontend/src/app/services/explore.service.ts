@@ -6,26 +6,11 @@ import {
   Attraction,
   AttractionDetail,
   County,
+  ExploreAttractionDetailResponse,
+  ExploreAttractionsResponse,
+  ExploreCountiesResponse,
   PagedResponse,
 } from "../models/explore.models";
-
-interface ExploreCountiesResponseDto {
-  counties: County[];
-}
-
-interface ExploreAttractionsResponseDto {
-  attractions: Attraction[];
-  page: number;
-  pageSize: number;
-  totalCount: number;
-  totalPages: number;
-  hasNextPage: boolean;
-  hasPreviousPage: boolean;
-}
-
-interface ExploreAttractionDetailResponseDto {
-  attraction: AttractionDetail;
-}
 
 @Injectable({
   providedIn: "root",
@@ -35,7 +20,7 @@ export class ExploreService {
 
   getCounties(): Observable<County[]> {
     return this.http
-      .get<ExploreCountiesResponseDto>(`${environment.apiUrl}/explore/counties`)
+      .get<ExploreCountiesResponse>(`${environment.apiUrl}/explore/counties`)
       .pipe(map((response) => response.counties ?? []));
   }
 
@@ -62,7 +47,7 @@ export class ExploreService {
     }
 
     return this.http
-      .get<ExploreAttractionsResponseDto>(
+      .get<ExploreAttractionsResponse>(
         `${environment.apiUrl}/explore/attractions`,
         {
           params,
@@ -82,11 +67,10 @@ export class ExploreService {
   }
 
   getAttraction(
-    _countyId: string,
     attractionId: string,
   ): Observable<AttractionDetail | undefined> {
     return this.http
-      .get<ExploreAttractionDetailResponseDto>(
+      .get<ExploreAttractionDetailResponse>(
         `${environment.apiUrl}/explore/attractions/${encodeURIComponent(attractionId)}`,
       )
       .pipe(map((response) => response.attraction));

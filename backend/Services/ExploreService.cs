@@ -9,10 +9,11 @@ public class ExploreService : IExploreService
           _attractionRepository = attractionRepository;
      }
 
-     public async Task<IEnumerable<CountyDto>> GetCountiesAsync()
-     {
-          return await CountyData.GetCountiesAsync();
-     }
+     public Task<IEnumerable<CountyDto>> GetCountiesAsync()
+          => CountyData.GetCountiesAsync();
+
+     public Task<bool> HasAnyAttractionsAsync(CancellationToken cancellationToken = default)
+          => _attractionRepository.HasAnyAttractionsAsync(cancellationToken);
 
      public async Task<PagedResponse<AttractionDto>> GetAttractionsAsync(
          string county,

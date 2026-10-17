@@ -22,7 +22,7 @@ public class TaxDataProvider
                NumberHandling = JsonNumberHandling.AllowReadingFromString
           };
 
-          TaxRates = JsonSerializer.Deserialize<List<MunicipalityTaxRate>>(json, options)!
+          TaxRates = JsonSerializer.Deserialize<List<MunicipalityTaxRate>>(json, options)
                 ?? throw new InvalidOperationException("Unable to load tax data.");
      }
 }

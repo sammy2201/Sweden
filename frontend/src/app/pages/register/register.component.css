@@ -1,68 +1,68 @@
 .register-page {
-  min-height: calc(100vh - 84px);
+  min-height: calc(100vh - var(--auth-header-offset));
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 3rem 2rem;
+  padding: var(--space-12) var(--space-8);
   background: var(--app-bg);
 }
 
 .register-layout {
-  width: min(1140px, 100%);
+  width: min(var(--content-standard), 100%);
   display: grid;
-  grid-template-columns: 1fr 560px;
-  gap: 4rem;
+  grid-template-columns: 1fr var(--auth-register-width);
+  gap: var(--space-16);
   align-items: center;
 }
 
 /* LEFT */
 
 .hero {
-  max-width: 500px;
+  max-width: var(--auth-copy-width);
 }
 
 .hero-badge {
   display: inline-flex;
-  padding: 0.45rem 0.9rem;
-  border-radius: 999px;
+  padding: var(--space-1-5) var(--space-3-5);
+  border-radius: var(--radius-pill);
   background: var(--app-accent-soft);
   color: var(--app-primary);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .hero h1 {
-  margin: 1.25rem 0 1rem;
-  font-size: clamp(2.8rem, 5vw, 3.8rem);
-  line-height: 1.05;
+  margin: var(--space-5) 0 var(--space-4);
+  font-size: var(--font-size-display);
+  line-height: var(--line-height-tight);
   letter-spacing: -2px;
   color: var(--app-heading);
 }
 
 .hero p {
   margin: 0;
-  font-size: 1.05rem;
+  font-size: var(--font-size-base);
   line-height: 1.8;
   color: var(--app-text-soft);
 }
 
 .hero-features {
-  margin-top: 2.5rem;
+  margin-top: var(--space-10);
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--space-4);
 }
 
 .hero-features div {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: var(--space-4);
   color: var(--app-text-soft);
 }
 
 .hero-features i {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
+  width: var(--icon-size-medium);
+  height: var(--icon-size-medium);
+  border-radius: var(--radius-md);
   display: grid;
   place-items: center;
   background: var(--app-accent-soft);
@@ -72,14 +72,14 @@
 /* CARD */
 
 .register-card {
-  border-radius: 20px;
+  border-radius: var(--radius-xl);
   border: 1px solid var(--app-border);
   overflow: hidden;
-  box-shadow: 0 12px 40px rgb(22 95 102 / 8%);
+  box-shadow: var(--app-shadow-raised);
 }
 
 :host ::ng-deep .register-card .p-card-body {
-  padding: 2rem;
+  padding: var(--space-8);
 }
 
 /* FORM */
@@ -92,22 +92,22 @@ form {
 .name-row {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
+  gap: var(--space-4);
 }
 
 .field {
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-4);
 }
 
 .field:last-of-type {
-  margin-bottom: 1.25rem;
+  margin-bottom: var(--space-5);
 }
 
 label {
   display: block;
-  margin-bottom: 0.45rem;
-  font-size: 0.88rem;
-  font-weight: 600;
+  margin-bottom: var(--space-2);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
   color: var(--app-text-soft);
 }
 
@@ -116,13 +116,13 @@ label {
 input,
 .p-inputtext {
   width: 100%;
-  height: 48px;
-  padding: 0 1rem;
-  border-radius: 10px;
+  height: var(--input-height);
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-control);
   border: 1px solid var(--app-border);
-  background: #fff;
-  font-size: 0.95rem;
-  transition: 0.2s;
+  background: var(--app-surface);
+  font-size: var(--font-size-caption);
+  transition: var(--app-transition);
   box-sizing: border-box;
 }
 
@@ -130,7 +130,7 @@ input:focus,
 .p-inputtext:focus {
   outline: none;
   border-color: var(--app-primary);
-  box-shadow: 0 0 0 3px rgb(22 95 102 / 10%);
+  box-shadow: var(--app-shadow-focus);
 }
 
 /* PASSWORD */
@@ -141,24 +141,24 @@ input:focus,
 
 :host ::ng-deep .p-password input {
   width: 100%;
-  height: 48px;
-  border-radius: 10px;
+  height: var(--input-height);
+  border-radius: var(--radius-control);
 }
 
 /* BUTTON */
 
 :host ::ng-deep .register-btn {
   width: 100%;
-  margin-top: 0.5rem;
-  height: 54px;
+  margin-top: var(--space-2);
+  height: var(--auth-button-height);
   border: none;
-  border-radius: 14px;
+  border-radius: var(--app-radius);
   background: var(--app-primary);
   color: white;
-  font-weight: 600;
-  font-size: 0.96rem;
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-caption);
   cursor: pointer;
-  transition: 0.2s;
+  transition: var(--app-transition);
 }
 
 /* FEEDBACK */
@@ -166,12 +166,12 @@ input:focus,
 .error-message,
 .success-message {
   display: block;
-  margin-bottom: 1rem;
-  font-size: 0.9rem;
+  margin-bottom: var(--space-4);
+  font-size: var(--font-size-caption);
 }
 
 .error-message {
-  color: #dc2626;
+  color: var(--app-danger);
 }
 
 .success-message {
@@ -181,14 +181,14 @@ input:focus,
 /* LOGIN */
 
 .login-link {
-  margin-top: 1.5rem;
+  margin-top: var(--space-6);
   text-align: center;
   color: var(--app-text-muted);
 }
 
 .login-link a {
   color: var(--app-primary);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   text-decoration: none;
 }
 
@@ -201,8 +201,8 @@ input:focus,
 @media (max-width: 960px) {
   .register-layout {
     grid-template-columns: 1fr;
-    max-width: 560px;
-    gap: 2.5rem;
+    max-width: var(--auth-register-layout-width);
+    gap: var(--space-10);
   }
 
   .hero {
@@ -211,7 +211,7 @@ input:focus,
   }
 
   .hero p {
-    max-width: 480px;
+    max-width: var(--auth-copy-mobile-width);
     margin: auto;
   }
 
@@ -222,7 +222,7 @@ input:focus,
 
 @media (max-width: 640px) {
   .register-page {
-    padding: 1.5rem;
+    padding: var(--space-6);
   }
 
   .name-row {
@@ -230,10 +230,11 @@ input:focus,
   }
 
   :host ::ng-deep .register-card .p-card-body {
-    padding: 1.5rem;
+    padding: var(--space-6);
   }
 
   .hero h1 {
-    font-size: 2.4rem;
+    font-size: var(--font-size-display);
+    letter-spacing: var(--letter-spacing-mobile-display);
   }
 }

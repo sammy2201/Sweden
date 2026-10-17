@@ -6,6 +6,10 @@
     </p>
   </div>
 
+  @if (errorMessage) {
+    <div class="api-error" role="alert">{{ errorMessage }}</div>
+  }
+
   <div class="tax-layout">
     <!-- Left Card -->
     <div class="tax-card">
