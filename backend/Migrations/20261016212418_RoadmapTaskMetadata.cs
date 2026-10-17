@@ -67,7 +67,7 @@ namespace SwedenStart.Migrations
                         WHEN 'Apply for Personnummer' THEN 'personnummer-prepare'
                         WHEN 'Apply for Swedish ID Card' THEN 'id-card'
                         WHEN 'Activate BankID' THEN 'bankid'
-                        WHEN 'Register with Försäkringskassan' THEN 'insurance-check'
+                        WHEN 'Register with Försäkringskassan' THEN 'insurance-review'
                         WHEN 'Register with Arbetsförmedlingen' THEN 'work-search'
                         WHEN 'Join Housing Queues' THEN 'housing-search'
                         WHEN 'Check Driving Licence Rules' THEN 'licence-other'

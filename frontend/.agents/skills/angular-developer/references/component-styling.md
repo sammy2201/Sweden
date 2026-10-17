@@ -30,7 +30,6 @@ Every component has a view encapsulation setting that determines how styles are 
 | `Emulated` (Default)            | Scopes styles to the component using unique HTML attributes. Global styles can still leak in. |
 | `ShadowDom`                     | Uses the browser's native Shadow DOM API to isolate styles completely.                        |
 | `None`                          | Disables encapsulation. Component styles become global.                                       |
-| `ExperimentalIsolatedShadowDom` | Strictly guarantees that only the component's styles apply.                                   |
 
 ### Usage
 

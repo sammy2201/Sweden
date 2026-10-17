@@ -10,12 +10,12 @@ You can generate a service using the Angular CLI:
 ng generate service my-data
 ```
 
-Or you can manually create a TypeScript class and decorate it with `@Service()`. For reactive state management, store data in a private `signal()` and expose it publicly via `.asReadonly()`:
+Or you can manually create a TypeScript class and decorate it with `@Injectable({ providedIn: 'root' })`. For reactive state management, store data in a private `signal()` and expose it publicly via `.asReadonly()`:
 
 ```ts
-import {Service, signal} from '@angular/core';
+import {Injectable, signal} from '@angular/core';
 
-@Service()
+@Injectable({ providedIn: 'root' })
 export class BasicDataStore {
   private readonly dataSignal = signal<string[]>([]);
 
@@ -28,17 +28,17 @@ export class BasicDataStore {
 }
 ```
 
-### The `@Service` decorator
+### The `@Injectable` decorator
 
-Using `@Service` is the recommended approach for most services. It tells Angular to:
+Using `@Injectable({ providedIn: 'root' })` is the recommended approach for most services. It tells Angular to:
 
 - **Create a single instance (singleton)** for the entire application.
 - **Make it available everywhere** automatically, without needing to list it in any `providers` array.
 - **Enable tree-shaking**, meaning the service is only included in the final JavaScript bundle if it is actually injected somewhere.
 
-#### The `autoProvided` option
+#### Scoped service instances
 
-If you don't want to create a singleton of your service, you can set `@Service({autoProvided: false})` and declare the service in a `providers` array.
+For an instance scoped to a component, use `@Injectable()` and provide the service in the component's `providers` array.
 
 ## Injecting a Service
 
@@ -70,10 +70,10 @@ export class Example {
 Services can inject other services in the exact same way. Use `computed()` to derive values from injected services reactively:
 
 ```ts
-import {Service, computed, inject, signal} from '@angular/core';
+import {Injectable, computed, inject, signal} from '@angular/core';
 import {AdvancedDataStore} from './advanced-data-store.service';
 
-@Service()
+@Injectable({ providedIn: 'root' })
 export class CombinedDataStore {
   // Injecting another service
   private readonly advancedDataStore = inject(AdvancedDataStore);
@@ -86,8 +86,8 @@ export class CombinedDataStore {
 
 ## Advanced Service Patterns
 
-While `@Service` covers most scenarios, you may sometimes need:
+While `@Injectable({ providedIn: 'root' })` covers most scenarios, you may sometimes need:
 
-- **Component-specific instances**: If a component needs its own isolated instance of a service, provide it directly in the component's `@Component({ providers: [MyService] })` array and set the `autoProvided: false` option: `@Service({autoProvided: false})`
+- **Component-specific instances**: Use `@Injectable()` and provide the service directly in the component's `@Component({ providers: [MyService] })` array.
 - **Factory providers**: For dynamic creation.
 - **Value providers**: For injecting configuration objects.

@@ -79,7 +79,7 @@ initialization.
 Load the configuration before the application starts:
 
 ```ts
-import {Service, inject} from '@angular/core';
+import {Injectable, inject} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {tap} from 'rxjs';
 
@@ -87,7 +87,7 @@ interface AppConfig {
   apiUrl: string;
 }
 
-@Service()
+@Injectable({ providedIn: 'root' })
 export class AppConfigService {
   private config!: AppConfig;
 
