@@ -85,32 +85,50 @@ export class RoadmapComponent implements OnInit {
   }
 
   get completedTaskCount(): number {
-    return this.applicableTasks.filter((task) => task.completed || task.state === "Completed").length;
+    return this.applicableTasks.filter(
+      (task) => task.completed || task.state === "Completed",
+    ).length;
   }
 
   get remainingTaskCount(): number {
-    return this.applicableTasks.filter((task) =>
-      !task.completed && task.state !== "Completed" && task.state !== "Waiting"
-      && this.unmetPrerequisiteTitles(task).length === 0,
+    return this.applicableTasks.filter(
+      (task) =>
+        !task.completed &&
+        task.state !== "Completed" &&
+        task.state !== "Waiting" &&
+        this.unmetPrerequisiteTitles(task).length === 0,
     ).length;
   }
 
   get waitingTaskCount(): number {
-    return this.applicableTasks.filter((task) => !task.completed && (
-      task.state === "Waiting" || this.unmetPrerequisiteTitles(task).length > 0
-    )).length;
+    return this.applicableTasks.filter(
+      (task) =>
+        !task.completed &&
+        (task.state === "Waiting" ||
+          this.unmetPrerequisiteTitles(task).length > 0),
+    ).length;
   }
 
   get taskProgressPercent(): number {
     if (this.applicableTasks.length === 0) return 0;
-    return Math.round((this.completedTaskCount / this.applicableTasks.length) * 100);
+    return Math.round(
+      (this.completedTaskCount / this.applicableTasks.length) * 100,
+    );
   }
 
   get nextTask(): RoadmapTaskResponse | null {
-    return this.tasks.find((task) =>
-      task.state !== "NotApplicable" && !task.completed && task.state !== "Completed"
-      && task.state !== "Waiting" && this.unmetPrerequisiteTitles(task).length === 0,
-    ) ?? this.tasks.find((task) => task.state === "Waiting" && !task.completed) ?? null;
+    return (
+      this.tasks.find(
+        (task) =>
+          task.state !== "NotApplicable" &&
+          !task.completed &&
+          task.state !== "Completed" &&
+          task.state !== "Waiting" &&
+          this.unmetPrerequisiteTitles(task).length === 0,
+      ) ??
+      this.tasks.find((task) => task.state === "Waiting" && !task.completed) ??
+      null
+    );
   }
 
   get phases(): RoadmapPhase[] {
@@ -125,7 +143,8 @@ export class RoadmapComponent implements OnInit {
       phase.tasks.push(task);
       if (task.state !== "NotApplicable") {
         phase.taskCount += 1;
-        if (task.completed || task.state === "Completed") phase.completedCount += 1;
+        if (task.completed || task.state === "Completed")
+          phase.completedCount += 1;
       }
     }
     return [...phases.values()];
@@ -140,16 +159,22 @@ export class RoadmapComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.roadmapService.getQuestions().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (questions) => {
-        this.fields = [...questions].sort((a, b) => a.order - b.order);
-        this.isLoadingQuestions = false;
-      },
-      error: (error: unknown) => {
-        this.generationError = getApiErrorMessage(error, "We could not load the roadmap questions.");
-        this.isLoadingQuestions = false;
-      },
-    });
+    this.roadmapService
+      .getQuestions()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (questions) => {
+          this.fields = [...questions].sort((a, b) => a.order - b.order);
+          this.isLoadingQuestions = false;
+        },
+        error: (error: unknown) => {
+          this.generationError = getApiErrorMessage(
+            error,
+            "We could not load the roadmap questions.",
+          );
+          this.isLoadingQuestions = false;
+        },
+      });
     this.loadExistingRoadmap();
   }
 
@@ -212,21 +237,28 @@ export class RoadmapComponent implements OnInit {
   }
 
   private loadExistingRoadmap(): void {
-    this.roadmapService.getRoadmap().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (response) => {
-        if (response?.id) {
-          this.applyRoadmapResponse(response);
-          this.hasExistingRoadmap = true;
-        }
-        this.isLoadingExistingRoadmap = false;
-      },
-      error: (error: unknown) => {
-        this.generationError = error instanceof HttpErrorResponse && error.status === 404
-          ? ""
-          : getApiErrorMessage(error, "We could not load your roadmap right now.");
-        this.isLoadingExistingRoadmap = false;
-      },
-    });
+    this.roadmapService
+      .getRoadmap()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          if (response?.id) {
+            this.applyRoadmapResponse(response);
+            this.hasExistingRoadmap = true;
+          }
+          this.isLoadingExistingRoadmap = false;
+        },
+        error: (error: unknown) => {
+          this.generationError =
+            error instanceof HttpErrorResponse && error.status === 404
+              ? ""
+              : getApiErrorMessage(
+                  error,
+                  "We could not load your roadmap right now.",
+                );
+          this.isLoadingExistingRoadmap = false;
+        },
+      });
   }
 
   private applyRoadmapResponse(response: RoadmapResponse): void {
@@ -237,48 +269,93 @@ export class RoadmapComponent implements OnInit {
 
   private toRequest(): RoadmapRequest {
     const liveInSweden = this.editAnswers.liveInSweden ?? "";
-    const personnummer = liveInSweden === "Yes" ? this.editAnswers.personnummer ?? "" : "Not applicable";
+    const personnummer =
+      liveInSweden === "Yes"
+        ? (this.editAnswers.personnummer ?? "")
+        : "Not applicable";
     const planToDrive = this.editAnswers.planToDrive ?? "";
     return {
       origin: this.editAnswers.origin ?? "",
       residencePermit: this.editAnswers.residencePermit ?? "",
       liveInSweden,
       personnummer,
-      appliedPersonnummer: personnummer === "No" ? this.editAnswers.appliedPersonnummer ?? "" : "Not applicable",
-      idCard: liveInSweden === "Yes" ? this.editAnswers.idCard ?? "" : "Not applicable",
-      bankAccount: liveInSweden === "Yes" ? this.editAnswers.bankAccount ?? "" : "Not applicable",
-      bankId: liveInSweden === "Yes" ? this.editAnswers.bankId ?? "" : "Not applicable",
+      appliedPersonnummer:
+        personnummer === "No"
+          ? (this.editAnswers.appliedPersonnummer ?? "")
+          : "Not applicable",
+      idCard:
+        liveInSweden === "Yes"
+          ? (this.editAnswers.idCard ?? "")
+          : "Not applicable",
+      bankAccount:
+        liveInSweden === "Yes"
+          ? (this.editAnswers.bankAccount ?? "")
+          : "Not applicable",
+      bankId:
+        liveInSweden === "Yes"
+          ? (this.editAnswers.bankId ?? "")
+          : "Not applicable",
       housing: this.editAnswers.housing ?? "",
       planToDrive,
-      drivingLicenceType: planToDrive === "Yes" ? this.editAnswers.drivingLicenceType ?? "" : "Not applicable",
+      drivingLicenceType:
+        planToDrive === "Yes"
+          ? (this.editAnswers.drivingLicenceType ?? "")
+          : "Not applicable",
       purpose: this.editAnswers.purpose ?? "",
-      insurance: liveInSweden === "Yes" ? this.editAnswers.insurance ?? "" : "Not applicable",
+      insurance:
+        liveInSweden === "Yes"
+          ? (this.editAnswers.insurance ?? "")
+          : "Not applicable",
     };
   }
 
   private isVisible(field: RoadmapField): boolean {
-    const showRules = field.dependencies.filter((dependency) => dependency.effect === "Show");
-    const hideRules = field.dependencies.filter((dependency) => dependency.effect === "Hide");
+    const showRules = field.dependencies.filter(
+      (dependency) => dependency.effect === "Show",
+    );
+    const hideRules = field.dependencies.filter(
+      (dependency) => dependency.effect === "Hide",
+    );
     const matches = (dependency: RoadmapQuestionDependency) =>
-      dependency.operator === "Equals" && this.editAnswers[dependency.sourceQuestionId] === dependency.answer;
-    return (showRules.length === 0 || showRules.some(matches)) && !hideRules.some(matches);
+      dependency.operator === "Equals" &&
+      this.editAnswers[dependency.sourceQuestionId] === dependency.answer;
+    return (
+      (showRules.length === 0 || showRules.some(matches)) &&
+      !hideRules.some(matches)
+    );
   }
 
   clarificationMessages(field: RoadmapField): string[] {
     return field.dependencies
       .filter((dependency) => dependency.effect === "RequireClarification")
-      .filter((dependency) => dependency.operator === "Equals" && this.editAnswers[dependency.sourceQuestionId] === dependency.answer)
+      .filter(
+        (dependency) =>
+          dependency.operator === "Equals" &&
+          this.editAnswers[dependency.sourceQuestionId] === dependency.answer,
+      )
       .map((dependency) => dependency.explanation);
   }
 
-  toggleTaskCompletion(task: RoadmapTaskResponse, completed: boolean, checkbox: NgModel): void {
+  toggleTaskCompletion(
+    task: RoadmapTaskResponse,
+    completed: boolean,
+    checkbox: NgModel,
+  ): void {
     const savedCompletion = task.completed || task.state === "Completed";
     checkbox.control.setValue(savedCompletion, { emitEvent: false });
-    if (this.pendingTaskIds.has(task.id) || task.state === "NotApplicable" || savedCompletion === completed) return;
+    if (
+      this.pendingTaskIds.has(task.id) ||
+      task.state === "NotApplicable" ||
+      savedCompletion === completed
+    )
+      return;
     this.openTaskCompletionDialog(task, completed);
   }
 
-  openTaskCompletionDialog(task: RoadmapTaskResponse, completed: boolean): void {
+  openTaskCompletionDialog(
+    task: RoadmapTaskResponse,
+    completed: boolean,
+  ): void {
     if (!this.canChangeTask(task, completed)) return;
     this.selectedTask = task;
     this.selectedCompletion = completed;
@@ -286,7 +363,8 @@ export class RoadmapComponent implements OnInit {
   }
 
   closeTaskCompletionDialog(): void {
-    if (this.selectedTask && this.pendingTaskIds.has(this.selectedTask.id)) return;
+    if (this.selectedTask && this.pendingTaskIds.has(this.selectedTask.id))
+      return;
     this.selectedTask = null;
     this.taskDialogError = "";
   }
@@ -297,7 +375,8 @@ export class RoadmapComponent implements OnInit {
 
     this.pendingTaskIds.add(task.id);
     this.taskDialogError = "";
-    this.roadmapService.updateTaskCompletion(task.id, this.selectedCompletion)
+    this.roadmapService
+      .updateTaskCompletion(task.id, this.selectedCompletion)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
@@ -308,9 +387,13 @@ export class RoadmapComponent implements OnInit {
             : "Step marked as not done. Your roadmap progress is up to date.";
         },
         error: (error: unknown) => {
-          this.taskDialogError = getApiErrorMessage(error, "We could not update this step. Your saved progress has not changed.");
+          this.taskDialogError = getApiErrorMessage(
+            error,
+            "We could not update this step. Your saved progress has not changed.",
+          );
         },
-      }).add(() => this.pendingTaskIds.delete(task.id));
+      })
+      .add(() => this.pendingTaskIds.delete(task.id));
   }
 
   guideForTask(task: RoadmapTaskResponse): GuideLink | null {
@@ -318,10 +401,15 @@ export class RoadmapComponent implements OnInit {
   }
 
   unmetPrerequisiteTitles(task: RoadmapTaskResponse): string[] {
-    const taskByRule = new Map(this.tasks.map((candidate) => [candidate.ruleId, candidate]));
+    const taskByRule = new Map(
+      this.tasks.map((candidate) => [candidate.ruleId, candidate]),
+    );
     return task.prerequisites.flatMap((prerequisite) => {
       const required = taskByRule.get(prerequisite.ruleId);
-      return required && required.state !== "NotApplicable" && !required.completed && required.state !== "Completed"
+      return required &&
+        required.state !== "NotApplicable" &&
+        !required.completed &&
+        required.state !== "Completed"
         ? [required.title]
         : [];
     });
@@ -329,23 +417,36 @@ export class RoadmapComponent implements OnInit {
 
   completedDependentTitles(task: RoadmapTaskResponse): string[] {
     return this.tasks
-      .filter((candidate) => candidate.completed
-        && candidate.state !== "NotApplicable"
-        && candidate.prerequisites.some((prerequisite) => prerequisite.ruleId === task.ruleId))
+      .filter(
+        (candidate) =>
+          (candidate.completed || candidate.state === "Completed") &&
+          candidate.state !== "NotApplicable" &&
+          candidate.prerequisites.some(
+            (prerequisite) => prerequisite.ruleId === task.ruleId,
+          ),
+      )
       .map((candidate) => candidate.title);
   }
 
   canChangeTask(task: RoadmapTaskResponse, completed: boolean): boolean {
-    if (task.state === "NotApplicable" || task.state === "Waiting" || this.pendingTaskIds.has(task.id)) return false;
+    if (
+      task.state === "NotApplicable" ||
+      task.state === "Waiting" ||
+      this.pendingTaskIds.has(task.id)
+    )
+      return false;
     if (completed) return this.unmetPrerequisiteTitles(task).length === 0;
     return this.completedDependentTitles(task).length === 0;
   }
 
   taskActionBlockReason(task: RoadmapTaskResponse): string {
-    if (task.state === "NotApplicable") return "This step does not apply to your answers.";
-    if (task.state === "Waiting") return "This step is waiting for an update before it can be completed.";
+    if (task.state === "NotApplicable")
+      return "This step does not apply to your answers.";
+    if (task.state === "Waiting")
+      return "This step is waiting for an update before it can be completed.";
     const prerequisites = this.unmetPrerequisiteTitles(task);
-    if (prerequisites.length) return `Complete ${prerequisites.join(", ")} first.`;
+    if (prerequisites.length)
+      return `Complete ${prerequisites.join(", ")} first.`;
     return `First mark ${this.completedDependentTitles(task).join(", ")} as not done.`;
   }
 
@@ -362,8 +463,12 @@ export class RoadmapComponent implements OnInit {
   }
 
   isTaskBlocked(task: RoadmapTaskResponse): boolean {
-    return task.state !== "NotApplicable" && !task.completed
-      && task.state !== "Completed" && this.unmetPrerequisiteTitles(task).length > 0;
+    return (
+      task.state !== "NotApplicable" &&
+      !task.completed &&
+      task.state !== "Completed" &&
+      this.unmetPrerequisiteTitles(task).length > 0
+    );
   }
 
   priorityLabel(priority: number): string {
@@ -376,7 +481,8 @@ export class RoadmapComponent implements OnInit {
   confirmDeleteRoadmap(): void {
     this.confirmationService.confirm({
       header: "Delete roadmap",
-      message: "This will permanently delete your roadmap and checklist. Are you sure?",
+      message:
+        "This will permanently delete your roadmap and checklist. Are you sure?",
       acceptLabel: "Delete",
       rejectLabel: "Cancel",
       acceptButtonProps: { severity: "danger" },
@@ -390,33 +496,62 @@ export class RoadmapComponent implements OnInit {
     this.isDeleting = true;
     this.generationError = "";
     this.successMessage = "";
-    this.roadmapService.deleteRoadmap().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: () => {
-        this.hasExistingRoadmap = false;
-        this.currentRoadmapResponse = null;
-        this.tasks = [];
-        this.isDeleting = false;
-        this.successMessage = "Your roadmap has been deleted.";
-      },
-      error: (error: unknown) => {
-        this.generationError = getApiErrorMessage(error, "We could not delete your roadmap right now.");
-        this.isDeleting = false;
-      },
-    });
+    this.roadmapService
+      .deleteRoadmap()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.hasExistingRoadmap = false;
+          this.currentRoadmapResponse = null;
+          this.tasks = [];
+          this.isDeleting = false;
+          this.successMessage = "Your roadmap has been deleted.";
+        },
+        error: (error: unknown) => {
+          this.generationError = getApiErrorMessage(
+            error,
+            "We could not delete your roadmap right now.",
+          );
+          this.isDeleting = false;
+        },
+      });
   }
 
-  private phaseFor(category: string): Pick<RoadmapPhase, "id" | "title" | "description"> {
+  private phaseFor(
+    category: string,
+  ): Pick<RoadmapPhase, "id" | "title" | "description"> {
     const normalized = category.trim().toLowerCase();
     if (["residence", "housing", "settlement"].includes(normalized)) {
-      return { id: "move-planning", title: "Plan your move", description: "Prepare the practical pieces that shape your move and arrival." };
+      return {
+        id: "move-planning",
+        title: "Plan your move",
+        description:
+          "Prepare the practical pieces that shape your move and arrival.",
+      };
     }
-    if (["registration", "identity", "banking", "insurance"].includes(normalized)) {
-      return { id: "essentials", title: "Get established", description: "Work through the services and registrations that apply to you." };
+    if (
+      ["registration", "identity", "banking", "insurance"].includes(normalized)
+    ) {
+      return {
+        id: "essentials",
+        title: "Get established",
+        description:
+          "Work through the services and registrations that apply to you.",
+      };
     }
     if (["work", "study", "family", "transport"].includes(normalized)) {
-      return { id: "daily-life", title: "Settle into daily life", description: "Continue with the work, study, family, or travel steps in your plan." };
+      return {
+        id: "daily-life",
+        title: "Settle into daily life",
+        description:
+          "Continue with the work, study, family, or travel steps in your plan.",
+      };
     }
     const title = category.trim() || "Other steps";
-    return { id: `category-${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`, title, description: "Additional steps from your personalized roadmap." };
+    return {
+      id: `category-${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
+      title,
+      description: "Additional steps from your personalized roadmap.",
+    };
   }
 }

@@ -3,20 +3,25 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
 namespace SwedenStart;
+
 [ApiController]
 [Route("api/roadmap")]
 [Authorize]
 public class RoadmapController : ControllerBase
 {
     private readonly IRoadmapService _roadmapService;
+    private readonly RoadmapQuestionnaire _questionnaire;
 
-    public RoadmapController(IRoadmapService roadmapService)
-        => _roadmapService = roadmapService;
+    public RoadmapController(IRoadmapService roadmapService, RoadmapQuestionnaire questionnaire)
+    {
+        _roadmapService = roadmapService;
+        _questionnaire = questionnaire;
+    }
 
     [HttpGet("questions")]
     [AllowAnonymous]
     public ActionResult<IReadOnlyList<RoadmapQuestionDto>> GetQuestions()
-        => Ok(RoadmapQuestionnaire.Questions.OrderBy(q => q.Order).ToArray());
+        => Ok(_questionnaire.Questions.OrderBy(q => q.Order).ToArray());
 
     [HttpPost]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
@@ -24,10 +29,10 @@ public class RoadmapController : ControllerBase
     public async Task<ActionResult<RoadmapResponseDto>> GenerateRoadmap(
         RoadmapRequestDto request)
     {
-        var validation = RoadmapAnswerValidator.Validate(request);
+        var validation = RoadmapAnswerValidator.Validate(request, _questionnaire);
         if (validation.Count > 0) return BadRequest(new ValidationProblemDetails(validation));
         if (!TryGetUserId(out var userId))
-            return Unauthorized(ApiProblemDetails.Create(StatusCodes.Status401Unauthorized, "Unauthorized", "The authenticated user could not be identified."));
+            return Problem(statusCode: StatusCodes.Status401Unauthorized, title: "Unauthorized", detail: "The authenticated user could not be identified.");
 
         var response = await _roadmapService.GenerateRoadmapAsync(request, userId);
         return Ok(response);
@@ -39,11 +44,11 @@ public class RoadmapController : ControllerBase
     public async Task<ActionResult<RoadmapResponseDto>> GetRoadmap()
     {
         if (!TryGetUserId(out var userId))
-            return Unauthorized(ApiProblemDetails.Create(StatusCodes.Status401Unauthorized, "Unauthorized", "The authenticated user could not be identified."));
+            return Problem(statusCode: StatusCodes.Status401Unauthorized, title: "Unauthorized", detail: "The authenticated user could not be identified.");
 
         var response = await _roadmapService.GetRoadmapAsync(userId);
         return response == null
-            ? NotFound(ApiProblemDetails.Create(StatusCodes.Status404NotFound, "Roadmap not found", "No roadmap exists for this user."))
+            ? Problem(statusCode: StatusCodes.Status404NotFound, title: "Roadmap not found", detail: "No roadmap exists for this user.")
             : Ok(response);
     }
 
@@ -53,10 +58,10 @@ public class RoadmapController : ControllerBase
     public async Task<ActionResult<RoadmapResponseDto>> UpdateRoadmap(
         RoadmapRequestDto request)
     {
-        var validation = RoadmapAnswerValidator.Validate(request);
+        var validation = RoadmapAnswerValidator.Validate(request, _questionnaire);
         if (validation.Count > 0) return BadRequest(new ValidationProblemDetails(validation));
         if (!TryGetUserId(out var userId))
-            return Unauthorized(ApiProblemDetails.Create(StatusCodes.Status401Unauthorized, "Unauthorized", "The authenticated user could not be identified."));
+            return Problem(statusCode: StatusCodes.Status401Unauthorized, title: "Unauthorized", detail: "The authenticated user could not be identified.");
 
         var response = await _roadmapService.UpdateRoadmapAsync(request, userId);
         return Ok(response);
@@ -68,12 +73,12 @@ public class RoadmapController : ControllerBase
     public async Task<IActionResult> DeleteRoadmap()
     {
         if (!TryGetUserId(out var userId))
-            return Unauthorized(ApiProblemDetails.Create(StatusCodes.Status401Unauthorized, "Unauthorized", "The authenticated user could not be identified."));
+            return Problem(statusCode: StatusCodes.Status401Unauthorized, title: "Unauthorized", detail: "The authenticated user could not be identified.");
 
         var deleted = await _roadmapService.DeleteRoadmapAsync(userId);
         return deleted
             ? NoContent()
-            : NotFound(ApiProblemDetails.Create(StatusCodes.Status404NotFound, "Roadmap not found", "No roadmap exists for this user."));
+            : Problem(statusCode: StatusCodes.Status404NotFound, title: "Roadmap not found", detail: "No roadmap exists for this user.");
     }
 
     [HttpPatch("tasks/{taskId:guid}")]
@@ -91,7 +96,7 @@ public class RoadmapController : ControllerBase
         }
 
         if (!TryGetUserId(out var userId))
-            return Unauthorized(ApiProblemDetails.Create(StatusCodes.Status401Unauthorized, "Unauthorized", "The authenticated user could not be identified."));
+            return Problem(statusCode: StatusCodes.Status401Unauthorized, title: "Unauthorized", detail: "The authenticated user could not be identified.");
 
         var response = await _roadmapService.SetTaskCompletionAsync(userId, taskId, completed);
         return Ok(response);

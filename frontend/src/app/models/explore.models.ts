@@ -11,7 +11,6 @@ export interface Attraction {
   city: string;
   category: string;
   imageUrl: string;
-  rating: number;
 }
 
 export interface AttractionDetail extends Attraction {

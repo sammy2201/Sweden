@@ -31,10 +31,10 @@ public class TransportController : ControllerBase
           CancellationToken cancellationToken = default)
      {
           if (string.IsNullOrWhiteSpace(from) || string.IsNullOrWhiteSpace(to))
-               return BadRequest(ApiProblemDetails.Create(
-                    StatusCodes.Status400BadRequest,
-                    "Invalid transport search",
-                    "Both query params 'from' and 'to' are required."));
+               return Problem(
+                    statusCode: StatusCodes.Status400BadRequest,
+                    title: "Invalid transport search",
+                    detail: "Both query params 'from' and 'to' are required.");
 
           try
           {
@@ -44,12 +44,10 @@ public class TransportController : ControllerBase
           catch (InvalidOperationException ex)
           {
                _logger.LogWarning(ex, "Transport search failed for from={From}, to={To}", from, to);
-               return StatusCode(
-                    StatusCodes.Status502BadGateway,
-                    ApiProblemDetails.Create(
-                         StatusCodes.Status502BadGateway,
-                         "Transport service unavailable",
-                         ex.Message));
+               return Problem(
+                    statusCode: StatusCodes.Status502BadGateway,
+                    title: "Transport service unavailable",
+                    detail: ex.Message);
           }
      }
 }

@@ -5,7 +5,7 @@ namespace SwedenStart;
 
 public static class TransportMapper
 {
-     public static TransportTripDto? MapTrip(ResRobotTrip trip)
+     public static TransportTripDto? MapTrip(ResRobotTripDto trip)
      {
           var firstLeg = trip.LegList?.Legs.FirstOrDefault();
           var lastLeg = trip.LegList?.Legs.LastOrDefault();
@@ -56,7 +56,7 @@ public static class TransportMapper
           };
      }
 
-     private static TransportTripLegDto? MapLeg(ResRobotLeg leg)
+     private static TransportTripLegDto? MapLeg(ResRobotLegDto leg)
      {
           if (leg.Origin is null || leg.Destination is null)
           {
@@ -176,7 +176,7 @@ public static class TransportMapper
           return "Train";
      }
 
-     private static string ResolveLine(ResRobotLeg leg)
+     private static string ResolveLine(ResRobotLegDto leg)
      {
           if (!string.IsNullOrWhiteSpace(leg.Name))
           {
@@ -259,7 +259,7 @@ public static class TransportMapper
           return string.Empty;
      }
 
-     private static int ResolveNumberOfChanges(ResRobotTrip trip)
+     private static int ResolveNumberOfChanges(ResRobotTripDto trip)
      {
           var legs = trip.LegList?.Legs ?? [];
           if (legs.Count == 0)
@@ -276,7 +276,7 @@ public static class TransportMapper
           return Math.Max(0, legs.Count - 1);
      }
 
-     private static bool IsServiceLeg(ResRobotLeg leg)
+     private static bool IsServiceLeg(ResRobotLegDto leg)
      {
           if (leg.Product.ValueKind == JsonValueKind.Object || leg.Product.ValueKind == JsonValueKind.Array)
           {
@@ -294,7 +294,7 @@ public static class TransportMapper
           return true;
      }
 
-     private static string GetPlatform(ResRobotStopPoint? stopPoint)
+     private static string GetPlatform(ResRobotStopPointDto? stopPoint)
      {
           if (stopPoint is null)
           {
@@ -319,7 +319,7 @@ public static class TransportMapper
           return stopPoint.Stop;
      }
 
-     private static string ResolveDirection(ResRobotLeg leg)
+     private static string ResolveDirection(ResRobotLegDto leg)
      {
           if (!string.IsNullOrWhiteSpace(leg.Direction))
           {
@@ -351,7 +351,7 @@ public static class TransportMapper
           return string.Empty;
      }
 
-     private static bool ResolveCancelled(ResRobotTrip trip)
+     private static bool ResolveCancelled(ResRobotTripDto trip)
      {
           var legs = trip.LegList?.Legs ?? [];
           return legs.Any(leg => leg.Cancelled == true

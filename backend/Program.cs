@@ -113,6 +113,9 @@ builder.Services.AddAuthentication(options =>
 
 });
 builder.Services.AddScoped<IRoadmapRepository, RoadmapRepository>();
+builder.Services.AddSingleton(_ => RoadmapTaskCatalog.Load(
+    Path.Combine(builder.Environment.ContentRootPath, "Data", "roadmap-rules.json")));
+builder.Services.AddSingleton<RoadmapQuestionnaire>();
 builder.Services.AddSingleton<RoadmapTaskGenerator>();
 builder.Services.AddScoped<IRoadmapService, RoadmapService>();
 builder.Services.AddScoped<IBankService, BankService>();
@@ -135,7 +138,6 @@ builder.Services.AddHttpClient<ITransportService, TransportService>((sp, client)
 builder.Services.AddScoped<IExploreService, ExploreService>();
 builder.Services.AddScoped<IAttractionRepository, AttractionRepository>();
 builder.Services.AddScoped<IVisitSwedenRepository, VisitSwedenRepository>();
-builder.Services.AddSingleton<ICountyLookupService, CountyLookupService>();
 builder.Services.AddSingleton<VisitSwedenSyncGate>();
 builder.Services.AddHostedService<VisitSwedenStartupSyncService>();
 builder.Services.AddHttpClient<IVisitSwedenService, VisitSwedenService>((sp, client) =>

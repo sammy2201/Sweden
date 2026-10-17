@@ -38,11 +38,13 @@ public class AuthController : ControllerBase
         var created = await _authService.RegisterAsync(request.FirstName, request.LastName, request.Username, request.Email, request.City, request.Address, request.Password);
         if (!created)
         {
-            return Conflict(ApiProblemDetails.Create(
-                StatusCodes.Status409Conflict,
-                "Account already exists",
-                "A user with that username or email already exists.",
-                "ACCOUNT_ALREADY_EXISTS"));
+            var problem = Problem(
+                statusCode: StatusCodes.Status409Conflict,
+                title: "Account already exists",
+                detail: "A user with that username or email already exists.");
+            if (problem.Value is ProblemDetails problemDetails)
+                problemDetails.Extensions["code"] = "ACCOUNT_ALREADY_EXISTS";
+            return problem;
         }
 
         return CreatedAtAction(nameof(Register), new { username = request.Username });
@@ -56,11 +58,11 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> GetUser()
     {
         if (!TryGetCurrentUserId(out var id))
-            return Unauthorized(ApiProblemDetails.Create(StatusCodes.Status401Unauthorized, "Unauthorized", "The authenticated user could not be identified."));
+            return Problem(statusCode: StatusCodes.Status401Unauthorized, title: "Unauthorized", detail: "The authenticated user could not be identified.");
 
         var user = await _authService.GetUserAsync(id);
         if (user == null)
-            return NotFound(ApiProblemDetails.Create(StatusCodes.Status404NotFound, "User not found", "The requested user profile was not found."));
+            return Problem(statusCode: StatusCodes.Status404NotFound, title: "User not found", detail: "The requested user profile was not found.");
 
         var dto = MapUserDto(user);
 
@@ -74,7 +76,7 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> UpdateUser([FromBody] UpdateUserProfileRequestDto request)
     {
         if (!TryGetCurrentUserId(out var id))
-            return Unauthorized(ApiProblemDetails.Create(StatusCodes.Status401Unauthorized, "Unauthorized", "The authenticated user could not be identified."));
+            return Problem(statusCode: StatusCodes.Status401Unauthorized, title: "Unauthorized", detail: "The authenticated user could not be identified.");
 
         var user = await _authService.UpdateUserProfileAsync(
             id,
@@ -84,7 +86,7 @@ public class AuthController : ControllerBase
             request.Address);
 
         if (user == null)
-            return NotFound(ApiProblemDetails.Create(StatusCodes.Status404NotFound, "User not found", "The requested user profile was not found."));
+            return Problem(statusCode: StatusCodes.Status404NotFound, title: "User not found", detail: "The requested user profile was not found.");
 
         return Ok(MapUserDto(user));
     }

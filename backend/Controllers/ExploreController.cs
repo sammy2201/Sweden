@@ -19,9 +19,9 @@ public class ExploreController : ControllerBase
 
      [HttpGet("counties")]
      [AllowAnonymous]
-     public async Task<ActionResult<ExploreCountiesResponseDto>> GetCounties()
+     public ActionResult<ExploreCountiesResponseDto> GetCounties()
      {
-          var counties = await _exploreService.GetCountiesAsync();
+          var counties = _exploreService.GetCounties();
 
           return Ok(new ExploreCountiesResponseDto
           {
@@ -106,10 +106,10 @@ public class ExploreController : ControllerBase
 
           if (attraction == null)
           {
-               return NotFound(ApiProblemDetails.Create(
-                    StatusCodes.Status404NotFound,
-                    "Attraction not found",
-                    "The requested attraction was not found."));
+               return Problem(
+                    statusCode: StatusCodes.Status404NotFound,
+                    title: "Attraction not found",
+                    detail: "The requested attraction was not found.");
           }
 
           return Ok(new ExploreAttractionDetailResponseDto

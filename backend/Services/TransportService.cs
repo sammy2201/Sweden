@@ -45,7 +45,7 @@ public class TransportService : ITransportService
           return trips;
      }
 
-     private async Task<ResRobotStopLocation> LookupStationAsync(string input, string apiKey, CancellationToken cancellationToken)
+     private async Task<ResRobotStopLocationDto> LookupStationAsync(string input, string apiKey, CancellationToken cancellationToken)
      {
           var endpoint = $"location.name?format=json&input={Uri.EscapeDataString(input)}&accessId={Uri.EscapeDataString(apiKey)}";
           using var response = await _httpClient.GetAsync(endpoint, cancellationToken);
@@ -62,7 +62,7 @@ public class TransportService : ITransportService
           }
 
           await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-          var payload = await JsonSerializer.DeserializeAsync<ResRobotLocationResponse>(stream, JsonOptions, cancellationToken);
+          var payload = await JsonSerializer.DeserializeAsync<ResRobotLocationResponseDto>(stream, JsonOptions, cancellationToken);
 
           var station = payload?.StopLocationOrCoordLocation
                .Select(x => x.StopLocation)
@@ -120,7 +120,7 @@ public class TransportService : ITransportService
           }
 
           await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-          var payload = await JsonSerializer.DeserializeAsync<ResRobotTripResponse>(stream, JsonOptions, cancellationToken);
+          var payload = await JsonSerializer.DeserializeAsync<ResRobotTripResponseDto>(stream, JsonOptions, cancellationToken);
 
           var result = (payload?.Trips ?? [])
                .Select(TransportMapper.MapTrip)

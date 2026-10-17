@@ -53,16 +53,6 @@
   line-height: 1.6;
 }
 
-.rating-row {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.rating-value {
-  font-weight: 600;
-}
-
 .card-footer {
   margin-top: auto;
   display: flex;
@@ -72,8 +62,4 @@
 
 :host ::ng-deep .card-footer .p-button {
   flex: 1;
-}
-
-:host ::ng-deep .p-rating {
-  gap: 0.1rem;
 }

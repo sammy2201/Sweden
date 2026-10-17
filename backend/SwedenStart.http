@@ -1,6 +1,0 @@
-@SwedenStart_HostAddress = http://localhost:5195
-
-GET {{SwedenStart_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

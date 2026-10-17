@@ -9,8 +9,8 @@ public class ExploreService : IExploreService
           _attractionRepository = attractionRepository;
      }
 
-     public Task<IEnumerable<CountyDto>> GetCountiesAsync()
-          => CountyData.GetCountiesAsync();
+     public IEnumerable<CountyDto> GetCounties()
+          => CountyData.GetCounties();
 
      public Task<bool> HasAnyAttractionsAsync(CancellationToken cancellationToken = default)
           => _attractionRepository.HasAnyAttractionsAsync(cancellationToken);

@@ -11,20 +11,17 @@ public class VisitSwedenService : IVisitSwedenService
      private readonly HttpClient _httpClient;
      private readonly ILogger<VisitSwedenService> _logger;
      private readonly IVisitSwedenRepository _visitSwedenRepository;
-     private readonly ICountyLookupService _countyLookupService;
      private readonly VisitSwedenSyncGate _syncGate;
 
      public VisitSwedenService(
          HttpClient httpClient,
          ILogger<VisitSwedenService> logger,
          IVisitSwedenRepository visitSwedenRepository,
-         ICountyLookupService countyLookupService,
          VisitSwedenSyncGate syncGate)
      {
           _httpClient = httpClient;
           _logger = logger;
           _visitSwedenRepository = visitSwedenRepository;
-          _countyLookupService = countyLookupService;
           _syncGate = syncGate;
      }
 
@@ -279,14 +276,7 @@ public class VisitSwedenService : IVisitSwedenService
 
           var description = GetLocalizedTexts(node, "schema:description");
           var geo = GetGeo(child, node);
-          var county = GetCountySlug(node);
-
-          if (string.IsNullOrWhiteSpace(county) && geo.Latitude.HasValue && geo.Longitude.HasValue)
-          {
-               county = _countyLookupService.GetCounty(geo.Latitude.Value, geo.Longitude.Value) ?? string.Empty;
-          }
-
-          county = CountyData.ResolveCountyId(county);
+          var county = CountyData.ResolveCountyId(GetCountySlug(node));
 
           return new Attraction
           {

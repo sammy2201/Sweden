@@ -178,10 +178,7 @@ public static class CountyData
         }
     ];
 
-    public static Task<IEnumerable<CountyDto>> GetCountiesAsync()
-    {
-        return Task.FromResult<IEnumerable<CountyDto>>(Counties);
-    }
+    public static IEnumerable<CountyDto> GetCounties() => Counties;
 
     public static string ResolveCountyId(string? value)
     {

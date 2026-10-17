@@ -2,7 +2,7 @@ namespace SwedenStart;
 
 public interface IExploreService
 {
-     Task<IEnumerable<CountyDto>> GetCountiesAsync();
+     IEnumerable<CountyDto> GetCounties();
 
      Task<bool> HasAnyAttractionsAsync(CancellationToken cancellationToken = default);
 

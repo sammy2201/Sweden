@@ -13,7 +13,7 @@ public static class RoadmapTaskPrerequisiteGuard
         return task.Prerequisites
             .Where(prerequisite => byRuleId.TryGetValue(prerequisite.RuleId, out var prerequisiteTask)
                 && prerequisiteTask.State != "NotApplicable"
-                && !prerequisiteTask.Completed)
+                && !IsCompleted(prerequisiteTask))
             .Select(prerequisite => byRuleId[prerequisite.RuleId].Title)
             .Distinct(StringComparer.Ordinal)
             .ToArray();
@@ -25,11 +25,14 @@ public static class RoadmapTaskPrerequisiteGuard
     {
         return roadmapTasks
             .Where(candidate => candidate.RuleId != task.RuleId
-                && candidate.Completed
+                && IsCompleted(candidate)
                 && candidate.State != "NotApplicable"
                 && candidate.Prerequisites.Any(prerequisite => prerequisite.RuleId == task.RuleId))
             .Select(candidate => candidate.Title)
             .Distinct(StringComparer.Ordinal)
             .ToArray();
     }
+
+    private static bool IsCompleted(RoadmapTask task) =>
+        task.Completed || task.State == "Completed";
 }
