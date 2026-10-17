@@ -2,7 +2,6 @@ import { Component, computed, inject, signal } from "@angular/core";
 import { Router, RouterLink, RouterOutlet } from "@angular/router";
 import { AuthService } from "./services/auth.service";
 import { ButtonModule } from "primeng/button";
-import { ChatWidgetComponent } from "./components/chat-widget/chat-widget.component";
 import { SiteFooterComponent } from "./components/site-footer/site-footer.component";
 import {
   GuideDirectoryService,
@@ -11,13 +10,7 @@ import {
 
 @Component({
   selector: "app-root",
-  imports: [
-    RouterOutlet,
-    RouterLink,
-    ButtonModule,
-    ChatWidgetComponent,
-    SiteFooterComponent,
-  ],
+  imports: [RouterOutlet, RouterLink, ButtonModule, SiteFooterComponent],
   templateUrl: "./app.component.html",
   styleUrl: "./app.component.css",
 })

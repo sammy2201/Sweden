@@ -221,3 +221,66 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Roadmap task confirmation content is rendered in PrimeNG's global dialog overlay. */
+.step-links,
+.completion-action-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+}
+
+.completion-action-group { justify-content: flex-end; margin-left: auto; }
+.guide-link { color: var(--app-primary); }
+
+.completion-block-reason {
+  max-width: 18rem;
+  color: var(--app-warning-text);
+  font-size: 0.76rem;
+  line-height: 1.4;
+}
+
+.completion-dialog-content {
+  display: grid;
+  justify-items: center;
+  padding: 0.25rem 0 0.5rem;
+  text-align: center;
+}
+
+.completion-dialog-icon {
+  display: grid;
+  width: 3.5rem;
+  height: 3.5rem;
+  margin-bottom: 1rem;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--app-success-soft);
+  color: var(--app-success-text);
+  font-size: 1.5rem;
+}
+
+.completion-dialog-content h2 { margin: 0; font-size: 1.35rem; }
+.completion-dialog-content > p { max-width: 28rem; margin: 0.65rem 0 0.9rem; color: var(--app-text-soft); line-height: 1.55; }
+.completion-dialog-content h3 { margin: 1.25rem 0 0.75rem; color: var(--app-heading); font-size: 1rem; }
+
+.dialog-resource-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.45rem;
+  color: var(--app-primary-dark);
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.dialog-resource-link:hover { text-decoration: underline; text-underline-offset: 0.2em; }
+.completion-dialog-actions { display: flex; width: 100%; justify-content: center; gap: 0.75rem; }
+
+@media (max-width: 560px) {
+  .step-links, .completion-action-group { width: 100%; }
+  .completion-action-group { justify-content: flex-start; margin-left: 0; }
+  .completion-dialog-actions { flex-direction: column-reverse; }
+  .completion-dialog-actions .p-button { width: 100%; }
+}

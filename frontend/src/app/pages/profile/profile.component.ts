@@ -14,7 +14,7 @@ import {
   ReactiveFormsModule,
   Validators,
 } from "@angular/forms";
-import { Router, RouterLink } from "@angular/router";
+import { Router } from "@angular/router";
 import { ButtonModule } from "primeng/button";
 import { CardModule } from "primeng/card";
 import { CheckboxModule } from "primeng/checkbox";
@@ -38,7 +38,6 @@ import { HttpErrorResponse } from "@angular/common/http";
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    RouterLink,
     ButtonModule,
     CardModule,
     CheckboxModule,

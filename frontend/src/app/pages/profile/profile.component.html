@@ -1,269 +1,129 @@
-<section class="profile-page">
+<main class="profile-page">
   @if (loading()) {
-    <div class="profile-layout">
-      <p-card styleClass="identity-card">
-        <p-skeleton shape="circle" size="6rem"></p-skeleton>
-        <p-skeleton width="70%" height="2rem"></p-skeleton>
-        <p-skeleton width="45%" height="1rem"></p-skeleton>
-      </p-card>
-
-      <p-card styleClass="details-card">
-        <p-skeleton height="2rem"></p-skeleton>
-        <div class="details-grid">
-          @for (item of [1, 2, 3, 4, 5, 6]; track item) {
-            <p-skeleton height="72px"></p-skeleton>
-          }
-        </div>
-      </p-card>
+    <div class="settings-shell loading-state" aria-label="Loading profile">
+      <p-skeleton width="14rem" height="2.5rem"></p-skeleton>
+      <p-skeleton width="100%" height="8rem"></p-skeleton>
+      <p-skeleton width="100%" height="18rem"></p-skeleton>
     </div>
   } @else if (errorMessage()) {
-    <div class="profile-error">
-      <i class="pi pi-exclamation-circle"></i>
+    <section class="profile-error" role="alert">
+      <span class="eyebrow">Account</span>
       <h1>Profile unavailable</h1>
       <p>{{ errorMessage() }}</p>
-      <p-button label="Try again" icon="pi pi-refresh" (onClick)="ngOnInit()">
-      </p-button>
-    </div>
+      <p-button label="Try again" icon="pi pi-refresh" (onClick)="ngOnInit()"></p-button>
+    </section>
   } @else if (profile(); as user) {
-    <div class="profile-layout">
-      <p-card styleClass="identity-card">
-        <div class="avatar">{{ initials() }}</div>
-
+    <div class="settings-shell">
+      <header class="page-heading">
         <div>
-          <p-tag value="Active account" severity="success"></p-tag>
-          <h1>{{ user.firstName }} {{ user.lastName }}</h1>
-          <p>{{ "@" + user.username }}</p>
+          <span class="eyebrow">Account settings</span>
+          <h1>Your profile</h1>
+          <p>Manage your personal information and moving plan.</p>
         </div>
+      </header>
 
-        <p-divider></p-divider>
-
-        <div class="quick-facts">
-          <div>
-            <i class="pi pi-map-marker"></i>
-            <span>{{ user.city }}</span>
-          </div>
-
-          @if (user.age) {
-            <div>
-              <i class="pi pi-calendar"></i>
-              <span>{{ user.age }} years old</span>
-            </div>
+      <section class="identity-header" aria-label="Profile summary">
+        <div class="avatar" aria-hidden="true">{{ initials() }}</div>
+        <div class="identity-copy">
+          <h2>{{ user.firstName }} {{ user.lastName }}</h2>
+          <p class="username">@{{ user.username }}</p>
+          @if (user.city) {
+            <p class="identity-location"><i class="pi pi-map-marker" aria-hidden="true"></i>{{ user.city }}</p>
           }
         </div>
-      </p-card>
-
-      <p-card styleClass="details-card">
-        <div class="details-header">
-          <div>
-            <span class="eyebrow">User profile</span>
-            <h2>Account details</h2>
-          </div>
-
-          <p-button
-            *ngIf="!isEditing()"
-            label="Edit"
-            icon="pi pi-pencil"
-            severity="secondary"
-            variant="outlined"
-            (onClick)="startEditing()">
-          </p-button>
-
-          <p-button
-            *ngIf="isEditing()"
-            label="Roadmap"
-            icon="pi pi-list-check"
-            routerLink="/roadmap">
-          </p-button>
+        <div class="identity-actions">
+          @if (isEditing()) {
+            <span class="editing-indicator"><i class="pi pi-pencil" aria-hidden="true"></i> Editing profile</span>
+          } @else {
+            <p-button label="Edit profile" icon="pi pi-pencil" severity="secondary" variant="outlined" (onClick)="startEditing()"></p-button>
+          }
         </div>
+      </section>
 
-        @if (saveMessage()) {
-          <small class="success-message">{{ saveMessage() }}</small>
-        }
-
-        @if (errorMessage()) {
-          <small class="error-message">{{ errorMessage() }}</small>
-        }
-
-        @if (isEditing()) {
-          <form
-            class="profile-form"
-            [formGroup]="form"
-            (ngSubmit)="saveProfile()">
-            <div class="form-grid">
-              <div class="field">
-                <label for="firstName">First name</label>
-                <input id="firstName" pInputText formControlName="firstName" />
-                @if (isInvalid("firstName")) {
-                  <small>First name must be at least 2 characters.</small>
-                }
-              </div>
-
-              <div class="field">
-                <label for="lastName">Last name</label>
-                <input id="lastName" pInputText formControlName="lastName" />
-                @if (isInvalid("lastName")) {
-                  <small>Last name must be at least 2 characters.</small>
-                }
-              </div>
-
-              <div class="field">
-                <label for="city">City</label>
-                <input id="city" pInputText formControlName="city" />
-                @if (isInvalid("city")) {
-                  <small>City must be at least 2 characters.</small>
-                }
-              </div>
-
-              <div class="field">
-                <label for="address">Address</label>
-                <input id="address" pInputText formControlName="address" />
-                @if (isInvalid("address")) {
-                  <small>Address must be at least 3 characters.</small>
-                }
-              </div>
-            </div>
-
-            <div class="form-actions">
-              <p-button
-                type="button"
-                label="Cancel"
-                severity="secondary"
-                variant="outlined"
-                [disabled]="isSaving()"
-                (onClick)="cancelEditing()">
-              </p-button>
-
-              <p-button
-                type="submit"
-                label="Save changes"
-                icon="pi pi-check"
-                [loading]="isSaving()">
-              </p-button>
-            </div>
-          </form>
-        } @else {
-          <div class="details-grid">
-            <div class="detail-item">
-              <span>First name</span>
-              <strong>{{ user.firstName }}</strong>
-            </div>
-
-            <div class="detail-item">
-              <span>Last name</span>
-              <strong>{{ user.lastName }}</strong>
-            </div>
-
-            <div class="detail-item">
-              <span>Email</span>
-              <strong>{{ user.email }}</strong>
-            </div>
-
-            <div class="detail-item">
-              <span>Username</span>
-              <strong>{{ user.username }}</strong>
-            </div>
-
-            <div class="detail-item">
-              <span>City</span>
-              <strong>{{ user.city }}</strong>
-            </div>
-
-            <div class="detail-item">
-              <span>Address</span>
-              <strong>{{ user.address }}</strong>
-            </div>
-
-            @if (user.age) {
-              <div class="detail-item">
-                <span>Age</span>
-                <strong>{{ user.age }}</strong>
-              </div>
-            }
-          </div>
-        }
-      </p-card>
-    </div>
-
-    <section class="roadmap-overview" aria-labelledby="profile-roadmap-title">
-      <div class="roadmap-overview-header">
-        <div>
-          <span class="eyebrow">Your moving plan</span>
-          <h2 id="profile-roadmap-title">Roadmap progress</h2>
-        </div>
-        @if (roadmap()) {
-          <p-button
-            label="Edit answers"
-            icon="pi pi-pencil"
-            severity="secondary"
-            variant="outlined"
-            (onClick)="openRoadmap()">
-          </p-button>
-        } @else if (!roadmapLoading() && !roadmapError()) {
-          <p-button
-            label="Create roadmap"
-            icon="pi pi-plus"
-            (onClick)="openRoadmap()">
-          </p-button>
-        }
-      </div>
-
-      @if (roadmapLoading()) {
-        <p class="roadmap-empty-state">Loading your roadmap progress...</p>
-      } @else if (roadmapError()) {
-        <div class="api-error" role="alert">{{ roadmapError() }}</div>
-      } @else if (roadmap(); as currentRoadmap) {
-        <div class="roadmap-progress-summary">
-          <div>
-            <strong
-              >{{ completedRoadmapTasks() }} /
-              {{ currentRoadmap.tasks.length }}</strong
-            >
-            <span>steps completed</span>
-          </div>
-          <strong>{{ roadmapProgress() }}%</strong>
-        </div>
-        <p-progressBar
-          [value]="roadmapProgress()"
-          [showValue]="false"
-          styleClass="profile-roadmap-progress">
-        </p-progressBar>
-
-        @if (currentRoadmap.tasks.length) {
-          <ul class="roadmap-task-list">
-            @for (task of currentRoadmap.tasks; track task.id) {
-              <li [class.completed]="task.completed">
-                <p-checkbox
-                  [binary]="true"
-                  [ngModel]="task.completed"
-                  [disabled]="pendingRoadmapTaskIds().has(task.id)"
-                  [ngModelOptions]="{ standalone: true }"
-                  (ngModelChange)="toggleRoadmapTask(task.id, $event)">
-                </p-checkbox>
-                <div>
-                  <strong>{{ task.title }}</strong>
-                  <span>{{ task.description }}</span>
-                </div>
-              </li>
-            }
-          </ul>
-        } @else {
-          <p class="roadmap-empty-state">
-            Your roadmap has no checklist steps yet.
-          </p>
-        }
-
-        <p-button
-          label="Open full roadmap"
-          icon="pi pi-arrow-right"
-          iconPos="right"
-          variant="text"
-          (onClick)="openRoadmap()">
-        </p-button>
-      } @else {
-        <p class="roadmap-empty-state">
-          Create a personalized roadmap to track your Sweden setup tasks here.
-        </p>
+      @if (saveMessage()) {
+        <div class="status-message success-message" role="status"><i class="pi pi-check-circle" aria-hidden="true"></i>{{ saveMessage() }}</div>
       }
-    </section>
+      @if (errorMessage()) {
+        <div class="status-message error-message" role="alert"><i class="pi pi-exclamation-circle" aria-hidden="true"></i>{{ errorMessage() }}</div>
+      }
+
+      @if (isEditing()) {
+        <form class="account-panel edit-panel" [formGroup]="form" (ngSubmit)="saveProfile()">
+          <div class="panel-heading">
+            <div><span class="eyebrow">Your account</span><h2>Edit personal information</h2></div>
+            <p>Changes are saved to your SwedenStart account.</p>
+          </div>
+          <div class="form-grid">
+            <div class="field"><label for="firstName">First name</label><input id="firstName" pInputText formControlName="firstName" autocomplete="given-name" />@if (isInvalid("firstName")) { <small>First name must be at least 2 characters.</small> }</div>
+            <div class="field"><label for="lastName">Last name</label><input id="lastName" pInputText formControlName="lastName" autocomplete="family-name" />@if (isInvalid("lastName")) { <small>Last name must be at least 2 characters.</small> }</div>
+            <div class="field"><label for="city">City</label><input id="city" pInputText formControlName="city" autocomplete="address-level2" />@if (isInvalid("city")) { <small>City must be at least 2 characters.</small> }</div>
+            <div class="field"><label for="address">Address</label><input id="address" pInputText formControlName="address" autocomplete="street-address" />@if (isInvalid("address")) { <small>Address must be at least 3 characters.</small> }</div>
+          </div>
+          <div class="form-actions">
+            <p-button type="button" label="Cancel" severity="secondary" variant="outlined" [disabled]="isSaving()" (onClick)="cancelEditing()"></p-button>
+            <p-button type="submit" label="Save changes" icon="pi pi-check" [loading]="isSaving()" [disabled]="isSaving()"></p-button>
+          </div>
+        </form>
+      } @else {
+        <section class="account-panel" aria-labelledby="account-details-title">
+          <div class="panel-heading">
+            <div><span class="eyebrow">Profile information</span><h2 id="account-details-title">Account details</h2></div>
+            <p>Your saved personal and contact information.</p>
+          </div>
+          <div class="information-grid">
+            <section class="information-group" aria-labelledby="personal-info-title">
+              <h3 id="personal-info-title">Personal information</h3>
+              <dl class="detail-list">
+                <div class="detail-row"><dt>First name</dt><dd>{{ user.firstName }}</dd></div>
+                <div class="detail-row"><dt>Last name</dt><dd>{{ user.lastName }}</dd></div>
+                <div class="detail-row"><dt>Username</dt><dd>@{{ user.username }}</dd></div>
+              </dl>
+            </section>
+            <div class="information-column">
+              <section class="information-group" aria-labelledby="contact-info-title">
+                <h3 id="contact-info-title">Contact information</h3>
+                <dl class="detail-list"><div class="detail-row"><dt>Email</dt><dd>{{ user.email }}</dd></div></dl>
+              </section>
+              <section class="information-group" aria-labelledby="location-info-title">
+                <h3 id="location-info-title">Location</h3>
+                <dl class="detail-list">
+                  <div class="detail-row"><dt>City</dt><dd>{{ user.city }}</dd></div>
+                  <div class="detail-row"><dt>Address</dt><dd>{{ user.address }}</dd></div>
+                </dl>
+              </section>
+            </div>
+          </div>
+        </section>
+      }
+
+      <section class="roadmap-overview" aria-labelledby="profile-roadmap-title">
+        <div class="roadmap-overview-header">
+          <div><span class="eyebrow">Your moving plan</span><h2 id="profile-roadmap-title">Roadmap progress</h2></div>
+          @if (roadmap()) {
+            <p-button label="Edit answers" icon="pi pi-pencil" severity="secondary" variant="outlined" (onClick)="openRoadmap()"></p-button>
+          } @else if (!roadmapLoading() && !roadmapError()) {
+            <p-button label="Create roadmap" icon="pi pi-plus" (onClick)="openRoadmap()"></p-button>
+          }
+        </div>
+        @if (roadmapLoading()) {
+          <p class="roadmap-empty-state">Loading your roadmap progress...</p>
+        } @else if (roadmapError()) {
+          <div class="api-error" role="alert">{{ roadmapError() }}</div>
+        } @else if (roadmap(); as currentRoadmap) {
+          <div class="roadmap-progress-summary"><div><strong>{{ completedRoadmapTasks() }} / {{ currentRoadmap.tasks.length }}</strong><span>steps completed</span></div><strong>{{ roadmapProgress() }}%</strong></div>
+          <p-progressBar [value]="roadmapProgress()" [showValue]="false" styleClass="profile-roadmap-progress"></p-progressBar>
+          @if (currentRoadmap.tasks.length) {
+            <ul class="roadmap-task-list">
+              @for (task of currentRoadmap.tasks; track task.id) {
+                <li [class.completed]="task.completed"><p-checkbox [binary]="true" [ngModel]="task.completed" [disabled]="pendingRoadmapTaskIds().has(task.id)" [ngModelOptions]="{ standalone: true }" (ngModelChange)="toggleRoadmapTask(task.id, $event)"></p-checkbox><div><strong>{{ task.title }}</strong><span>{{ task.description }}</span></div></li>
+              }
+            </ul>
+          } @else { <p class="roadmap-empty-state">Your roadmap has no checklist steps yet.</p> }
+          <p-button label="Open full roadmap" icon="pi pi-arrow-right" iconPos="right" variant="text" (onClick)="openRoadmap()"></p-button>
+        } @else {
+          <p class="roadmap-empty-state">Create a personalized roadmap to track your Sweden setup tasks here.</p>
+        }
+      </section>
+    </div>
   }
-</section>
+</main>

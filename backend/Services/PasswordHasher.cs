@@ -1,5 +1,5 @@
+using System.Globalization;
 using System.Security.Cryptography;
-using System.Text;
 
 namespace SwedenStart;
 
@@ -8,18 +8,17 @@ public static class PasswordHasher
     private const int SaltSize = 16;
     private const int KeySize = 32;
     private const int Iterations = 210_000;
+    private const int MaxAcceptedIterations = 1_000_000;
 
     public static string Hash(string password)
     {
-        using var rng = RandomNumberGenerator.Create();
-        var salt = new byte[SaltSize];
-        rng.GetBytes(salt);
+        var salt = RandomNumberGenerator.GetBytes(SaltSize);
 
         var key = Rfc2898DeriveBytes.Pbkdf2(password, salt, Iterations, HashAlgorithmName.SHA256, KeySize);
 
         var parts = new List<string>
         {
-            Iterations.ToString(),
+            Iterations.ToString(CultureInfo.InvariantCulture),
             Convert.ToBase64String(salt),
             Convert.ToBase64String(key)
         };
@@ -34,14 +33,27 @@ public static class PasswordHasher
             var parts = hash.Split('.');
             if (parts.Length != 3) return false;
 
-            var iterations = int.Parse(parts[0]);
+            if (!int.TryParse(parts[0], NumberStyles.None, CultureInfo.InvariantCulture, out var iterations)
+                || iterations is < 1 or > MaxAcceptedIterations)
+            {
+                return false;
+            }
+
             var salt = Convert.FromBase64String(parts[1]);
             var key = Convert.FromBase64String(parts[2]);
+            if (salt.Length != SaltSize || key.Length != KeySize)
+            {
+                return false;
+            }
 
-            var attempted = Rfc2898DeriveBytes.Pbkdf2(password, salt, iterations, HashAlgorithmName.SHA256, key.Length);
+            var attempted = Rfc2898DeriveBytes.Pbkdf2(password, salt, iterations, HashAlgorithmName.SHA256, KeySize);
             return CryptographicOperations.FixedTimeEquals(attempted, key);
         }
-        catch
+        catch (FormatException)
+        {
+            return false;
+        }
+        catch (CryptographicException)
         {
             return false;
         }

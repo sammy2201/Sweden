@@ -12,87 +12,228 @@ public class VisitSwedenService : IVisitSwedenService
      private readonly ILogger<VisitSwedenService> _logger;
      private readonly IVisitSwedenRepository _visitSwedenRepository;
      private readonly ICountyLookupService _countyLookupService;
+     private readonly VisitSwedenSyncGate _syncGate;
 
      public VisitSwedenService(
          HttpClient httpClient,
          ILogger<VisitSwedenService> logger,
          IVisitSwedenRepository visitSwedenRepository,
-         ICountyLookupService countyLookupService)
+         ICountyLookupService countyLookupService,
+         VisitSwedenSyncGate syncGate)
      {
           _httpClient = httpClient;
           _logger = logger;
           _visitSwedenRepository = visitSwedenRepository;
           _countyLookupService = countyLookupService;
+          _syncGate = syncGate;
      }
 
-     public async Task SyncAttractionsAsync()
+     public async Task<VisitSwedenSyncResult> SyncAttractionsAsync(CancellationToken cancellationToken = default)
+     {
+          await _syncGate.WaitAsync(cancellationToken);
+          try
+          {
+               return await SyncAttractionsCoreAsync(cancellationToken);
+          }
+          finally
+          {
+               _syncGate.Release();
+          }
+     }
+
+     private async Task<VisitSwedenSyncResult> SyncAttractionsCoreAsync(CancellationToken cancellationToken)
      {
           var mapped = new List<Attraction>();
           var skippedMissingImage = 0;
           var skippedMissingCoordinates = 0;
           var skippedTotal = 0;
+          var skippedUnmappable = 0;
+          var pagesFetched = 0;
+          var recordsFetched = 0;
+          var currentOffset = 0;
+          int? sourceTotal = null;
 
-          for (var sourcePage = 0; ; sourcePage++)
+          try
           {
-               var offset = sourcePage * SourcePageSize;
-               var query = "public:true AND rdfType:http\\://schema.org/*";
-               var endpoint =
-                    $"search?type=solr&query={Uri.EscapeDataString(query)}&limit={SourcePageSize}&offset={offset}&rdfFormat=application/ld+json";
-
-               using var response = await _httpClient.GetAsync(endpoint);
-               if (!response.IsSuccessStatusCode)
+               for (var offset = 0; ; offset += SourcePageSize)
                {
-                    var body = await response.Content.ReadAsStringAsync();
-                    _logger.LogWarning("Visit Sweden sync failed: {StatusCode} {Body}", (int)response.StatusCode, body);
-                    throw new InvalidOperationException("Visit Sweden API request failed.");
-               }
+                    currentOffset = offset;
+                    var query = "public:true AND rdfType:http\\://schema.org/*";
+                    var endpoint =
+                         $"search?type=solr&query={Uri.EscapeDataString(query)}&limit={SourcePageSize}&offset={offset}&rdfFormat=application/ld+json";
 
-               await using var stream = await response.Content.ReadAsStreamAsync();
-               using var document = await JsonDocument.ParseAsync(stream);
-
-               var children = GetChildren(document.RootElement);
-               if (children.Count == 0)
-                    break;
-
-               foreach (var child in children)
-               {
-                    var attraction = MapAttraction(child);
-                    if (attraction is not null)
+                    HttpResponseMessage response;
+                    try
                     {
-                         var missingImage = string.IsNullOrWhiteSpace(attraction.ImageUrl);
-                         var missingCoordinates = !HasValidCoordinates(attraction.Latitude, attraction.Longitude);
+                         response = await _httpClient.GetAsync(endpoint, cancellationToken);
+                    }
+                    catch (OperationCanceledException exception) when (!cancellationToken.IsCancellationRequested)
+                    {
+                         _logger.LogWarning("Visit Sweden sync request timed out at offset {Offset}.", offset);
+                         throw new HttpRequestException("Visit Sweden API request timed out.", exception);
+                    }
 
-                         if (missingImage || missingCoordinates)
+                    using var responseScope = response;
+                    if (!response.IsSuccessStatusCode)
+                    {
+                         _logger.LogWarning(
+                              "Visit Sweden sync request failed at offset {Offset} with HTTP {StatusCode}.",
+                              offset,
+                              (int)response.StatusCode);
+                         throw new HttpRequestException(
+                              $"Visit Sweden API request failed with HTTP {(int)response.StatusCode}.",
+                              null,
+                              response.StatusCode);
+                    }
+
+                    JsonDocument document;
+                    try
+                    {
+                         await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+                         document = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken);
+                    }
+                    catch (OperationCanceledException exception) when (!cancellationToken.IsCancellationRequested)
+                    {
+                         _logger.LogWarning("Visit Sweden response timed out while reading offset {Offset}.", offset);
+                         throw new HttpRequestException("Visit Sweden API response timed out.", exception);
+                    }
+                    catch (JsonException exception)
+                    {
+                         _logger.LogWarning(exception, "Visit Sweden returned malformed JSON at offset {Offset}.", offset);
+                         throw new HttpRequestException("Visit Sweden API returned an invalid response.", exception);
+                    }
+
+                    using (document)
+                    {
+                         var children = GetChildren(document.RootElement);
+                         if (!document.RootElement.TryGetProperty("results", out var resultsElement) ||
+                             !resultsElement.TryGetInt32(out var pageTotal))
                          {
-                              if (missingImage)
-                              {
-                                   skippedMissingImage++;
-                              }
-
-                              if (missingCoordinates)
-                              {
-                                   skippedMissingCoordinates++;
-                              }
-
-                              skippedTotal++;
-                              continue;
+                              throw new HttpRequestException("Visit Sweden response did not include the expected result count.");
                          }
 
-                         mapped.Add(attraction);
+                         sourceTotal ??= pageTotal;
+                         if (children.Count == 0)
+                         {
+                              if (recordsFetched < sourceTotal)
+                              {
+                                   throw new HttpRequestException(
+                                        $"Visit Sweden returned no records at offset {offset} before the reported result count was reached.");
+                              }
+
+                              break;
+                         }
+
+                         pagesFetched++;
+                         recordsFetched += children.Count;
+
+                         foreach (var child in children)
+                         {
+                              var attraction = MapAttraction(child);
+                              if (attraction is null)
+                              {
+                                   skippedUnmappable++;
+                                   continue;
+                              }
+
+                              var missingImage = string.IsNullOrWhiteSpace(attraction.ImageUrl);
+                              var missingCoordinates = !HasValidCoordinates(attraction.Latitude, attraction.Longitude);
+
+                              if (missingImage || missingCoordinates)
+                              {
+                                   if (missingImage)
+                                   {
+                                        skippedMissingImage++;
+                                   }
+
+                                   if (missingCoordinates)
+                                   {
+                                        skippedMissingCoordinates++;
+                                   }
+
+                                   skippedTotal++;
+                                   continue;
+                              }
+
+                              if (string.IsNullOrWhiteSpace(attraction.County))
+                              {
+                                   skippedUnmappable++;
+                                   continue;
+                              }
+
+                              mapped.Add(attraction);
+                         }
+
+                         if (recordsFetched >= sourceTotal)
+                         {
+                              break;
+                         }
+
+                         if (children.Count < SourcePageSize)
+                         {
+                              throw new HttpRequestException(
+                                   $"Visit Sweden returned a short page at offset {offset} before the reported result count was reached.");
+                         }
                     }
                }
-          }
 
-          if (skippedTotal > 0)
-          {
-               _logger.LogWarning(
-                    "Visit Sweden sync skipped records due to missing media/location data. MissingImage: {MissingImageCount}, MissingCoordinates: {MissingCoordinatesCount}, TotalSkipped: {TotalSkippedCount}",
+               if (skippedTotal > 0)
+               {
+                    _logger.LogWarning(
+                         "Visit Sweden sync skipped records due to missing media/location data. MissingImage: {MissingImageCount}, MissingCoordinates: {MissingCoordinatesCount}, TotalSkipped: {TotalSkippedCount}",
+                         skippedMissingImage,
+                         skippedMissingCoordinates,
+                         skippedTotal);
+               }
+
+               if (recordsFetched > 0 && mapped.Count == 0)
+               {
+                    _logger.LogWarning(
+                         "Visit Sweden returned {RecordsFetched} source records, but none could be mapped to a county attraction.",
+                         recordsFetched);
+                    throw new HttpRequestException("Visit Sweden returned records, but none could be mapped to usable county attractions.");
+               }
+
+               var upsertResult = await _visitSwedenRepository.UpsertAttractionsAsync(mapped, cancellationToken);
+               var result = new VisitSwedenSyncResult(
+                    pagesFetched,
+                    recordsFetched,
+                    mapped.Count,
+                    upsertResult.Inserted,
+                    upsertResult.Updated,
                     skippedMissingImage,
                     skippedMissingCoordinates,
-                    skippedTotal);
-          }
+                    skippedUnmappable);
 
-          await _visitSwedenRepository.UpsertAttractionsAsync(mapped);
+               _logger.LogInformation(
+                    "Visit Sweden sync completed. Pages: {PagesFetched}, source records: {RecordsFetched}/{SourceTotal}, mapped: {MappedCount}, inserted: {InsertedCount}, updated: {UpdatedCount}, missing image: {MissingImageCount}, missing coordinates: {MissingCoordinatesCount}, unmappable: {UnmappableCount}.",
+                    result.PagesFetched,
+                    result.RecordsFetched,
+                    sourceTotal,
+                    result.AttractionsMapped,
+                    result.AttractionsInserted,
+                    result.AttractionsUpdated,
+                    result.SkippedMissingImage,
+                    result.SkippedMissingCoordinates,
+                    result.SkippedUnmappable);
+
+               return result;
+          }
+          catch (Exception exception) when (exception is not OperationCanceledException || !cancellationToken.IsCancellationRequested)
+          {
+               _logger.LogError(
+                    exception,
+                    "Visit Sweden sync failed at offset {Offset}. Pages fetched: {PagesFetched}; source records fetched: {RecordsFetched}/{SourceTotal}; mapped: {MappedCount}; skipped missing image: {MissingImageCount}; skipped missing coordinates: {MissingCoordinatesCount}; skipped unmappable: {UnmappableCount}.",
+                    currentOffset,
+                    pagesFetched,
+                    recordsFetched,
+                    sourceTotal,
+                    mapped.Count,
+                    skippedMissingImage,
+                    skippedMissingCoordinates,
+                    skippedUnmappable);
+               throw;
+          }
      }
 
      private static bool HasValidCoordinates(double? latitude, double? longitude)
@@ -112,10 +253,11 @@ public class VisitSwedenService : IVisitSwedenService
      private static List<JsonElement> GetChildren(JsonElement root)
      {
           if (!root.TryGetProperty("resource", out var resource) ||
+              resource.ValueKind != JsonValueKind.Object ||
               !resource.TryGetProperty("children", out var children) ||
               children.ValueKind != JsonValueKind.Array)
           {
-               return [];
+               throw new HttpRequestException("Visit Sweden response did not include the expected resource children array.");
           }
 
           return children.EnumerateArray().ToList();
@@ -144,7 +286,7 @@ public class VisitSwedenService : IVisitSwedenService
                county = _countyLookupService.GetCounty(geo.Latitude.Value, geo.Longitude.Value) ?? string.Empty;
           }
 
-          county = NormalizeCounty(county);
+          county = CountyData.ResolveCountyId(county);
 
           return new Attraction
           {
@@ -162,34 +304,6 @@ public class VisitSwedenService : IVisitSwedenService
                Longitude = geo.Longitude,
                LastSynced = DateTime.UtcNow
           };
-     }
-
-     private static string? NormalizeCounty(string? county)
-     {
-          county = county?.Trim().ToLowerInvariant();
-
-          county = county switch
-          {
-               "gavleborg" => "Gävleborgs",
-               "halland" => "Hallands",
-               "jamtlandharjedalen" => "Jämtlands",
-               "jonkoping" => "Jönköpings",
-               "kronoberg" => "Kronobergs",
-               "norrbotten" => "Norrbottens",
-               "skane" => "Skåne",
-               "stockholm" => "Stockholms",
-               "sormland" => "Södermanlands",
-               "varmland" => "Värmlands",
-               "vasterbotten" => "Västerbottens",
-               "vasternorrland" => "Västernorrlands",
-               "vastmanland" => "Västmanlands",
-               "vastragotaland" => "Västra Götalands",
-               "orebro" => "Örebro",
-               "ostergotland" => "Östergötlands",
-               _ => county
-          };
-
-          return county;
      }
 
      private static bool TryGetGraphNode(JsonElement source, out JsonElement node)

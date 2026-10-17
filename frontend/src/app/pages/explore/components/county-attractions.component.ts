@@ -33,6 +33,11 @@ interface CountyAttractionsVm {
   paged: PagedResponse<Attraction>;
 }
 
+interface AttractionsLoadState {
+  error: string | null;
+  paged: PagedResponse<Attraction>;
+}
+
 const EMPTY_PAGED_RESPONSE: PagedResponse<Attraction> = {
   items: [],
   page: 1,
@@ -86,22 +91,27 @@ export class CountyAttractionsComponent {
           request.page,
           request.pageSize,
           request.category || undefined,
+        ).pipe(
+          map(
+            (paged): AttractionsLoadState => ({
+              error: null,
+              paged,
+            }),
+          ),
+          catchError((error: unknown) =>
+            of<AttractionsLoadState>({
+              error: buildExploreErrorMessage(error),
+              paged: EMPTY_PAGED_RESPONSE,
+            }),
+          ),
         ),
       ]).pipe(
         map(
-          ([county, paged]): CountyAttractionsVm => ({
+          ([county, attractions]): CountyAttractionsVm => ({
             loading: false,
-            error: null,
+            error: attractions.error,
             county,
-            paged,
-          }),
-        ),
-        catchError((error: unknown) =>
-          of({
-            loading: false,
-            error: buildExploreErrorMessage(error),
-            county: undefined,
-            paged: EMPTY_PAGED_RESPONSE,
+            paged: attractions.paged,
           }),
         ),
       ),
@@ -116,6 +126,10 @@ export class CountyAttractionsComponent {
 
   ratingStars(rating: number): number {
     return Math.round(rating);
+  }
+
+  retry(): void {
+    this.requestState$.next({ ...this.requestState$.value });
   }
 
   goToPreviousPage(currentPage: number): void {

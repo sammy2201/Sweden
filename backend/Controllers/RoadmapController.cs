@@ -1,10 +1,8 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Authorization;
 
 namespace SwedenStart;
-
-
 [ApiController]
 [Route("api/roadmap")]
 [Authorize]
@@ -15,12 +13,19 @@ public class RoadmapController : ControllerBase
     public RoadmapController(IRoadmapService roadmapService)
         => _roadmapService = roadmapService;
 
+    [HttpGet("questions")]
+    [AllowAnonymous]
+    public ActionResult<IReadOnlyList<RoadmapQuestionDto>> GetQuestions()
+        => Ok(RoadmapQuestionnaire.Questions.OrderBy(q => q.Order).ToArray());
+
     [HttpPost]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
     public async Task<ActionResult<RoadmapResponseDto>> GenerateRoadmap(
         RoadmapRequestDto request)
     {
+        var validation = RoadmapAnswerValidator.Validate(request);
+        if (validation.Count > 0) return BadRequest(new ValidationProblemDetails(validation));
         if (!TryGetUserId(out var userId))
             return Unauthorized(ApiProblemDetails.Create(StatusCodes.Status401Unauthorized, "Unauthorized", "The authenticated user could not be identified."));
 
@@ -48,6 +53,8 @@ public class RoadmapController : ControllerBase
     public async Task<ActionResult<RoadmapResponseDto>> UpdateRoadmap(
         RoadmapRequestDto request)
     {
+        var validation = RoadmapAnswerValidator.Validate(request);
+        if (validation.Count > 0) return BadRequest(new ValidationProblemDetails(validation));
         if (!TryGetUserId(out var userId))
             return Unauthorized(ApiProblemDetails.Create(StatusCodes.Status401Unauthorized, "Unauthorized", "The authenticated user could not be identified."));
 
@@ -75,10 +82,18 @@ public class RoadmapController : ControllerBase
     public async Task<ActionResult<RoadmapResponseDto>> UpdateTaskCompletion(
         Guid taskId, UpdateTaskCompletionDto request)
     {
+        if (request.Completed is not bool completed)
+        {
+            return BadRequest(new ValidationProblemDetails(new Dictionary<string, string[]>
+            {
+                [nameof(request.Completed)] = ["The Completed field is required."],
+            }));
+        }
+
         if (!TryGetUserId(out var userId))
             return Unauthorized(ApiProblemDetails.Create(StatusCodes.Status401Unauthorized, "Unauthorized", "The authenticated user could not be identified."));
 
-        var response = await _roadmapService.SetTaskCompletionAsync(userId, taskId, request.Completed);
+        var response = await _roadmapService.SetTaskCompletionAsync(userId, taskId, completed);
         return Ok(response);
     }
 

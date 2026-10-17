@@ -2,5 +2,5 @@ namespace SwedenStart;
 
 public interface IVisitSwedenRepository
 {
-     Task UpsertAttractionsAsync(IEnumerable<Attraction> attractions);
+     Task<VisitSwedenUpsertResult> UpsertAttractionsAsync(IEnumerable<Attraction> attractions, CancellationToken cancellationToken = default);
 }

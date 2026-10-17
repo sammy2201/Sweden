@@ -6,7 +6,7 @@ These instructions apply to the entire Sweden Start repository.
 
 - The backend is an ASP.NET Core Web API targeting .NET 10 in `backend/`.
 - The frontend is an Angular 20 application in `frontend/`, using TypeScript, PrimeNG, RxJS, and Angular signals.
-- PostgreSQL 16 runs through Docker Compose. The backend and frontend normally run on the host during local development; `make dev` starts the database and both apps.
+- Local PostgreSQL runs natively through the Homebrew service. The backend and frontend run on the host during local development; `make dev` starts the database and both apps.
 - The frontend is also packaged into the backend's static web root by the root `Dockerfile` for the production container.
 - Backend code is organized around controllers, services, repositories, DTOs, models, and EF Core data access. Follow the nearest existing implementation when adding features.
 
@@ -18,7 +18,7 @@ These instructions apply to the entire Sweden Start repository.
 - Do not add dependencies or broad abstractions when the existing platform or local pattern already solves the problem.
 - Keep changes focused. Avoid unrelated refactors, generated output, and formatting churn.
 - Never commit secrets, tokens, passwords, private keys, or local machine configuration. Do not print secret values in command output or responses.
-- Do not run destructive database or Git commands without explicit user approval. In particular, never use `docker compose down -v`; it deletes the PostgreSQL data volume.
+- Do not run destructive database or Git commands without explicit user approval. Never delete or reset a PostgreSQL data directory or database volume as part of routine development.
 - Do not claim tests passed unless they were actually run. Report unavailable test coverage and relevant existing warnings clearly.
 
 ## Backend Conventions
@@ -54,9 +54,8 @@ Run commands from the repository root unless a command specifies a working direc
 - `make backend_build` builds the .NET API.
 - `make frontend_build` builds the Angular production app.
 - `make dev` starts PostgreSQL and runs the backend and frontend locally.
-- `docker compose config` validates the resolved Compose configuration without starting containers.
-- `docker compose up -d postgres` starts or updates the PostgreSQL container while preserving its named data volume.
-- `docker compose ps postgres` and `docker compose logs postgres` help inspect database state.
+- `make db_status` checks the Homebrew PostgreSQL 18 service.
+- `make db_shell` opens a `psql` session against the development database on port 5434.
 - Run the narrowest relevant build or test after editing, then broader checks when the change affects shared behavior. The frontend currently defines a production `build` script; check package scripts before assuming a test command exists.
 - The backend build may report a known `NU1903` advisory for `Microsoft.OpenApi`. Do not perform a breaking package upgrade as part of unrelated work.
 

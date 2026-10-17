@@ -6,5 +6,3 @@
 **/obj
 **/node_modules
 frontend/dist
-backend/appsettings*.json
-!backend/appsettings.example.json

@@ -24,6 +24,16 @@ public sealed class ApiExceptionHandler(
                    "Roadmap not found",
                    ex.Message,
                    "ROADMAP_NOT_FOUND"),
+               RoadmapConcurrencyException ex => (
+                   StatusCodes.Status409Conflict,
+                   "Roadmap update conflict",
+                   ex.Message,
+                   "ROADMAP_CONCURRENCY_CONFLICT"),
+               RoadmapPrerequisiteException ex => (
+                   StatusCodes.Status409Conflict,
+                   "Step prerequisites are incomplete",
+                   ex.Message,
+                   "ROADMAP_PREREQUISITES_INCOMPLETE"),
                UnauthorizedAccessException ex => (
                    StatusCodes.Status401Unauthorized,
                    "Unauthorized",

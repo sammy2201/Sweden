@@ -14,13 +14,29 @@
       </p>
 
       <div class="hero-actions">
-        <p-button
-          label="Start with the essentials"
-          icon="pi pi-arrow-right"
-          routerLink="/p-number">
-        </p-button>
+        @if (isAuthenticated() && !roadmapLookupComplete()) {
+          <p-button
+            label="Checking your roadmap"
+            icon="pi pi-spin pi-spinner"
+            [disabled]="true">
+          </p-button>
+        } @else {
+          <p-button
+            [label]="
+              roadmapLookupFailed()
+                ? 'Open your roadmap'
+                : hasRoadmap()
+                  ? 'Update your roadmap'
+                  : 'Create your roadmap'
+            "
+            [icon]="hasRoadmap() ? 'pi pi-pencil' : 'pi pi-arrow-right'"
+            routerLink="/roadmap">
+          </p-button>
+        }
+
         <a class="quiet-action" href="#guide-directory">
-          Browse all guides <i class="pi pi-arrow-down" aria-hidden="true"></i>
+          Browse all guides
+          <i class="pi pi-arrow-down" aria-hidden="true"></i>
         </a>
       </div>
 
@@ -146,3 +162,5 @@
     }
   </section>
 </main>
+
+<app-chat-widget></app-chat-widget>

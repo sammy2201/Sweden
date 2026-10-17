@@ -155,6 +155,10 @@ namespace SwedenStart.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<bool>("Completed")
                         .HasColumnType("boolean");
 
@@ -162,8 +166,34 @@ namespace SwedenStart.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("PrerequisitesJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Priority")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ResourceUrl")
+                        .HasColumnType("text");
+
                     b.Property<Guid?>("RoadmapId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("RuleExplanation")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("RuleId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("StateBeforeCompletion")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -246,9 +276,11 @@ namespace SwedenStart.Migrations
 
             modelBuilder.Entity("SwedenStart.RoadmapTask", b =>
                 {
-                    b.HasOne("SwedenStart.Roadmap", null)
+                    b.HasOne("SwedenStart.Roadmap", "Roadmap")
                         .WithMany("Tasks")
                         .HasForeignKey("RoadmapId");
+
+                    b.Navigation("Roadmap");
                 });
 
             modelBuilder.Entity("SwedenStart.Roadmap", b =>

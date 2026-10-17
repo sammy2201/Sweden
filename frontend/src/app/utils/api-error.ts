@@ -51,7 +51,11 @@ function asProblemDetails(value: unknown): ProblemDetailsPayload | null {
     return null;
   }
 
-  return value as ProblemDetailsPayload;
+  return {
+    title: "title" in value ? value.title : undefined,
+    detail: "detail" in value ? value.detail : undefined,
+    errors: "errors" in value ? value.errors : undefined,
+  };
 }
 
 function firstValidationMessage(errors: unknown): string | null {

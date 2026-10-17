@@ -18,6 +18,7 @@ public class ExploreController : ControllerBase
      }
 
      [HttpGet("counties")]
+     [AllowAnonymous]
      public async Task<ActionResult<ExploreCountiesResponseDto>> GetCounties()
      {
           var counties = await _exploreService.GetCountiesAsync();
@@ -65,14 +66,24 @@ public class ExploreController : ControllerBase
      }
 
      [HttpGet("attractions")]
+     [AllowAnonymous]
      public async Task<ActionResult<ExploreAttractionsResponseDto>> GetAttractions(
-         [FromQuery] ExploreAttractionsRequestDto request)
+         [FromQuery] ExploreAttractionsRequestDto request,
+         CancellationToken cancellationToken)
      {
           var result = await _exploreService.GetAttractionsAsync(
               request.County,
               request.Page,
               request.PageSize,
               request.Category);
+
+          if (result.TotalCount == 0 && !await _exploreService.HasAnyAttractionsAsync(cancellationToken))
+          {
+               return Problem(
+                    statusCode: StatusCodes.Status503ServiceUnavailable,
+                    title: "Attraction catalogue unavailable",
+                    detail: "Attraction data has not been synchronized yet. Please retry shortly.");
+          }
 
           return Ok(new ExploreAttractionsResponseDto
           {
@@ -87,6 +98,7 @@ public class ExploreController : ControllerBase
      }
 
      [HttpGet("attractions/{id}")]
+     [AllowAnonymous]
      [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
      public async Task<ActionResult<ExploreAttractionDetailResponseDto>> GetAttraction(string id)
      {

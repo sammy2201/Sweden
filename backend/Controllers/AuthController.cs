@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 namespace SwedenStart;
@@ -21,10 +22,11 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
     {
         var token = await _authService.LoginAsync(request.Email, request.Password);
+        var expiresAt = new JwtSecurityTokenHandler().ReadJwtToken(token).ValidTo;
         return Ok(new AuthResponseDto
         {
             AccessToken = token,
-            ExpiresAt = DateTime.UtcNow.AddHours(1)
+            ExpiresAt = expiresAt
         });
     }
 
