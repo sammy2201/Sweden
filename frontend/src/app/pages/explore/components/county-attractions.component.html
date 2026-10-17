@@ -72,18 +72,6 @@
                     Discover this place in {{ attraction.city || county.name }}.
                   </p>
 
-                  <div class="rating-row">
-                    <p-rating
-                      [ngModel]="ratingStars(attraction.rating)"
-                      [readonly]="true"
-                      [stars]="5">
-                    </p-rating>
-
-                    <span class="rating-value">
-                      {{ attraction.rating }}
-                    </span>
-                  </div>
-
                   <p-divider></p-divider>
 
                   <div class="card-footer">

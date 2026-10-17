@@ -1,6 +1,5 @@
 import { CommonModule } from "@angular/common";
 import { Component, inject } from "@angular/core";
-import { FormsModule } from "@angular/forms";
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
 import {
   catchError,
@@ -16,7 +15,6 @@ import { CardModule } from "primeng/card";
 import { DividerModule } from "primeng/divider";
 import { ImageModule } from "primeng/image";
 import { PanelModule } from "primeng/panel";
-import { RatingModule } from "primeng/rating";
 import { TabsModule } from "primeng/tabs";
 import { TagModule } from "primeng/tag";
 import { AttractionDetail, County } from "../../../models/explore.models";
@@ -36,14 +34,12 @@ interface AttractionDetailVm {
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
     RouterLink,
     ButtonModule,
     CardModule,
     DividerModule,
     ImageModule,
     PanelModule,
-    RatingModule,
     TabsModule,
     TagModule,
   ],
@@ -89,10 +85,6 @@ export class AttractionDetailsComponent {
       }),
     ),
   );
-
-  ratingStars(rating: number): number {
-    return Math.round(rating);
-  }
 
   mapsUrl(attraction: AttractionDetail): string {
     const query = attraction.address || attraction.name;

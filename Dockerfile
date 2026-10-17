@@ -13,7 +13,6 @@ COPY backend/ backend/
 RUN rm -rf backend/wwwroot && mkdir -p backend/wwwroot
 COPY --from=frontend-build /src/frontend/dist/sweden-start/browser/ backend/wwwroot/
 RUN dotnet publish backend/SwedenStart.csproj --configuration Release --no-restore --output /app/publish
-RUN mkdir -p /app/publish/Data && cp backend/Data/geoBoundaries-SWE-ADM1.geojson /app/publish/Data/
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app

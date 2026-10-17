@@ -14,14 +14,12 @@ import {
 import { ButtonModule } from "primeng/button";
 import { CardModule } from "primeng/card";
 import { DividerModule } from "primeng/divider";
-import { RatingModule } from "primeng/rating";
 import { TagModule } from "primeng/tag";
 import {
   Attraction,
   County,
   PagedResponse,
 } from "../../../models/explore.models";
-import { FormsModule } from "@angular/forms";
 import { buildExploreErrorMessage } from "../explore.utils";
 import { AuthService } from "../../../services/auth.service";
 import { ExploreService } from "../../../services/explore.service";
@@ -53,12 +51,10 @@ const EMPTY_PAGED_RESPONSE: PagedResponse<Attraction> = {
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
     RouterLink,
     ButtonModule,
     CardModule,
     DividerModule,
-    RatingModule,
     TagModule,
   ],
   templateUrl: "./county-attractions.component.html",
@@ -123,10 +119,6 @@ export class CountyAttractionsComponent {
       paged: EMPTY_PAGED_RESPONSE,
     }),
   );
-
-  ratingStars(rating: number): number {
-    return Math.round(rating);
-  }
 
   retry(): void {
     this.requestState$.next({ ...this.requestState$.value });

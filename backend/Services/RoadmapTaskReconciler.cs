@@ -38,6 +38,7 @@ public static class RoadmapTaskReconciler
             oldTask.Category = replacement.Category;
             oldTask.Priority = replacement.Priority;
             oldTask.StateBeforeCompletion = replacement.State;
+            oldTask.Completed |= oldTask.State == "Completed";
             oldTask.State = oldTask.Completed ? "Completed" : replacement.State;
             oldTask.ResourceUrl = replacement.ResourceUrl;
             oldTask.RuleExplanation = replacement.RuleExplanation;

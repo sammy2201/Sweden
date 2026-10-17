@@ -27,7 +27,7 @@ public class AuthService : IAuthService
             throw new UnauthorizedAccessException("Invalid credentials");
         }
 
-        return await GenerateJwtToken(user);
+        return GenerateJwtToken(user);
     }
 
     public async Task<bool> RegisterAsync(string firstName, string lastName, string username, string email, string city, string address, string password)
@@ -87,7 +87,7 @@ public class AuthService : IAuthService
         return user;
     }
 
-    public Task<string> GenerateJwtToken(User user)
+    private string GenerateJwtToken(User user)
     {
         var key = _config["Jwt:Key"] ?? _config["Jwt:Secret"] ?? throw new InvalidOperationException("JWT key is not configured.");
         var issuer = _config["Jwt:Issuer"] ?? "sweden-start";
@@ -119,6 +119,6 @@ public class AuthService : IAuthService
 
         var tokenHandler = new JwtSecurityTokenHandler();
         var jwt = tokenHandler.WriteToken(token);
-        return Task.FromResult(jwt);
+        return jwt;
     }
 }

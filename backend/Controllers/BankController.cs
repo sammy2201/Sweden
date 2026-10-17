@@ -1,8 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
-
-
 namespace SwedenStart;
 
 
@@ -19,9 +16,8 @@ public class BankController : ControllerBase
      }
 
      [HttpGet]
-     public async Task<ActionResult<IEnumerable<BankDto>>> GetBanks()
+     public ActionResult<IEnumerable<BankDto>> GetBanks()
      {
-          var banks = await _bankService.GetBanksAsync();
-          return Ok(banks);
+          return Ok(_bankService.GetBanks());
      }
 }

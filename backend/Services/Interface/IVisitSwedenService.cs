@@ -18,4 +18,5 @@ public sealed record VisitSwedenSyncResult(
      int SkippedUnmappable)
 {
      public int AttractionsStored => AttractionsInserted + AttractionsUpdated;
+     public int SkippedRecords => Math.Max(0, RecordsFetched - AttractionsMapped);
 }

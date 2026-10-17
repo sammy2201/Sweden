@@ -39,14 +39,17 @@ public sealed class VisitSwedenStartupSyncService : BackgroundService
                     var visitSwedenService = scope.ServiceProvider.GetRequiredService<IVisitSwedenService>();
                     var result = await visitSwedenService.SyncAttractionsAsync(stoppingToken);
                     _logger.LogInformation(
-                         "Visit Sweden startup sync finished successfully. Attempts: {Attempt}/{MaxAttempts}; fetched: {Fetched}; mapped: {Mapped}; inserted: {Inserted}; updated: {Updated}; skipped: {Skipped}.",
+                         "Visit Sweden startup sync finished successfully. Attempts: {Attempt}/{MaxAttempts}; fetched: {Fetched}; mapped: {Mapped}; inserted: {Inserted}; updated: {Updated}; skipped records: {SkippedRecords} (missing image: {MissingImage}, missing coordinates: {MissingCoordinates}, unmappable: {Unmappable}; reason counts can overlap).",
                          attempt,
                          maxAttempts,
                          result.RecordsFetched,
                          result.AttractionsMapped,
                          result.AttractionsInserted,
                          result.AttractionsUpdated,
-                         result.SkippedMissingImage + result.SkippedMissingCoordinates + result.SkippedUnmappable);
+                         result.SkippedRecords,
+                         result.SkippedMissingImage,
+                         result.SkippedMissingCoordinates,
+                         result.SkippedUnmappable);
                     return;
                }
                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)

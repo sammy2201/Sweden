@@ -4,26 +4,15 @@ public static class RoadmapAnswerValidator
 {
     private const string NotApplicable = "Not applicable";
 
-    private static readonly IReadOnlyDictionary<string, string[]> Allowed = new Dictionary<string, string[]>(StringComparer.Ordinal)
-    {
-        ["origin"] = ["EU", "Non-EU"], ["residencePermit"] = ["Yes", "No"],
-        ["liveInSweden"] = ["Yes", "No"], ["personnummer"] = ["Yes", "No", NotApplicable],
-        ["appliedPersonnummer"] = ["Yes", "No", "Waiting for decision", NotApplicable],
-        ["idCard"] = ["Yes", "No", NotApplicable], ["bankAccount"] = ["Yes", "No", NotApplicable],
-        ["bankId"] = ["Yes", "No", NotApplicable], ["housing"] = ["Permanent", "Temporary", "Still looking"],
-        ["planToDrive"] = ["Yes", "No"], ["drivingLicenceType"] = ["Swedish", "EU", "Other", NotApplicable],
-        ["purpose"] = ["Work", "Study", "Looking for work", "Family"], ["insurance"] = ["Yes", "No", NotApplicable],
-    };
-
-    public static Dictionary<string, string[]> Validate(RoadmapRequestDto request)
+    public static Dictionary<string, string[]> Validate(RoadmapRequestDto request, RoadmapQuestionnaire questionnaire)
     {
         var errors = new Dictionary<string, string[]>(StringComparer.Ordinal);
         var answers = RoadmapQuestionnaire.Answers(request);
         foreach (var (questionId, value) in answers)
-            if (!Allowed[questionId].Contains(value, StringComparer.Ordinal))
+            if (!questionnaire.IsAllowedValue(questionId, value))
                 errors[questionId] = [$"Select a valid {questionId} option."];
 
-        foreach (var question in RoadmapQuestionnaire.Questions)
+        foreach (var question in questionnaire.Questions)
         {
             if (!answers.TryGetValue(question.Id, out var value) || errors.ContainsKey(question.Id)) continue;
             if (RoadmapQuestionnaire.IsVisible(question, answers) && value == NotApplicable)
@@ -41,4 +30,5 @@ public static class RoadmapAnswerValidator
 
         return errors;
     }
+
 }

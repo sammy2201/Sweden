@@ -1,0 +1,741 @@
+{
+  "rules": [
+    {
+      "ruleId": "settle-arrival",
+      "when": [
+        {
+          "questionId": "liveInSweden",
+          "equals": "No"
+        }
+      ],
+      "title": "Prepare for arrival",
+      "description": "Review practical steps for settling in Sweden before or soon after arrival.",
+      "category": "Settlement",
+      "priority": 1,
+      "state": "Applicable",
+      "explanation": "The respondent does not yet live in Sweden."
+    },
+    {
+      "ruleId": "residence-status",
+      "when": [
+        {
+          "questionId": "residencePermit",
+          "equals": "No"
+        }
+      ],
+      "title": "Review residence guidance for your situation",
+      "description": "Review guidance for the selected origin category ({origin}) and purpose ({purpose}). These answers alone do not establish whether you need a permit or qualify to live in Sweden.",
+      "category": "Residence",
+      "priority": 2,
+      "resourceUrl": "https://www.migrationsverket.se/en/you-want-to-apply.html",
+      "explanation": "The respondent has no current residence permit; origin and purpose may help find relevant guidance but are not enough to determine individual residence rights."
+    },
+    {
+      "ruleId": "personnummer-prepare",
+      "when": [
+        {
+          "questionId": "liveInSweden",
+          "equals": "Yes"
+        },
+        {
+          "questionId": "personnummer",
+          "equals": "No"
+        },
+        {
+          "questionId": "appliedPersonnummer",
+          "equals": "No"
+        }
+      ],
+      "title": "Check eligibility and prepare a Personnummer application",
+      "description": "Review Skatteverket's current requirements for your situation and prepare the supporting documents before applying.",
+      "category": "Registration",
+      "priority": 1,
+      "state": "Applicable",
+      "resourceUrl": "https://www.skatteverket.se/servicelankar/otherlanguages/englishengelska/individualsandemployees/movingtosweden.4.7be5268414bea064694c40c.html",
+      "explanation": "The respondent lives in Sweden, has no Personnummer, and has not applied."
+    },
+    {
+      "ruleId": "personnummer-status",
+      "when": [
+        {
+          "questionId": "liveInSweden",
+          "equals": "Yes"
+        },
+        {
+          "questionId": "personnummer",
+          "equals": "No"
+        },
+        {
+          "questionId": "appliedPersonnummer",
+          "equals": "Yes"
+        }
+      ],
+      "title": "Check your Personnummer application status",
+      "description": "If you have not received a decision, check the status with Skatteverket. Do not submit a duplicate application.",
+      "category": "Registration",
+      "priority": 2,
+      "resourceUrl": "https://www.skatteverket.se/servicelankar/otherlanguages/englishengelska/individualsandemployees/movingtosweden.4.7be5268414bea064694c40c.html",
+      "explanation": "The respondent has applied but did not say a decision is pending; check status without assuming the application is still waiting."
+    },
+    {
+      "ruleId": "personnummer-pending",
+      "when": [
+        {
+          "questionId": "liveInSweden",
+          "equals": "Yes"
+        },
+        {
+          "questionId": "personnummer",
+          "equals": "No"
+        },
+        {
+          "questionId": "appliedPersonnummer",
+          "equals": "Waiting for decision"
+        }
+      ],
+      "title": "Follow your Personnummer application",
+      "description": "Wait for the decision and contact Skatteverket if you need an update. Do not submit a duplicate application.",
+      "category": "Registration",
+      "priority": 1,
+      "state": "Waiting",
+      "resourceUrl": "https://www.skatteverket.se/servicelankar/otherlanguages/englishengelska/individualsandemployees/movingtosweden.4.7be5268414bea064694c40c.html",
+      "explanation": "The respondent explicitly says a decision is pending."
+    },
+    {
+      "ruleId": "id-card",
+      "when": [
+        {
+          "questionId": "liveInSweden",
+          "equals": "Yes"
+        },
+        {
+          "questionId": "idCard",
+          "equals": "No"
+        }
+      ],
+      "title": "Check Swedish ID card eligibility and application steps",
+      "description": "Review Skatteverket's current requirements before applying; eligibility is assessed for your circumstances.",
+      "category": "Identity",
+      "priority": 2,
+      "resourceUrl": "https://www.skatteverket.se/servicelankar/otherlanguages/inenglishengelska/individualsandemployees/livinginsweden/swedishtaxagencyidentitycards/howtoapplyfororrenewidcard.4.3810a01c150939e893f1e20d.html",
+      "explanation": "A missing Swedish ID card calls for eligibility and application guidance, not an assumed legal obligation.",
+      "variants": [
+        {
+          "when": [
+            {
+              "questionId": "personnummer",
+              "equals": "No"
+            }
+          ],
+          "title": "Check Swedish ID card eligibility",
+          "description": "Ask Skatteverket which identity documents and personal-number status apply to your circumstances before preparing an application.",
+          "resourceUrl": "https://www.skatteverket.se/servicelankar/otherlanguages/inenglishengelska/individualsandemployees/livinginsweden/swedishtaxagencyidentitycards/howtoapplyfororrenewidcard.4.3810a01c150939e893f1e20d.html"
+        }
+      ],
+      "prerequisites": [
+        {
+          "ruleId": "personnummer-prepare",
+          "explanation": "A Personnummer may be relevant to the ID card process; confirm eligibility and timing with Skatteverket.",
+          "when": [
+            {
+              "questionId": "personnummer",
+              "equals": "No"
+            },
+            {
+              "questionId": "appliedPersonnummer",
+              "equals": "No"
+            }
+          ]
+        },
+        {
+          "ruleId": "personnummer-status",
+          "explanation": "A Personnummer may be relevant to the ID card process; confirm eligibility and timing with Skatteverket.",
+          "when": [
+            {
+              "questionId": "personnummer",
+              "equals": "No"
+            },
+            {
+              "questionId": "appliedPersonnummer",
+              "equals": "Yes"
+            }
+          ]
+        },
+        {
+          "ruleId": "personnummer-pending",
+          "explanation": "A Personnummer may be relevant to the ID card process; confirm eligibility and timing with Skatteverket.",
+          "when": [
+            {
+              "questionId": "personnummer",
+              "equals": "No"
+            },
+            {
+              "questionId": "appliedPersonnummer",
+              "equals": "Waiting for decision"
+            }
+          ]
+        },
+        {
+          "ruleId": "personnummer-prepare",
+          "explanation": "A Personnummer may be relevant to the ID card process; confirm eligibility and timing with Skatteverket.",
+          "when": [
+            {
+              "questionId": "personnummer",
+              "equals": "No"
+            },
+            {
+              "questionId": "appliedPersonnummer",
+              "equals": "Not applicable"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "ruleId": "bank-account",
+      "when": [
+        {
+          "questionId": "liveInSweden",
+          "equals": "Yes"
+        },
+        {
+          "questionId": "bankAccount",
+          "equals": "No"
+        }
+      ],
+      "title": "Prepare to open a bank account",
+      "description": "Compare banks' current identity, documentation, and appointment requirements. A Personnummer or Swedish ID card does not guarantee eligibility.",
+      "category": "Banking",
+      "priority": 2,
+      "state": "Applicable",
+      "explanation": "The respondent does not have a Swedish bank account; requirements vary between banks."
+    },
+    {
+      "ruleId": "bankid",
+      "when": [
+        {
+          "questionId": "liveInSweden",
+          "equals": "Yes"
+        },
+        {
+          "questionId": "bankId",
+          "equals": "No"
+        }
+      ],
+      "title": "Check BankID eligibility and setup options",
+      "description": "Ask an issuing bank about eligibility and setup requirements. Having a bank account does not guarantee BankID; ask about alternative access methods.",
+      "category": "Banking",
+      "priority": 3,
+      "resourceUrl": "https://www.bankid.com/en/individuals/get-bankid",
+      "explanation": "The respondent does not have BankID; provider eligibility and prerequisites must be confirmed.",
+      "prerequisites": [
+        {
+          "ruleId": "bank-account",
+          "explanation": "BankID is issued through banks; prepare to discuss account-opening requirements, but account eligibility does not guarantee BankID eligibility.",
+          "when": [
+            {
+              "questionId": "bankAccount",
+              "equals": "No"
+            }
+          ]
+        },
+        {
+          "ruleId": "personnummer-pending",
+          "explanation": "BankID's current eligibility guidance requires a Swedish personal identity number; confirm your circumstances with an issuing bank.",
+          "when": [
+            {
+              "questionId": "personnummer",
+              "equals": "No"
+            },
+            {
+              "questionId": "appliedPersonnummer",
+              "equals": "Waiting for decision"
+            }
+          ]
+        },
+        {
+          "ruleId": "personnummer-status",
+          "explanation": "BankID's current eligibility guidance requires a Swedish personal identity number; confirm your circumstances with an issuing bank.",
+          "when": [
+            {
+              "questionId": "personnummer",
+              "equals": "No"
+            },
+            {
+              "questionId": "appliedPersonnummer",
+              "equals": "Yes"
+            }
+          ]
+        },
+        {
+          "ruleId": "personnummer-prepare",
+          "explanation": "BankID's current eligibility guidance requires a Swedish personal identity number; confirm your circumstances with an issuing bank.",
+          "when": [
+            {
+              "questionId": "personnummer",
+              "equals": "No"
+            },
+            {
+              "questionId": "appliedPersonnummer",
+              "equals": "No"
+            }
+          ]
+        },
+        {
+          "ruleId": "personnummer-prepare",
+          "explanation": "BankID's current eligibility guidance requires a Swedish personal identity number; confirm your circumstances with an issuing bank.",
+          "when": [
+            {
+              "questionId": "personnummer",
+              "equals": "No"
+            },
+            {
+              "questionId": "appliedPersonnummer",
+              "equals": "Not applicable"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "ruleId": "insurance-review",
+      "when": [
+        {
+          "questionId": "liveInSweden",
+          "equals": "Yes"
+        },
+        {
+          "questionId": "insurance",
+          "equals": "No"
+        }
+      ],
+      "title": "Review your social insurance and coverage",
+      "description": "Check your registration and coverage situation with Försäkringskassan. Separately consider whether additional insurance suits your needs; private cover is not a universal legal requirement.",
+      "category": "Insurance",
+      "priority": 3,
+      "resourceUrl": "https://www.forsakringskassan.se/english/moving-to-working-studying-or-newly-arrived-in-sweden/social-insurance-in-sweden/insured-in-sweden",
+      "explanation": "The answer indicates no Försäkringskassan registration; it does not establish that the respondent lacks all insurance coverage."
+    },
+    {
+      "ruleId": "housing-search",
+      "when": [
+        {
+          "questionId": "housing",
+          "equals": "Still looking"
+        }
+      ],
+      "title": "Find housing and review rental terms",
+      "description": "Compare housing options and understand the rental contract, deposit, and notice terms before signing.",
+      "category": "Housing",
+      "priority": 1,
+      "state": "Applicable",
+      "explanation": "The respondent is still looking for housing."
+    },
+    {
+      "ruleId": "housing-next",
+      "when": [
+        {
+          "questionId": "housing",
+          "equals": "Temporary"
+        }
+      ],
+      "title": "Plan your next housing step",
+      "description": "Review your current arrangement and decide whether you need longer-term accommodation.",
+      "category": "Housing",
+      "priority": 3,
+      "explanation": "The respondent has temporary housing, so a follow-up plan may be useful."
+    },
+    {
+      "ruleId": "public-transport-card",
+      "when": [],
+      "title": "Get a Public Transport Card",
+      "description": "Purchase a regional travel card for the area where you live or travel. No other roadmap steps are required first.",
+      "category": "Transport",
+      "priority": 4,
+      "state": "Applicable",
+      "explanation": "A regional travel card can be purchased independently of the respondent's other roadmap answers."
+    },
+    {
+      "ruleId": "licence-eu",
+      "when": [
+        {
+          "questionId": "planToDrive",
+          "equals": "Yes"
+        },
+        {
+          "questionId": "drivingLicenceType",
+          "equals": "EU"
+        }
+      ],
+      "title": "Check rules for your EU licence",
+      "description": "Confirm the rules and conditions for your particular licence and issuing country with Transportstyrelsen.",
+      "category": "Transport",
+      "priority": 3,
+      "resourceUrl": "https://www.transportstyrelsen.se/en/road/driving-licences/",
+      "explanation": "The respondent plans to drive and selected the EU licence category; the issuing country and individual rules still need confirmation."
+    },
+    {
+      "ruleId": "licence-other",
+      "when": [
+        {
+          "questionId": "planToDrive",
+          "equals": "Yes"
+        },
+        {
+          "questionId": "drivingLicenceType",
+          "equals": "Other"
+        }
+      ],
+      "title": "Check rules for your driving licence",
+      "description": "Ask Transportstyrelsen whether your particular licence can be used or exchanged in Sweden; rules vary by issuing country and circumstances.",
+      "category": "Transport",
+      "priority": 3,
+      "resourceUrl": "https://www.transportstyrelsen.se/en/road/driving-licences/",
+      "explanation": "The respondent plans to drive and selected Other; no exchange or eligibility outcome is assumed."
+    },
+    {
+      "ruleId": "licence-swedish",
+      "when": [
+        {
+          "questionId": "planToDrive",
+          "equals": "Yes"
+        },
+        {
+          "questionId": "drivingLicenceType",
+          "equals": "Swedish"
+        }
+      ],
+      "title": "Check your Swedish driving licence details",
+      "description": "Keep your licence accessible and check that its details are current.",
+      "category": "Transport",
+      "priority": 4,
+      "explanation": "The respondent plans to drive and reports having a Swedish licence."
+    },
+    {
+      "ruleId": "work-search",
+      "when": [
+        {
+          "questionId": "purpose",
+          "equals": "Looking for work"
+        }
+      ],
+      "title": "Review job-seeking support",
+      "description": "Review Arbetsförmedlingen's services and create a profile if appropriate for your situation.",
+      "category": "Work",
+      "priority": 2,
+      "resourceUrl": "https://arbetsformedlingen.se/other-languages/english-engelska/find-your-new-job-in-sweden",
+      "explanation": "The respondent's stated purpose is looking for work."
+    },
+    {
+      "ruleId": "study-planning",
+      "when": [
+        {
+          "questionId": "purpose",
+          "equals": "Study"
+        }
+      ],
+      "title": "Review study and student support steps",
+      "description": "Confirm enrolment requirements and any support available through your education provider.",
+      "category": "Study",
+      "priority": 3,
+      "explanation": "The respondent's stated purpose is study."
+    },
+    {
+      "ruleId": "work-onboarding",
+      "when": [
+        {
+          "questionId": "purpose",
+          "equals": "Work"
+        }
+      ],
+      "title": "Review work and employment onboarding",
+      "description": "Confirm your employment documents, workplace onboarding, and practical arrangements with your employer.",
+      "category": "Work",
+      "priority": 3,
+      "explanation": "The respondent's stated purpose is work."
+    },
+    {
+      "ruleId": "family-planning",
+      "when": [
+        {
+          "questionId": "purpose",
+          "equals": "Family"
+        }
+      ],
+      "title": "Review family settlement needs",
+      "description": "Check which practical registration, childcare, school, or family-support steps apply to your household.",
+      "category": "Family",
+      "priority": 3,
+      "explanation": "The respondent's stated purpose is family."
+    }
+  ],
+  "questionnaire": [
+    {
+      "id": "origin",
+      "text": "Where are you from?",
+      "answerType": "select",
+      "values": [
+        "EU",
+        "Non-EU"
+      ],
+      "required": true,
+      "order": 1,
+      "allowNotApplicable": false,
+      "dependencies": [],
+      "guidance": "These choices do not separately identify EEA or Nordic status. Nationality alone does not establish residence rights."
+    },
+    {
+      "id": "residencePermit",
+      "text": "Do you already have a residence permit?",
+      "answerType": "select",
+      "values": [
+        "Yes",
+        "No"
+      ],
+      "required": true,
+      "order": 2,
+      "allowNotApplicable": false,
+      "dependencies": [
+        {
+          "id": "clarify-residence-rights-from-origin",
+          "sourceQuestionId": "origin",
+          "operator": "Equals",
+          "answer": "Non-EU",
+          "dependentQuestionId": "residencePermit",
+          "effect": "RequireClarification",
+          "explanation": "Origin alone does not determine residence rights or whether a permit is required; check rules for your individual situation and purpose."
+        }
+      ],
+      "guidance": "A No answer does not by itself establish that a permit is required; individual residence rights depend on more information."
+    },
+    {
+      "id": "liveInSweden",
+      "text": "Do you already live in Sweden?",
+      "answerType": "select",
+      "values": [
+        "Yes",
+        "No"
+      ],
+      "required": true,
+      "order": 3,
+      "allowNotApplicable": false,
+      "dependencies": [],
+      "guidance": null
+    },
+    {
+      "id": "personnummer",
+      "text": "Do you have a Personnummer?",
+      "answerType": "select",
+      "values": [
+        "Yes",
+        "No"
+      ],
+      "required": true,
+      "order": 4,
+      "allowNotApplicable": true,
+      "dependencies": [
+        {
+          "id": "show-personnummer-for-residents",
+          "sourceQuestionId": "liveInSweden",
+          "operator": "Equals",
+          "answer": "Yes",
+          "dependentQuestionId": "personnummer",
+          "effect": "Show",
+          "explanation": "Ask about registration only when the respondent already lives in Sweden."
+        }
+      ],
+      "guidance": null
+    },
+    {
+      "id": "appliedPersonnummer",
+      "text": "Have you applied for a Personnummer?",
+      "answerType": "select",
+      "values": [
+        "Yes",
+        "No",
+        "Waiting for decision"
+      ],
+      "required": true,
+      "order": 5,
+      "allowNotApplicable": true,
+      "dependencies": [
+        {
+          "id": "show-personnummer-application-status",
+          "sourceQuestionId": "personnummer",
+          "operator": "Equals",
+          "answer": "No",
+          "dependentQuestionId": "appliedPersonnummer",
+          "effect": "Show",
+          "explanation": "The application status only applies when the respondent does not already have a Personnummer."
+        }
+      ],
+      "guidance": null
+    },
+    {
+      "id": "idCard",
+      "text": "Do you have a Swedish ID card?",
+      "answerType": "select",
+      "values": [
+        "Yes",
+        "No"
+      ],
+      "required": true,
+      "order": 6,
+      "allowNotApplicable": true,
+      "dependencies": [
+        {
+          "id": "show-id-card-for-residents",
+          "sourceQuestionId": "liveInSweden",
+          "operator": "Equals",
+          "answer": "Yes",
+          "dependentQuestionId": "idCard",
+          "effect": "Show",
+          "explanation": "Ask about identity documentation for respondents already living in Sweden."
+        }
+      ],
+      "guidance": null
+    },
+    {
+      "id": "bankAccount",
+      "text": "Do you have a Swedish bank account?",
+      "answerType": "select",
+      "values": [
+        "Yes",
+        "No"
+      ],
+      "required": true,
+      "order": 7,
+      "allowNotApplicable": true,
+      "dependencies": [
+        {
+          "id": "show-bank-account-for-residents",
+          "sourceQuestionId": "liveInSweden",
+          "operator": "Equals",
+          "answer": "Yes",
+          "dependentQuestionId": "bankAccount",
+          "effect": "Show",
+          "explanation": "Bank requirements vary; the answer is useful even when the respondent lacks a Personnummer or Swedish ID card."
+        }
+      ],
+      "guidance": null
+    },
+    {
+      "id": "bankId",
+      "text": "Do you have BankID?",
+      "answerType": "select",
+      "values": [
+        "Yes",
+        "No"
+      ],
+      "required": true,
+      "order": 8,
+      "allowNotApplicable": true,
+      "dependencies": [
+        {
+          "id": "show-bankid-for-residents",
+          "sourceQuestionId": "liveInSweden",
+          "operator": "Equals",
+          "answer": "Yes",
+          "dependentQuestionId": "bankId",
+          "effect": "Show",
+          "explanation": "BankID eligibility depends on the provider and is not guaranteed by holding a bank account."
+        }
+      ],
+      "guidance": null
+    },
+    {
+      "id": "housing",
+      "text": "What is your housing situation?",
+      "answerType": "select",
+      "values": [
+        "Permanent",
+        "Temporary",
+        "Still looking"
+      ],
+      "required": true,
+      "order": 9,
+      "allowNotApplicable": false,
+      "dependencies": [],
+      "guidance": null
+    },
+    {
+      "id": "planToDrive",
+      "text": "Do you plan to drive in Sweden?",
+      "answerType": "select",
+      "values": [
+        "Yes",
+        "No"
+      ],
+      "required": true,
+      "order": 10,
+      "allowNotApplicable": false,
+      "dependencies": [],
+      "guidance": null
+    },
+    {
+      "id": "drivingLicenceType",
+      "text": "Which licence do you have?",
+      "answerType": "select",
+      "values": [
+        "Swedish",
+        "EU",
+        "Other"
+      ],
+      "required": true,
+      "order": 11,
+      "allowNotApplicable": true,
+      "dependencies": [
+        {
+          "id": "show-licence-if-driving",
+          "sourceQuestionId": "planToDrive",
+          "operator": "Equals",
+          "answer": "Yes",
+          "dependentQuestionId": "drivingLicenceType",
+          "effect": "Show",
+          "explanation": "Licence information is only relevant when the respondent plans to drive."
+        }
+      ],
+      "guidance": "This answer describes the licence category, not its issuing country. Origin does not establish which driving rules apply."
+    },
+    {
+      "id": "purpose",
+      "text": "Why are you in Sweden?",
+      "answerType": "select",
+      "values": [
+        "Work",
+        "Study",
+        "Looking for work",
+        "Family"
+      ],
+      "required": true,
+      "order": 12,
+      "allowNotApplicable": false,
+      "dependencies": [],
+      "guidance": null
+    },
+    {
+      "id": "insurance",
+      "text": "Have you registered with Försäkringskassan?",
+      "answerType": "select",
+      "values": [
+        "Yes",
+        "No"
+      ],
+      "required": true,
+      "order": 13,
+      "allowNotApplicable": true,
+      "dependencies": [
+        {
+          "id": "show-insurance-for-residents",
+          "sourceQuestionId": "liveInSweden",
+          "operator": "Equals",
+          "answer": "Yes",
+          "dependentQuestionId": "insurance",
+          "effect": "Show",
+          "explanation": "Ask about Swedish social-insurance registration only for respondents already living in Sweden."
+        }
+      ],
+      "guidance": null
+    }
+  ]
+}

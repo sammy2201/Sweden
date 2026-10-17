@@ -27,8 +27,11 @@ public class RoadmapRepository : IRoadmapRepository
 
         if (existing is not null)
         {
-            throw new RoadmapConflictException(
-                "A roadmap already exists for this user. Cannot create new. Go to profile and update.");
+            throw new ApiException(
+                StatusCodes.Status409Conflict,
+                "Roadmap conflict",
+                "A roadmap already exists for this user. Cannot create new. Go to profile and update.",
+                "ROADMAP_ALREADY_EXISTS");
         }
 
         roadmap.Id = roadmap.Id == Guid.Empty ? Guid.NewGuid() : roadmap.Id;
@@ -126,7 +129,11 @@ public class RoadmapRepository : IRoadmapRepository
 
         if (existing is null)
         {
-            throw new RoadmapNotFoundException("Roadmap not found for this user.");
+            throw new ApiException(
+                StatusCodes.Status404NotFound,
+                "Roadmap not found",
+                "Roadmap not found for this user.",
+                "ROADMAP_NOT_FOUND");
         }
 
         existing.Origin = roadmap.Origin;
@@ -192,16 +199,22 @@ public class RoadmapRepository : IRoadmapRepository
         {
             if (task.State == "Waiting")
             {
-                throw new RoadmapPrerequisiteException(
-                    "This step is waiting for an update and cannot be marked complete yet.");
+                throw new ApiException(
+                    StatusCodes.Status409Conflict,
+                    "Step prerequisites are incomplete",
+                    "This step is waiting for an update and cannot be marked complete yet.",
+                    "ROADMAP_PREREQUISITES_INCOMPLETE");
             }
 
             var blockingPrerequisites = RoadmapTaskPrerequisiteGuard.GetUnmetTitles(task, roadmap.Tasks);
 
             if (blockingPrerequisites.Count > 0)
             {
-                throw new RoadmapPrerequisiteException(
-                    $"Complete {string.Join(", ", blockingPrerequisites)} before marking this step complete.");
+                throw new ApiException(
+                    StatusCodes.Status409Conflict,
+                    "Step prerequisites are incomplete",
+                    $"Complete {string.Join(", ", blockingPrerequisites)} before marking this step complete.",
+                    "ROADMAP_PREREQUISITES_INCOMPLETE");
             }
         }
         else
@@ -209,8 +222,11 @@ public class RoadmapRepository : IRoadmapRepository
             var completedDependents = RoadmapTaskPrerequisiteGuard.GetCompletedDependentTitles(task, roadmap.Tasks);
             if (completedDependents.Count > 0)
             {
-                throw new RoadmapPrerequisiteException(
-                    $"First mark {string.Join(", ", completedDependents)} incomplete, then update this prerequisite step.");
+                throw new ApiException(
+                    StatusCodes.Status409Conflict,
+                    "Step prerequisites are incomplete",
+                    $"First mark {string.Join(", ", completedDependents)} incomplete, then update this prerequisite step.",
+                    "ROADMAP_PREREQUISITES_INCOMPLETE");
             }
         }
 
@@ -236,8 +252,11 @@ public class RoadmapRepository : IRoadmapRepository
         }
         catch (DbUpdateException ex) when (IsUserRoadmapUniqueViolation(ex))
         {
-            throw new RoadmapConflictException(
-                "A roadmap already exists for this user. Cannot create new. Go to profile and update.");
+            throw new ApiException(
+                StatusCodes.Status409Conflict,
+                "Roadmap conflict",
+                "A roadmap already exists for this user. Cannot create new. Go to profile and update.",
+                "ROADMAP_ALREADY_EXISTS");
         }
         catch (DbUpdateConcurrencyException ex)
         {
@@ -255,8 +274,11 @@ public class RoadmapRepository : IRoadmapRepository
                 "Roadmap persistence encountered a concurrency conflict. Affected entity types/states: {EntityTypes}",
                 entityTypes);
 
-            throw new RoadmapConcurrencyException(
+            throw new ApiException(
+                StatusCodes.Status409Conflict,
+                "Roadmap update conflict",
                 "Another request changed this roadmap while it was being saved. Reload the roadmap and try again.",
+                "ROADMAP_CONCURRENCY_CONFLICT",
                 ex);
         }
     }
