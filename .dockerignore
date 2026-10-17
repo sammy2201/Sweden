@@ -6,3 +6,4 @@
 **/obj
 **/node_modules
 frontend/dist
+**/appsettings.Development.json
