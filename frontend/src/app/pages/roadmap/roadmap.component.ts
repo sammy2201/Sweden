@@ -10,7 +10,7 @@ import { ConfirmDialogModule } from "primeng/confirmdialog";
 import { DialogModule } from "primeng/dialog";
 import { ProgressBarModule } from "primeng/progressbar";
 import { SelectModule } from "primeng/select";
-import { catchError, forkJoin, of, switchMap } from "rxjs";
+import { catchError, of } from "rxjs";
 import { getApiErrorMessage } from "../../utils/api-error";
 import { RoadmapService } from "../../services/roadmap.service";
 import type {
@@ -20,7 +20,6 @@ import type {
   RoadmapResponse,
   RoadmapTaskResponse,
 } from "../../models/roadmap.models";
-import { AuthService } from "../../services/auth.service";
 import { ExploreService } from "../../services/explore.service";
 import { County } from "../../models/explore.models";
 
@@ -56,7 +55,6 @@ export class RoadmapComponent implements OnInit {
   private readonly roadmapService = inject(RoadmapService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly confirmationService = inject(ConfirmationService);
-  private readonly authService = inject(AuthService);
   private readonly exploreService = inject(ExploreService);
 
   fields: RoadmapField[] = [];
@@ -64,8 +62,6 @@ export class RoadmapComponent implements OnInit {
   tasks: RoadmapTaskResponse[] = [];
   transportCounties: County[] = [];
   transportCounty: County | null = null;
-  isSavingTransportCounty = false;
-  transportCountySaveError = "";
   hasExistingRoadmap = false;
   isLoadingExistingRoadmap = true;
   isLoadingQuestions = true;
@@ -133,8 +129,15 @@ export class RoadmapComponent implements OnInit {
           task.state !== "Waiting" &&
           this.unmetPrerequisiteTitles(task).length === 0,
       ) ??
-      this.applicableTasks.find((task) => task.state === "Waiting" && !task.completed) ??
-      this.tasks.find((task) => this.isOptionalTask(task) && !task.completed && task.state !== "Completed") ??
+      this.applicableTasks.find(
+        (task) => task.state === "Waiting" && !task.completed,
+      ) ??
+      this.tasks.find(
+        (task) =>
+          this.isOptionalTask(task) &&
+          !task.completed &&
+          task.state !== "Completed",
+      ) ??
       null
     );
   }
@@ -172,7 +175,10 @@ export class RoadmapComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (questions) => {
-          this.fields = [...questions].sort((firstQuestion, secondQuestion) => firstQuestion.order - secondQuestion.order);
+          this.fields = [...questions].sort(
+            (firstQuestion, secondQuestion) =>
+              firstQuestion.order - secondQuestion.order,
+          );
           this.isLoadingQuestions = false;
         },
         error: (error: unknown) => {
@@ -188,57 +194,18 @@ export class RoadmapComponent implements OnInit {
   }
 
   private loadTransportCounty(): void {
-    const cachedProfile = this.authService.user();
-    const profile$ = cachedProfile
-      ? of(cachedProfile)
-      : this.authService.loadUserProfile().pipe(catchError(() => of(null)));
-
-    forkJoin({
-      profile: profile$,
-      counties: this.exploreService.getCounties().pipe(catchError(() => of([]))),
-    })
+    this.exploreService
+      .getCounties()
+      .pipe(catchError(() => of([])))
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(({ profile, counties }) => {
+      .subscribe((counties) => {
         this.transportCounties = counties;
-        this.transportCounty = this.resolveTransportCounty(profile?.transportCountyId);
       });
   }
 
-  private resolveTransportCounty(countyId?: string | null): County | null {
-    if (!countyId) return null;
-    return this.transportCounties.find((county) => county.id === countyId) ?? null;
-  }
-
   selectTransportCounty(county: County | null): void {
-    if (!county || county.id === this.transportCounty?.id || this.isSavingTransportCounty) return;
-    const previousCounty = this.transportCounty;
+    if (!county || county.id === this.transportCounty?.id) return;
     this.transportCounty = county;
-    this.transportCountySaveError = "";
-    this.isSavingTransportCounty = true;
-    const cachedProfile = this.authService.user();
-    const profile$ = cachedProfile
-      ? of(cachedProfile)
-      : this.authService.loadUserProfile();
-    profile$.pipe(
-      switchMap((profile) => this.authService.updateUserProfile({
-        firstName: profile.firstName,
-        lastName: profile.lastName,
-        city: profile.city,
-        address: profile.address,
-        transportCountyId: county.id,
-      })),
-      takeUntilDestroyed(this.destroyRef),
-    ).subscribe({
-      next: (updatedProfile) => {
-        this.transportCounty = this.resolveTransportCounty(updatedProfile.transportCountyId) ?? previousCounty;
-        this.isSavingTransportCounty = false;
-      },
-      error: (error: unknown) => {
-        this.transportCounty = previousCounty;
-        this.transportCountySaveError = getApiErrorMessage(error, "Your region could not be saved. Please try again.");
-        this.isSavingTransportCounty = false;
-      },
-    });
   }
 
   isPublicTransportTask(task: RoadmapTaskResponse): boolean {
@@ -472,8 +439,16 @@ export class RoadmapComponent implements OnInit {
   private isUnavailableTaskError(error: unknown): boolean {
     if (!(error instanceof HttpErrorResponse)) return false;
     if (error.status === 404) return true;
-    if (error.status !== 409 || typeof error.error !== "object" || error.error === null) return false;
-    return "code" in error.error && error.error.code === "ROADMAP_TASK_NOT_APPLICABLE";
+    if (
+      error.status !== 409 ||
+      typeof error.error !== "object" ||
+      error.error === null
+    )
+      return false;
+    return (
+      "code" in error.error &&
+      error.error.code === "ROADMAP_TASK_NOT_APPLICABLE"
+    );
   }
 
   private refreshAfterUnavailableTask(): void {
@@ -566,8 +541,10 @@ export class RoadmapComponent implements OnInit {
   }
 
   isOptionalTask(task: RoadmapTaskResponse): boolean {
-    return task.state === "Optional" ||
-      (task.state === "Completed" && task.stateBeforeCompletion === "Optional");
+    return (
+      task.state === "Optional" ||
+      (task.state === "Completed" && task.stateBeforeCompletion === "Optional")
+    );
   }
 
   statusLabel(task: RoadmapTaskResponse): string {

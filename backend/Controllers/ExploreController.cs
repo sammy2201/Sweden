@@ -31,15 +31,14 @@ public class ExploreController : ControllerBase
                     TransportProviderName = county.TransportProviderName,
                     OfficialTicketUrl = county.OfficialTicketUrl,
                     JourneyPlannerUrl = county.JourneyPlannerUrl
-                }).ToList()
+               }).ToList()
           });
      }
 
      [HttpGet("attractions")]
      [AllowAnonymous]
      public async Task<ActionResult<ExploreAttractionsResponseDto>> GetAttractions(
-         [FromQuery] ExploreAttractionsRequestDto request,
-         CancellationToken cancellationToken)
+         [FromQuery] ExploreAttractionsRequestDto request)
      {
           var result = await _exploreService.GetAttractionsAsync(
               request.County,
@@ -47,7 +46,7 @@ public class ExploreController : ControllerBase
               request.PageSize,
               request.Category);
 
-          if (result.TotalCount == 0 && !await _exploreService.HasAnyAttractionsAsync(cancellationToken))
+          if (result.TotalCount == 0 && !await _exploreService.HasAnyAttractionsAsync())
           {
                throw new ApiException(
                     StatusCodes.Status503ServiceUnavailable,
@@ -69,7 +68,6 @@ public class ExploreController : ControllerBase
 
      [HttpGet("attractions/{id}")]
      [AllowAnonymous]
-     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
      public async Task<ActionResult<ExploreAttractionDetailResponseDto>> GetAttraction(string id)
      {
           var attraction = await _exploreService.GetAttractionAsync(id);

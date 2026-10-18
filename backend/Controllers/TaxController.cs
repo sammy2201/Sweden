@@ -24,9 +24,6 @@ public class TaxController : ControllerBase
      }
 
      [HttpPost("calculate")]
-     [ProducesResponseType(typeof(TaxCalculationResponse), StatusCodes.Status200OK)]
-     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
      public ActionResult<TaxCalculationResponse> Calculate([FromBody] TaxCalculationRequest request)
      {
           var result = _taxService.Calculate(request);

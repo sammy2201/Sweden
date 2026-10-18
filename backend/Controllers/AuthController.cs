@@ -1,3 +1,4 @@
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
@@ -10,19 +11,25 @@ namespace SwedenStart;
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
+
+    // Constructor initializes the controller's private field with the auth service.
     public AuthController(IAuthService authService)
     {
         _authService = authService;
-
     }
 
     [HttpPost("login")]
     [AllowAnonymous]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
     {
-        var token = await _authService.LoginAsync(request.Email, request.Password);
-        var expiresAt = new JwtSecurityTokenHandler().ReadJwtToken(token).ValidTo;
+        var token = await _authService.LoginAsync(
+            request.Email,
+            request.Password);
+
+        var expiresAt = new JwtSecurityTokenHandler()
+            .ReadJwtToken(token)
+            .ValidTo;
+
         return Ok(new AuthResponseDto
         {
             AccessToken = token,
@@ -32,10 +39,18 @@ public class AuthController : ControllerBase
 
     [HttpPost("register")]
     [AllowAnonymous]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
-    public async Task<IActionResult> Register([FromBody] RegisterRequestDto request)
+    public async Task<IActionResult> Register(
+        [FromBody] RegisterRequestDto request)
     {
-        var created = await _authService.RegisterAsync(request.FirstName, request.LastName, request.Username, request.Email, request.City, request.Address, request.Password);
+        var created = await _authService.RegisterAsync(
+            request.FirstName,
+            request.LastName,
+            request.Username,
+            request.Email,
+            request.City,
+            request.Address,
+            request.Password);
+
         if (!created)
         {
             throw new ApiException(
@@ -45,60 +60,86 @@ public class AuthController : ControllerBase
                 "ACCOUNT_ALREADY_EXISTS");
         }
 
-        return CreatedAtAction(nameof(Register), new { username = request.Username });
+        return StatusCode(
+            StatusCodes.Status201Created,
+            "Registration successful");
     }
-
 
     [HttpGet("user")]
     [Authorize]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetUser()
     {
-        if (!TryGetCurrentUserId(out var userId))
-            throw new ApiException(StatusCodes.Status401Unauthorized, "Unauthorized", "The authenticated user could not be identified.");
+        var userId = GetCurrentUserId();
 
-        var user = await _authService.GetUserAsync(userId);
-        if (user == null)
-            throw new ApiException(StatusCodes.Status404NotFound, "User not found", "The requested user profile was not found.");
+        if (userId == null)
+        {
+            throw new ApiException(
+                StatusCodes.Status401Unauthorized,
+                "Unauthorized",
+                "The authenticated user could not be identified.");
+        }
 
-        var userDto = MapUserDto(user);
-
-        return Ok(userDto);
-    }
-
-    [HttpPut("user")]
-    [Authorize]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> UpdateUser([FromBody] UpdateUserProfileRequestDto request)
-    {
-        if (request.TransportCountyId is not null && !CountyData.IsValidCountyId(request.TransportCountyId))
-            throw new ApiException(StatusCodes.Status400BadRequest, "Invalid transport region", "Select a valid Swedish county for public transport links.");
-
-        if (!TryGetCurrentUserId(out var userId))
-            throw new ApiException(StatusCodes.Status401Unauthorized, "Unauthorized", "The authenticated user could not be identified.");
-
-        var user = await _authService.UpdateUserProfileAsync(
-            userId,
-            request.FirstName,
-            request.LastName,
-            request.City,
-            request.Address,
-            request.TransportCountyId);
+        var user = await _authService.GetUserAsync(userId.Value);
 
         if (user == null)
-            throw new ApiException(StatusCodes.Status404NotFound, "User not found", "The requested user profile was not found.");
+        {
+            throw new ApiException(
+                StatusCodes.Status404NotFound,
+                "User not found",
+                "The requested user profile was not found.");
+        }
 
         return Ok(MapUserDto(user));
     }
 
-    private bool TryGetCurrentUserId(out Guid userId)
+    [HttpPut("user")]
+    [Authorize]
+    public async Task<IActionResult> UpdateUser(
+        [FromBody] UpdateUserProfileRequestDto request)
     {
-        var userIdentifierClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        return Guid.TryParse(userIdentifierClaim, out userId);
+        var userId = GetCurrentUserId();
+
+        if (userId == null)
+        {
+            throw new ApiException(
+                StatusCodes.Status401Unauthorized,
+                "Unauthorized",
+                "The authenticated user could not be identified.");
+        }
+
+        var user = await _authService.UpdateUserProfileAsync(
+            userId.Value,
+            request.FirstName,
+            request.LastName,
+            request.City,
+            request.Address);
+
+        if (user == null)
+        {
+            throw new ApiException(
+                StatusCodes.Status404NotFound,
+                "User not found",
+                "The requested user profile was not found.");
+        }
+
+        return Ok(MapUserDto(user));
     }
 
+    // Gets the current user's ID from the authentication claims.
+    private Guid? GetCurrentUserId()
+    {
+        var userIdentifierClaim =
+            User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (Guid.TryParse(userIdentifierClaim, out var userId))
+        {
+            return userId;
+        }
+
+        return null;
+    }
+
+    // Converts the database user into a DTO for the API response.
     private static UserDto MapUserDto(User user)
     {
         return new UserDto
@@ -109,8 +150,7 @@ public class AuthController : ControllerBase
             Username = user.Username,
             Email = user.Email,
             City = user.City,
-            Address = user.Address,
-            TransportCountyId = user.TransportCountyId
+            Address = user.Address
         };
     }
 }

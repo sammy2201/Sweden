@@ -21,7 +21,6 @@ export interface UserProfile {
   email: string;
   city: string;
   address: string;
-  transportCountyId?: string | null;
   age?: number | null;
 }
 
@@ -30,7 +29,6 @@ export interface UpdateUserProfilePayload {
   lastName: string;
   city: string;
   address: string;
-  transportCountyId?: string | null;
 }
 
 export interface AuthResponse {

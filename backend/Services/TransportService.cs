@@ -26,8 +26,7 @@ public class TransportService : ITransportService
           string from,
           string to,
           DateTime? departureTime = null,
-          DateTime? arrivalTime = null,
-          CancellationToken cancellationToken = default)
+          DateTime? arrivalTime = null)
      {
           if (string.IsNullOrWhiteSpace(from))
                throw new ApiException(StatusCodes.Status400BadRequest, "Invalid request", "'from' is required.");
@@ -39,20 +38,20 @@ public class TransportService : ITransportService
           if (string.IsNullOrWhiteSpace(apiKey))
                throw new ApiException(StatusCodes.Status502BadGateway, "Transport service unavailable", "ResRobot API key is not configured.");
 
-          var origin = await LookupStationAsync(from.Trim(), apiKey, cancellationToken);
-          var destination = await LookupStationAsync(to.Trim(), apiKey, cancellationToken);
-          var trips = await FetchTripsAsync(origin.ExtId, destination.ExtId, apiKey, cancellationToken, departureTime, arrivalTime);
+          var origin = await LookupStationAsync(from.Trim(), apiKey);
+          var destination = await LookupStationAsync(to.Trim(), apiKey);
+          var trips = await FetchTripsAsync(origin.ExtId, destination.ExtId, apiKey, departureTime, arrivalTime);
           return trips;
      }
 
-     private async Task<ResRobotStopLocationDto> LookupStationAsync(string input, string apiKey, CancellationToken cancellationToken)
+     private async Task<ResRobotStopLocationDto> LookupStationAsync(string input, string apiKey)
      {
           var endpoint = $"location.name?format=json&input={Uri.EscapeDataString(input)}&accessId={Uri.EscapeDataString(apiKey)}";
-          using var response = await _httpClient.GetAsync(endpoint, cancellationToken);
+          using var response = await _httpClient.GetAsync(endpoint);
 
           if (!response.IsSuccessStatusCode)
           {
-               var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
+               var errorBody = await response.Content.ReadAsStringAsync();
                _logger.LogWarning(
                     "ResRobot location lookup failed for '{Input}'. Status: {StatusCode}. Response: {Response}",
                     input,
@@ -61,8 +60,8 @@ public class TransportService : ITransportService
                throw new ApiException(StatusCodes.Status502BadGateway, "Transport service unavailable", "Unable to resolve station location from ResRobot.");
           }
 
-          await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-          var payload = await JsonSerializer.DeserializeAsync<ResRobotLocationResponseDto>(stream, JsonOptions, cancellationToken);
+          await using var stream = await response.Content.ReadAsStreamAsync();
+          var payload = await JsonSerializer.DeserializeAsync<ResRobotLocationResponseDto>(stream, JsonOptions);
 
           var station = payload?.StopLocationOrCoordLocation
                .Select(locationResult => locationResult.StopLocation)
@@ -78,7 +77,6 @@ public class TransportService : ITransportService
           string originId,
           string destinationId,
           string apiKey,
-          CancellationToken cancellationToken,
           DateTime? departureTime = null,
           DateTime? arrivalTime = null)
      {
@@ -105,11 +103,11 @@ public class TransportService : ITransportService
 
           var endpoint = $"trip?{string.Join("&", queryParts)}";
 
-          using var response = await _httpClient.GetAsync(endpoint, cancellationToken);
+          using var response = await _httpClient.GetAsync(endpoint);
 
           if (!response.IsSuccessStatusCode)
           {
-               var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
+               var errorBody = await response.Content.ReadAsStringAsync();
                _logger.LogWarning(
                     "ResRobot trip lookup failed. OriginId: {OriginId}, DestId: {DestId}, Status: {StatusCode}, Response: {Response}",
                     originId,
@@ -119,8 +117,8 @@ public class TransportService : ITransportService
                throw new ApiException(StatusCodes.Status502BadGateway, "Transport service unavailable", "Unable to fetch trips from ResRobot.");
           }
 
-          await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-          var payload = await JsonSerializer.DeserializeAsync<ResRobotTripResponseDto>(stream, JsonOptions, cancellationToken);
+          await using var stream = await response.Content.ReadAsStreamAsync();
+          var payload = await JsonSerializer.DeserializeAsync<ResRobotTripResponseDto>(stream, JsonOptions);
 
           var result = (payload?.Trips ?? [])
                .Select(TransportMapper.MapTrip)

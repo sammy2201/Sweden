@@ -71,7 +71,6 @@ public class UserDto
 
     public string Address { get; set; } = string.Empty;
 
-    public string? TransportCountyId { get; set; }
 }
 
 public class UpdateUserProfileRequestDto
@@ -92,5 +91,4 @@ public class UpdateUserProfileRequestDto
     [StringLength(255, MinimumLength = 3)]
     public string Address { get; set; } = string.Empty;
 
-    public string? TransportCountyId { get; set; }
 }

@@ -1,3 +1,4 @@
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -12,7 +13,9 @@ public class RoadmapController : ControllerBase
     private readonly IRoadmapService _roadmapService;
     private readonly RoadmapQuestionnaire _questionnaire;
 
-    public RoadmapController(IRoadmapService roadmapService, RoadmapQuestionnaire questionnaire)
+    public RoadmapController(
+        IRoadmapService roadmapService,
+        RoadmapQuestionnaire questionnaire)
     {
         _roadmapService = roadmapService;
         _questionnaire = questionnaire;
@@ -21,91 +24,155 @@ public class RoadmapController : ControllerBase
     [HttpGet("questions")]
     [AllowAnonymous]
     public ActionResult<IReadOnlyList<RoadmapQuestionDto>> GetQuestions()
-        => Ok(_questionnaire.Questions.OrderBy(question => question.Order).ToArray());
+    {
+        return Ok(_questionnaire.Questions
+            .OrderBy(question => question.Order)
+            .ToArray());
+    }
 
     [HttpPost]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
     public async Task<ActionResult<RoadmapResponseDto>> GenerateRoadmap(
         RoadmapRequestDto request)
     {
         var validation = RoadmapAnswerValidator.Validate(request, _questionnaire);
-        if (validation.Count > 0) return BadRequest(new ValidationProblemDetails(validation));
-        if (!TryGetUserId(out var userId))
-            throw new ApiException(StatusCodes.Status401Unauthorized, "Unauthorized", "The authenticated user could not be identified.");
 
-        var response = await _roadmapService.GenerateRoadmapAsync(request, userId);
+        if (validation.Count > 0)
+            return BadRequest(new ValidationProblemDetails(validation));
+
+        var userId = GetUserId();
+
+        if (userId == null)
+        {
+            throw new ApiException(
+                StatusCodes.Status401Unauthorized,
+                "Unauthorized",
+                "The authenticated user could not be identified.");
+        }
+
+        var response = await _roadmapService.GenerateRoadmapAsync(
+            request, userId.Value);
+
         return Ok(response);
     }
 
     [HttpGet]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<RoadmapResponseDto>> GetRoadmap()
     {
-        if (!TryGetUserId(out var userId))
-            throw new ApiException(StatusCodes.Status401Unauthorized, "Unauthorized", "The authenticated user could not be identified.");
+        var userId = GetUserId();
 
-        var response = await _roadmapService.GetRoadmapAsync(userId);
+        if (userId == null)
+        {
+            throw new ApiException(
+                StatusCodes.Status401Unauthorized,
+                "Unauthorized",
+                "The authenticated user could not be identified.");
+        }
+
+        var response = await _roadmapService.GetRoadmapAsync(userId.Value);
+
         if (response == null)
-            throw new ApiException(StatusCodes.Status404NotFound, "Roadmap not found", "No roadmap exists for this user.");
+        {
+            throw new ApiException(
+                StatusCodes.Status404NotFound,
+                "Roadmap not found",
+                "No roadmap exists for this user.");
+        }
+
         return Ok(response);
     }
 
     [HttpPut]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<RoadmapResponseDto>> UpdateRoadmap(
         RoadmapRequestDto request)
     {
         var validation = RoadmapAnswerValidator.Validate(request, _questionnaire);
-        if (validation.Count > 0) return BadRequest(new ValidationProblemDetails(validation));
-        if (!TryGetUserId(out var userId))
-            throw new ApiException(StatusCodes.Status401Unauthorized, "Unauthorized", "The authenticated user could not be identified.");
 
-        var response = await _roadmapService.UpdateRoadmapAsync(request, userId);
+        if (validation.Count > 0)
+            return BadRequest(new ValidationProblemDetails(validation));
+
+        var userId = GetUserId();
+
+        if (userId == null)
+        {
+            throw new ApiException(
+                StatusCodes.Status401Unauthorized,
+                "Unauthorized",
+                "The authenticated user could not be identified.");
+        }
+
+        var response = await _roadmapService.UpdateRoadmapAsync(
+            request, userId.Value);
+
         return Ok(response);
     }
 
     [HttpDelete]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteRoadmap()
     {
-        if (!TryGetUserId(out var userId))
-            throw new ApiException(StatusCodes.Status401Unauthorized, "Unauthorized", "The authenticated user could not be identified.");
+        var userId = GetUserId();
 
-        var deleted = await _roadmapService.DeleteRoadmapAsync(userId);
+        if (userId == null)
+        {
+            throw new ApiException(
+                StatusCodes.Status401Unauthorized,
+                "Unauthorized",
+                "The authenticated user could not be identified.");
+        }
+
+        var deleted = await _roadmapService.DeleteRoadmapAsync(userId.Value);
+
         if (!deleted)
-            throw new ApiException(StatusCodes.Status404NotFound, "Roadmap not found", "No roadmap exists for this user.");
+        {
+            throw new ApiException(
+                StatusCodes.Status404NotFound,
+                "Roadmap not found",
+                "No roadmap exists for this user.");
+        }
+
         return NoContent();
     }
 
     [HttpPatch("tasks/{taskId:guid}")]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<RoadmapResponseDto>> UpdateTaskCompletion(
-        Guid taskId, UpdateTaskCompletionDto request)
+        Guid taskId,
+        UpdateTaskCompletionDto request)
     {
         if (request.Completed is not bool completed)
         {
-            return BadRequest(new ValidationProblemDetails(new Dictionary<string, string[]>
-            {
-                [nameof(request.Completed)] = ["The Completed field is required."],
-            }));
+            return BadRequest(new ValidationProblemDetails(
+                new Dictionary<string, string[]>
+                {
+                    [nameof(request.Completed)] =
+                        ["The Completed field is required."]
+                }));
         }
 
-        if (!TryGetUserId(out var userId))
-            throw new ApiException(StatusCodes.Status401Unauthorized, "Unauthorized", "The authenticated user could not be identified.");
+        var userId = GetUserId();
 
-        var response = await _roadmapService.SetTaskCompletionAsync(userId, taskId, completed);
+        if (userId == null)
+        {
+            throw new ApiException(
+                StatusCodes.Status401Unauthorized,
+                "Unauthorized",
+                "The authenticated user could not be identified.");
+        }
+
+        var response = await _roadmapService.SetTaskCompletionAsync(
+            userId.Value, taskId, completed);
+
         return Ok(response);
     }
 
-    private bool TryGetUserId(out Guid userId)
+    // Gets the current user's ID from the authentication claims.
+    private Guid? GetUserId()
     {
         var claim = User.FindFirst(ClaimTypes.NameIdentifier);
-        userId = Guid.Empty;
-        return claim != null && Guid.TryParse(claim.Value, out userId);
+
+        if (claim != null && Guid.TryParse(claim.Value, out var userId))
+        {
+            return userId;
+        }
+
+        return null;
     }
 }

@@ -12,8 +12,8 @@ public class ExploreService : IExploreService
      public IEnumerable<CountyDto> GetCounties()
           => CountyData.GetCounties();
 
-     public Task<bool> HasAnyAttractionsAsync(CancellationToken cancellationToken = default)
-          => _attractionRepository.HasAnyAttractionsAsync(cancellationToken);
+     public Task<bool> HasAnyAttractionsAsync()
+          => _attractionRepository.HasAnyAttractionsAsync();
 
      public async Task<PagedResponse<AttractionDto>> GetAttractionsAsync(
          string county,

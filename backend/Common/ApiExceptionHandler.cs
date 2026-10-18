@@ -10,7 +10,7 @@ public class ApiExceptionHandler(
     public async ValueTask<bool> TryHandleAsync(
         HttpContext httpContext,
         Exception exception,
-        CancellationToken cancellationToken)
+        CancellationToken _)
     {
         var apiException = exception as ApiException;
         var status = apiException?.StatusCode ?? StatusCodes.Status500InternalServerError;

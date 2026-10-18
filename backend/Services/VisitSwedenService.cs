@@ -25,12 +25,12 @@ public class VisitSwedenService : IVisitSwedenService
           _syncGate = syncGate;
      }
 
-     public async Task<VisitSwedenSyncResult> SyncAttractionsAsync(CancellationToken cancellationToken = default)
+     public async Task<VisitSwedenSyncResult> SyncAttractionsAsync()
      {
-          await _syncGate.WaitAsync(cancellationToken);
+          await _syncGate.WaitAsync();
           try
           {
-               return await SyncAttractionsCoreAsync(cancellationToken);
+               return await SyncAttractionsCoreAsync();
           }
           finally
           {
@@ -38,7 +38,7 @@ public class VisitSwedenService : IVisitSwedenService
           }
      }
 
-     private async Task<VisitSwedenSyncResult> SyncAttractionsCoreAsync(CancellationToken cancellationToken)
+     private async Task<VisitSwedenSyncResult> SyncAttractionsCoreAsync()
      {
           var mapped = new List<Attraction>();
           var skippedMissingImage = 0;
@@ -59,18 +59,7 @@ public class VisitSwedenService : IVisitSwedenService
                     var endpoint =
                          $"search?type=solr&query={Uri.EscapeDataString(query)}&limit={SourcePageSize}&offset={offset}&rdfFormat=application/ld+json";
 
-                    HttpResponseMessage response;
-                    try
-                    {
-                         response = await _httpClient.GetAsync(endpoint, cancellationToken);
-                    }
-                    catch (OperationCanceledException exception) when (!cancellationToken.IsCancellationRequested)
-                    {
-                         _logger.LogWarning("Visit Sweden sync request timed out at offset {Offset}.", offset);
-                         throw new HttpRequestException("Visit Sweden API request timed out.", exception);
-                    }
-
-                    using var responseScope = response;
+                    using var response = await _httpClient.GetAsync(endpoint);
                     if (!response.IsSuccessStatusCode)
                     {
                          _logger.LogWarning(
@@ -86,13 +75,8 @@ public class VisitSwedenService : IVisitSwedenService
                     JsonDocument document;
                     try
                     {
-                         await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-                         document = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken);
-                    }
-                    catch (OperationCanceledException exception) when (!cancellationToken.IsCancellationRequested)
-                    {
-                         _logger.LogWarning("Visit Sweden response timed out while reading offset {Offset}.", offset);
-                         throw new HttpRequestException("Visit Sweden API response timed out.", exception);
+                         await using var stream = await response.Content.ReadAsStreamAsync();
+                         document = await JsonDocument.ParseAsync(stream);
                     }
                     catch (JsonException exception)
                     {
@@ -191,7 +175,7 @@ public class VisitSwedenService : IVisitSwedenService
                     throw new HttpRequestException("Visit Sweden returned records, but none could be mapped to usable county attractions.");
                }
 
-               var upsertResult = await _visitSwedenRepository.UpsertAttractionsAsync(mapped, cancellationToken);
+               var upsertResult = await _visitSwedenRepository.UpsertAttractionsAsync(mapped);
                var result = new VisitSwedenSyncResult(
                     pagesFetched,
                     recordsFetched,
@@ -216,7 +200,7 @@ public class VisitSwedenService : IVisitSwedenService
 
                return result;
           }
-          catch (Exception exception) when (exception is not OperationCanceledException || !cancellationToken.IsCancellationRequested)
+          catch (Exception exception)
           {
                _logger.LogError(
                     exception,

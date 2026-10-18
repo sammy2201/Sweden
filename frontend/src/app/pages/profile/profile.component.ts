@@ -8,11 +8,7 @@ import {
   signal,
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import {
-  FormBuilder,
-  ReactiveFormsModule,
-  Validators,
-} from "@angular/forms";
+import { FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
 import { ButtonModule } from "primeng/button";
 import { CardModule } from "primeng/card";
@@ -66,12 +62,17 @@ export class ProfileComponent implements OnInit {
   readonly roadmapError = signal("");
 
   readonly applicableRoadmapTasks = computed(
-    () => this.roadmap()?.tasks.filter((task) =>
-      task.state !== "NotApplicable" && !this.isOptionalRoadmapTask(task),
-    ) ?? [],
+    () =>
+      this.roadmap()?.tasks.filter(
+        (task) =>
+          task.state !== "NotApplicable" && !this.isOptionalRoadmapTask(task),
+      ) ?? [],
   );
   readonly completedRoadmapTasks = computed(
-    () => this.applicableRoadmapTasks().filter((task) => task.completed || task.state === "Completed").length,
+    () =>
+      this.applicableRoadmapTasks().filter(
+        (task) => task.completed || task.state === "Completed",
+      ).length,
   );
   readonly roadmapProgress = computed(() => {
     const tasks = this.applicableRoadmapTasks();
@@ -156,8 +157,10 @@ export class ProfileComponent implements OnInit {
   }
 
   isOptionalRoadmapTask(task: RoadmapTaskResponse): boolean {
-    return task.state === "Optional" ||
-      (task.state === "Completed" && task.stateBeforeCompletion === "Optional");
+    return (
+      task.state === "Optional" ||
+      (task.state === "Completed" && task.stateBeforeCompletion === "Optional")
+    );
   }
 
   roadmapTaskStatusLabel(task: RoadmapTaskResponse): string {
@@ -212,7 +215,6 @@ export class ProfileComponent implements OnInit {
     this.authService
       .updateUserProfile({
         ...this.form.getRawValue(),
-        transportCountyId: this.profile()?.transportCountyId ?? null,
       })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({

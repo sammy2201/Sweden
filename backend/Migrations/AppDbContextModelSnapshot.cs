@@ -245,9 +245,6 @@ namespace SwedenStart.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("TransportCountyId")
-                        .HasColumnType("text");
-
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 

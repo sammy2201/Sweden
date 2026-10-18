@@ -6,6 +6,5 @@ public interface ITransportService
           string from,
           string to,
           DateTime? departureTime = null,
-          DateTime? arrivalTime = null,
-          CancellationToken cancellationToken = default);
+          DateTime? arrivalTime = null);
 }

@@ -11,8 +11,8 @@ public class AttractionRepository : IAttractionRepository
           _dbContext = dbContext;
      }
 
-     public Task<bool> HasAnyAttractionsAsync(CancellationToken cancellationToken = default)
-          => _dbContext.Attractions.AnyAsync(cancellationToken);
+     public Task<bool> HasAnyAttractionsAsync()
+          => _dbContext.Attractions.AnyAsync();
 
      public async Task<PagedResponse<Attraction>> GetAttractionsAsync(
          string? county,

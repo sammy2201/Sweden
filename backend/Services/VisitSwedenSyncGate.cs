@@ -4,7 +4,7 @@ public class VisitSwedenSyncGate
 {
      private readonly SemaphoreSlim _semaphore = new(1, 1);
 
-     public Task WaitAsync(CancellationToken cancellationToken) => _semaphore.WaitAsync(cancellationToken);
+     public Task WaitAsync() => _semaphore.WaitAsync();
 
      public void Release() => _semaphore.Release();
 }

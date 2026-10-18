@@ -70,7 +70,7 @@ public class AuthService : IAuthService
         return _repo.GetUserByIdAsync(id);
     }
 
-    public async Task<User?> UpdateUserProfileAsync(Guid id, string firstName, string lastName, string city, string address, string? transportCountyId)
+    public async Task<User?> UpdateUserProfileAsync(Guid id, string firstName, string lastName, string city, string address)
     {
         var user = await _repo.GetUserByIdAsync(id);
         if (user is null)
@@ -82,8 +82,6 @@ public class AuthService : IAuthService
         user.LastName = lastName.Trim();
         user.City = city.Trim();
         user.Address = address.Trim();
-        user.TransportCountyId = transportCountyId;
-
         await _repo.UpdateUserAsync(user);
         return user;
     }

@@ -31,7 +31,9 @@
     <div class="message error-message" role="alert">{{ generationError }}</div>
   }
   @if (successMessage) {
-    <div class="message success-message" role="status">{{ successMessage }}</div>
+    <div class="message success-message" role="status">
+      {{ successMessage }}
+    </div>
   }
   @if (taskUpdateError) {
     <div class="message error-message" role="alert">{{ taskUpdateError }}</div>
@@ -44,14 +46,26 @@
     </div>
   } @else if (!hasExistingRoadmap) {
     <section class="empty-state">
-      <span class="empty-icon" aria-hidden="true"><i class="pi pi-map"></i></span>
+      <span class="empty-icon" aria-hidden="true"
+        ><i class="pi pi-map"></i
+      ></span>
       <span class="eyebrow">Your next chapter</span>
       <h2>Build your personal moving plan</h2>
-      <p>Answer a few questions and get a roadmap shaped around your plans for Sweden.</p>
+      <p>
+        Answer a few questions and get a roadmap shaped around your plans for
+        Sweden.
+      </p>
       @if (isLoadingQuestions) {
-        <span class="loading-note"><i class="pi pi-spin pi-spinner" aria-hidden="true"></i> Loading questions…</span>
+        <span class="loading-note"
+          ><i class="pi pi-spin pi-spinner" aria-hidden="true"></i> Loading
+          questions…</span
+        >
       } @else {
-        <p-button label="Create my roadmap" icon="pi pi-arrow-right" iconPos="right" (onClick)="startRoadmapCreation()"></p-button>
+        <p-button
+          label="Create my roadmap"
+          icon="pi pi-arrow-right"
+          iconPos="right"
+          (onClick)="startRoadmapCreation()"></p-button>
       }
     </section>
   } @else {
@@ -60,7 +74,10 @@
         <div class="overview-heading">
           <div>
             <span class="eyebrow">Your progress</span>
-            <h2 id="progress-heading">{{ completedTaskCount }} of {{ applicableTasks.length }} steps complete</h2>
+            <h2 id="progress-heading">
+              {{ completedTaskCount }} of {{ applicableTasks.length }} steps
+              complete
+            </h2>
           </div>
           <span class="progress-percent">{{ taskProgressPercent }}%</span>
         </div>
@@ -70,23 +87,49 @@
           ariaLabel="Roadmap completion progress"
           styleClass="roadmap-progress"></p-progressBar>
         <div class="progress-meta">
-          <span>{{ remainingTaskCount }} {{ remainingTaskCount === 1 ? 'action' : 'actions' }} remaining</span>
+          <span
+            >{{ remainingTaskCount }}
+            {{ remainingTaskCount === 1 ? "action" : "actions" }}
+            remaining</span
+          >
           @if (waitingTaskCount > 0) {
-            <span class="waiting-count"><i class="pi pi-clock" aria-hidden="true"></i> {{ waitingTaskCount }} waiting or blocked</span>
+            <span class="waiting-count"
+              ><i class="pi pi-clock" aria-hidden="true"></i>
+              {{ waitingTaskCount }} waiting or blocked</span
+            >
           }
         </div>
       </div>
       @if (nextTask; as next) {
         <div class="next-action">
-          <span class="next-action-label"><i class="pi" [class.pi-clock]="next.state === 'Waiting'" [class.pi-arrow-down-right]="next.state !== 'Waiting'" aria-hidden="true"></i> {{ next.state === 'Waiting' ? 'Waiting on an update' : isOptionalTask(next) ? 'Optional suggestion' : 'Your next step' }}</span>
+          <span class="next-action-label"
+            ><i
+              class="pi"
+              [class.pi-clock]="next.state === 'Waiting'"
+              [class.pi-arrow-down-right]="next.state !== 'Waiting'"
+              aria-hidden="true"></i>
+            {{
+              next.state === "Waiting"
+                ? "Waiting on an update"
+                : isOptionalTask(next)
+                  ? "Optional suggestion"
+                  : "Your next step"
+            }}</span
+          >
           <strong>{{ next.title }}</strong>
           <span>{{ next.description }}</span>
         </div>
       } @else {
         <div class="next-action all-done">
-          <span class="next-action-label"><i class="pi pi-check-circle" aria-hidden="true"></i> Roadmap complete</span>
+          <span class="next-action-label"
+            ><i class="pi pi-check-circle" aria-hidden="true"></i> Roadmap
+            complete</span
+          >
           <strong>You’ve reached your current milestones.</strong>
-          <span>You can update your circumstances any time to refresh your plan.</span>
+          <span
+            >You can update your circumstances any time to refresh your
+            plan.</span
+          >
         </div>
       }
     </section>
@@ -97,22 +140,35 @@
           <span class="eyebrow">Your journey</span>
           <h2 id="journey-heading">Steps along the way</h2>
         </div>
-        <span class="step-total">{{ applicableTasks.length }} applicable {{ applicableTasks.length === 1 ? 'step' : 'steps' }}</span>
+        <span class="step-total"
+          >{{ applicableTasks.length }} applicable
+          {{ applicableTasks.length === 1 ? "step" : "steps" }}</span
+        >
       </div>
 
       @if (phases.length === 0) {
-        <div class="state-panel">Your answers don’t currently require any roadmap steps. Edit your roadmap to update your circumstances.</div>
+        <div class="state-panel">
+          Your answers don’t currently require any roadmap steps. Edit your
+          roadmap to update your circumstances.
+        </div>
       } @else {
         <div class="journey-phases">
           @for (phase of phases; track phase.id; let phaseIndex = $index) {
-            <section class="journey-phase" [attr.aria-labelledby]="'phase-' + phase.id">
+            <section
+              class="journey-phase"
+              [attr.aria-labelledby]="'phase-' + phase.id">
               <header class="phase-heading">
-                <span class="phase-number" aria-hidden="true">{{ phaseIndex + 1 }}</span>
+                <span class="phase-number" aria-hidden="true">{{
+                  phaseIndex + 1
+                }}</span>
                 <div class="phase-copy">
                   <div class="phase-title-row">
                     <h3 [id]="'phase-' + phase.id">{{ phase.title }}</h3>
                     @if (phase.taskCount > 0) {
-                      <span class="phase-progress">{{ phase.completedCount }} / {{ phase.taskCount }}</span>
+                      <span class="phase-progress"
+                        >{{ phase.completedCount }} /
+                        {{ phase.taskCount }}</span
+                      >
                     }
                   </div>
                   <p>{{ phase.description }}</p>
@@ -120,20 +176,31 @@
               </header>
 
               <ol class="timeline-list">
-                @for (task of phase.tasks; track task.id; let taskIndex = $index) {
+                @for (
+                  task of phase.tasks;
+                  track task.id;
+                  let taskIndex = $index
+                ) {
                   <li
                     class="timeline-item"
-                    [class.completed]="task.state !== 'NotApplicable' && (task.completed || task.state === 'Completed')"
+                    [class.completed]="
+                      task.state !== 'NotApplicable' &&
+                      (task.completed || task.state === 'Completed')
+                    "
                     [class.current]="isCurrentTask(task)"
-                    [class.waiting]="task.state === 'Waiting' || isTaskBlocked(task)"
+                    [class.waiting]="
+                      task.state === 'Waiting' || isTaskBlocked(task)
+                    "
                     [class.not-applicable]="task.state === 'NotApplicable'">
                     <div class="timeline-rail" aria-hidden="true">
                       <span class="timeline-node">
-                        @if (task.state === 'NotApplicable') {
+                        @if (task.state === "NotApplicable") {
                           <i class="pi pi-minus"></i>
-                        } @else if (task.completed || task.state === 'Completed') {
+                        } @else if (
+                          task.completed || task.state === "Completed"
+                        ) {
                           <i class="pi pi-check"></i>
-                        } @else if (task.state === 'Waiting') {
+                        } @else if (task.state === "Waiting") {
                           <i class="pi pi-clock"></i>
                         } @else {
                           <span>{{ taskIndex + 1 }}</span>
@@ -151,10 +218,14 @@
                         </div>
                         <span
                           class="status-pill"
-                          [class.status-completed]="task.completed || task.state === 'Completed'"
+                          [class.status-completed]="
+                            task.completed || task.state === 'Completed'
+                          "
                           [class.status-waiting]="task.state === 'Waiting'"
                           [class.status-blocked]="isTaskBlocked(task)"
-                          [class.status-inactive]="task.state === 'NotApplicable'"
+                          [class.status-inactive]="
+                            task.state === 'NotApplicable'
+                          "
                           [class.status-current]="isCurrentTask(task)">
                           {{ statusLabel(task) }}
                         </span>
@@ -164,15 +235,28 @@
 
                       @if (isPublicTransportTask(task)) {
                         @if (transportCounty; as county) {
-                          <div class="transport-provider-links" aria-label="Regional public transport links">
-                            <span>Official provider: <strong>{{ county.transportProviderName }}</strong></span>
+                          <div
+                            class="transport-provider-links"
+                            aria-label="Regional public transport links">
+                            <span
+                              >Official provider:
+                              <strong>{{
+                                county.transportProviderName
+                              }}</strong></span
+                            >
                             <a
                               class="resource-link"
                               [href]="county.officialTicketUrl"
                               target="_blank"
                               rel="noopener noreferrer"
-                              [attr.aria-label]="'View tickets from ' + county.transportProviderName">
-                              View tickets <i class="pi pi-arrow-up-right" aria-hidden="true"></i>
+                              [attr.aria-label]="
+                                'View tickets from ' +
+                                county.transportProviderName
+                              ">
+                              View tickets
+                              <i
+                                class="pi pi-arrow-up-right"
+                                aria-hidden="true"></i>
                             </a>
                             @if (county.journeyPlannerUrl) {
                               <a
@@ -180,15 +264,24 @@
                                 [href]="county.journeyPlannerUrl"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                [attr.aria-label]="'Plan a journey with ' + county.transportProviderName">
-                                Journey planner <i class="pi pi-arrow-up-right" aria-hidden="true"></i>
+                                [attr.aria-label]="
+                                  'Plan a journey with ' +
+                                  county.transportProviderName
+                                ">
+                                Journey planner
+                                <i
+                                  class="pi pi-arrow-up-right"
+                                  aria-hidden="true"></i>
                               </a>
                             }
                           </div>
                         }
                         <div class="transport-provider-links">
                           @if (!transportCounty) {
-                            <span>Choose your region to find its official public transport provider.</span>
+                            <span
+                              >Choose your region to find its official public
+                              transport provider.</span
+                            >
                           }
                           <p-select
                             [options]="transportCounties"
@@ -196,37 +289,46 @@
                             [ngModel]="transportCounty"
                             [ngModelOptions]="{ standalone: true }"
                             (ngModelChange)="selectTransportCounty($event)"
-                            [disabled]="isSavingTransportCounty"
                             placeholder="Select your region"
                             ariaLabel="Select your county or region for public transport links">
                           </p-select>
-                          @if (isSavingTransportCounty) {
-                            <span role="status">Saving region…</span>
-                          }
-                          @if (transportCountySaveError) {
-                            <span class="transport-save-error" role="alert">{{ transportCountySaveError }}</span>
-                          }
                         </div>
                       }
 
                       <div class="step-meta">
-                        @if (task.state !== 'NotApplicable') {
-                          <span class="priority-label" [class.priority-high]="task.priority <= 1">
-                            <i class="pi pi-flag" aria-hidden="true"></i>{{ priorityLabel(task.priority) }}
+                        @if (task.state !== "NotApplicable") {
+                          <span
+                            class="priority-label"
+                            [class.priority-high]="task.priority <= 1">
+                            <i class="pi pi-flag" aria-hidden="true"></i
+                            >{{ priorityLabel(task.priority) }}
                           </span>
                         }
                         @if (task.category) {
-                          <span class="category-label">{{ task.category }}</span>
+                          <span class="category-label">{{
+                            task.category
+                          }}</span>
                         }
                       </div>
 
                       @if (task.ruleExplanation) {
-                        <p class="step-explanation"><i class="pi pi-info-circle" aria-hidden="true"></i>{{ task.ruleExplanation }}</p>
+                        <p class="step-explanation">
+                          <i class="pi pi-info-circle" aria-hidden="true"></i
+                          >{{ task.ruleExplanation }}
+                        </p>
                       }
                       @if (task.prerequisites.length > 0) {
-                        <div class="prerequisite-list" aria-label="Prerequisites">
-                          @for (prerequisite of task.prerequisites; track prerequisite.ruleId) {
-                            <span class="prerequisite"><i class="pi pi-link" aria-hidden="true"></i>{{ prerequisite.explanation }}</span>
+                        <div
+                          class="prerequisite-list"
+                          aria-label="Prerequisites">
+                          @for (
+                            prerequisite of task.prerequisites;
+                            track prerequisite.ruleId
+                          ) {
+                            <span class="prerequisite"
+                              ><i class="pi pi-link" aria-hidden="true"></i
+                              >{{ prerequisite.explanation }}</span
+                            >
                           }
                         </div>
                       }
@@ -234,25 +336,72 @@
                       <footer class="step-footer">
                         <div class="step-links">
                           @if (task.resourceUrl) {
-                            <a class="resource-link" [href]="task.resourceUrl" target="_blank" rel="noopener noreferrer">
-                              Official information <i class="pi pi-arrow-up-right" aria-hidden="true"></i>
+                            <a
+                              class="resource-link"
+                              [href]="task.resourceUrl"
+                              target="_blank"
+                              rel="noopener noreferrer">
+                              Official information
+                              <i
+                                class="pi pi-arrow-up-right"
+                                aria-hidden="true"></i>
                             </a>
                           }
                         </div>
                         <div class="completion-action-group">
-                          <label class="completion-control" [class.is-complete]="task.state !== 'NotApplicable' && (task.completed || task.state === 'Completed')">
-                          <p-checkbox
-                            #taskCompletionModel="ngModel"
-                            [binary]="true"
-                            [ngModel]="task.completed || task.state === 'Completed'"
-                            [ngModelOptions]="{ standalone: true }"
-                            [disabled]="pendingTaskIds.has(task.id) || !canChangeTask(task, !(task.completed || task.state === 'Completed'))"
-                            [ariaLabel]="((task.completed || task.state === 'Completed') ? 'Mark ' + task.title + ' as not done' : 'Mark ' + task.title + ' as done')"
-                            (ngModelChange)="toggleTaskCompletion(task, $event, taskCompletionModel)"></p-checkbox>
-                            <span>{{ task.state === 'NotApplicable' ? 'Not applicable' : (task.completed || task.state === 'Completed') ? 'Mark as not done' : 'Mark done' }}</span>
+                          <label
+                            class="completion-control"
+                            [class.is-complete]="
+                              task.state !== 'NotApplicable' &&
+                              (task.completed || task.state === 'Completed')
+                            ">
+                            <p-checkbox
+                              #taskCompletionModel="ngModel"
+                              [binary]="true"
+                              [ngModel]="
+                                task.completed || task.state === 'Completed'
+                              "
+                              [ngModelOptions]="{ standalone: true }"
+                              [disabled]="
+                                pendingTaskIds.has(task.id) ||
+                                !canChangeTask(
+                                  task,
+                                  !(
+                                    task.completed || task.state === 'Completed'
+                                  )
+                                )
+                              "
+                              [ariaLabel]="
+                                task.completed || task.state === 'Completed'
+                                  ? 'Mark ' + task.title + ' as not done'
+                                  : 'Mark ' + task.title + ' as done'
+                              "
+                              (ngModelChange)="
+                                toggleTaskCompletion(
+                                  task,
+                                  $event,
+                                  taskCompletionModel
+                                )
+                              "></p-checkbox>
+                            <span>{{
+                              task.state === "NotApplicable"
+                                ? "Not applicable"
+                                : task.completed || task.state === "Completed"
+                                  ? "Mark as not done"
+                                  : "Mark done"
+                            }}</span>
                           </label>
-                          @if (task.state === 'Waiting' || (task.state !== 'NotApplicable' && !task.completed && unmetPrerequisiteTitles(task).length > 0) || ((task.completed || task.state === 'Completed') && completedDependentTitles(task).length > 0)) {
-                            <small class="completion-block-reason">{{ taskActionBlockReason(task) }}</small>
+                          @if (
+                            task.state === "Waiting" ||
+                            (task.state !== "NotApplicable" &&
+                              !task.completed &&
+                              unmetPrerequisiteTitles(task).length > 0) ||
+                            ((task.completed || task.state === "Completed") &&
+                              completedDependentTitles(task).length > 0)
+                          ) {
+                            <small class="completion-block-reason">{{
+                              taskActionBlockReason(task)
+                            }}</small>
                           }
                         </div>
                       </footer>
@@ -275,18 +424,28 @@
     [closable]="!isGenerating"
     [dismissableMask]="!isGenerating">
     <div class="dialog-intro">
-      <p>Update your answers below. Your saved roadmap won’t change until you save.</p>
+      <p>
+        Update your answers below. Your saved roadmap won’t change until you
+        save.
+      </p>
     </div>
     @if (generationError && isRoadmapDialogVisible) {
-      <div class="message error-message" role="alert">{{ generationError }}</div>
+      <div class="message error-message" role="alert">
+        {{ generationError }}
+      </div>
     }
     @if (isLoadingQuestions) {
-      <div class="state-panel" role="status"><i class="pi pi-spin pi-spinner" aria-hidden="true"></i> Loading questions…</div>
+      <div class="state-panel" role="status">
+        <i class="pi pi-spin pi-spinner" aria-hidden="true"></i> Loading
+        questions…
+      </div>
     } @else {
       <div class="edit-grid">
         @for (field of visibleFields; track field.id) {
           <div class="edit-field">
-            <label [for]="field.id">{{ field.text }} <span aria-hidden="true">*</span></label>
+            <label [for]="field.id"
+              >{{ field.text }} <span aria-hidden="true">*</span></label
+            >
             <p-select
               [inputId]="field.id"
               [options]="field.options"
@@ -297,16 +456,26 @@
               [disabled]="isGenerating"
               [placeholder]="'Choose an answer'"
               appendTo="body"></p-select>
-            @if (field.guidance) { <small class="field-guidance">{{ field.guidance }}</small> }
+            @if (field.guidance) {
+              <small class="field-guidance">{{ field.guidance }}</small>
+            }
             @for (message of clarificationMessages(field); track message) {
-              <small class="field-guidance clarification"><i class="pi pi-info-circle" aria-hidden="true"></i>{{ message }}</small>
+              <small class="field-guidance clarification"
+                ><i class="pi pi-info-circle" aria-hidden="true"></i
+                >{{ message }}</small
+              >
             }
           </div>
         }
       </div>
     }
     <ng-template pTemplate="footer">
-      <p-button label="Cancel" severity="secondary" [outlined]="true" [disabled]="isGenerating" (onClick)="cancelRoadmapUpdate()"></p-button>
+      <p-button
+        label="Cancel"
+        severity="secondary"
+        [outlined]="true"
+        [disabled]="isGenerating"
+        (onClick)="cancelRoadmapUpdate()"></p-button>
       <p-button
         [label]="isCreatingRoadmap ? 'Create roadmap' : 'Save changes'"
         icon="pi pi-check"
@@ -327,17 +496,57 @@
     [header]="selectedCompletion ? 'Confirm this step' : 'Update this step'">
     @if (selectedTask; as task) {
       <div class="completion-dialog-content">
-        <span class="completion-dialog-icon" aria-hidden="true"><i class="pi" [class.pi-check-circle]="selectedCompletion" [class.pi-undo]="!selectedCompletion"></i></span>
+        <span class="completion-dialog-icon" aria-hidden="true"
+          ><i
+            class="pi"
+            [class.pi-check-circle]="selectedCompletion"
+            [class.pi-undo]="!selectedCompletion"></i
+        ></span>
         <h2>{{ task.title }}</h2>
-        <p>{{ selectedCompletion ? 'Marking this step complete updates your roadmap progress and may unlock a dependent step.' : 'This will return the step to your active roadmap and update your progress.' }}</p>
+        <p>
+          {{
+            selectedCompletion
+              ? "Marking this step complete updates your roadmap progress and may unlock a dependent step."
+              : "This will return the step to your active roadmap and update your progress."
+          }}
+        </p>
         @if (task.resourceUrl) {
-          <a class="dialog-resource-link" [href]="task.resourceUrl" target="_blank" rel="noopener noreferrer">Official information <i class="pi pi-arrow-up-right" aria-hidden="true"></i></a>
+          <a
+            class="dialog-resource-link"
+            [href]="task.resourceUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+            >Official information
+            <i class="pi pi-arrow-up-right" aria-hidden="true"></i
+          ></a>
         }
-        <h3>{{ selectedCompletion ? 'Have you completed this step?' : 'Would you like to mark this step as not done?' }}</h3>
-        @if (taskDialogError) { <div class="message error-message" role="alert">{{ taskDialogError }}</div> }
+        <h3>
+          {{
+            selectedCompletion
+              ? "Have you completed this step?"
+              : "Would you like to mark this step as not done?"
+          }}
+        </h3>
+        @if (taskDialogError) {
+          <div class="message error-message" role="alert">
+            {{ taskDialogError }}
+          </div>
+        }
         <div class="completion-dialog-actions">
-          <p-button label="Not yet" severity="secondary" [outlined]="true" [disabled]="pendingTaskIds.has(task.id)" (onClick)="closeTaskCompletionDialog()"></p-button>
-          <p-button [label]="selectedCompletion ? 'Yes, mark as done' : 'Yes, mark as not done'" [icon]="selectedCompletion ? 'pi pi-check' : 'pi pi-undo'" [loading]="pendingTaskIds.has(task.id)" [disabled]="pendingTaskIds.has(task.id)" (onClick)="confirmTaskCompletion()"></p-button>
+          <p-button
+            label="Not yet"
+            severity="secondary"
+            [outlined]="true"
+            [disabled]="pendingTaskIds.has(task.id)"
+            (onClick)="closeTaskCompletionDialog()"></p-button>
+          <p-button
+            [label]="
+              selectedCompletion ? 'Yes, mark as done' : 'Yes, mark as not done'
+            "
+            [icon]="selectedCompletion ? 'pi pi-check' : 'pi pi-undo'"
+            [loading]="pendingTaskIds.has(task.id)"
+            [disabled]="pendingTaskIds.has(task.id)"
+            (onClick)="confirmTaskCompletion()"></p-button>
         </div>
       </div>
     }

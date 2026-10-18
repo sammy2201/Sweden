@@ -16,17 +16,11 @@ public class TransportController : ControllerBase
      }
 
      [HttpGet("search")]
-     [ProducesResponseType(typeof(IReadOnlyList<TransportTripDto>), StatusCodes.Status200OK)]
-     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status502BadGateway)]
-     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
      public async Task<ActionResult<IReadOnlyList<TransportTripDto>>> Search(
           [FromQuery] string from,
           [FromQuery] string to,
           [FromQuery] DateTime? departureTime = null,
-          [FromQuery] DateTime? arrivalTime = null,
-          CancellationToken cancellationToken = default)
+          [FromQuery] DateTime? arrivalTime = null)
      {
           if (string.IsNullOrWhiteSpace(from) || string.IsNullOrWhiteSpace(to))
                throw new ApiException(
@@ -36,7 +30,7 @@ public class TransportController : ControllerBase
 
           try
           {
-               var trips = await _transportService.SearchTripsAsync(from, to, departureTime, arrivalTime, cancellationToken);
+               var trips = await _transportService.SearchTripsAsync(from, to, departureTime, arrivalTime);
                return Ok(trips);
           }
           catch (HttpRequestException exception)

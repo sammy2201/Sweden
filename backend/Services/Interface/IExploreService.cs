@@ -4,7 +4,7 @@ public interface IExploreService
 {
      IEnumerable<CountyDto> GetCounties();
 
-     Task<bool> HasAnyAttractionsAsync(CancellationToken cancellationToken = default);
+     Task<bool> HasAnyAttractionsAsync();
 
      Task<PagedResponse<AttractionDto>> GetAttractionsAsync(string county, int page, int pageSize, string? category);
 
