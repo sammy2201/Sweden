@@ -277,29 +277,27 @@ section:not(.hero) {
 .office-map {
   position: relative;
   overflow: hidden;
+  min-height: 32rem;
   border-radius: var(--radius-card);
   border: var(--border-width) solid var(--app-border);
   box-shadow: var(--app-shadow);
 }
 
-.map-link {
-  position: absolute;
-  right: var(--space-4);
-  bottom: var(--space-4);
+.office-map iframe {
+  display: block;
+  width: 100%;
+  min-height: 32rem;
+  border: 0;
 }
 
-.map-frame {
-  width: 100%;
-  height: var(--map-height);
-  border: none;
+.office-map a {
+  display: inline-block;
+  margin: var(--space-3);
+  color: var(--app-primary);
 }
 
 @media (max-width: 900px) {
   .office-layout {
     grid-template-columns: 1fr;
-  }
-
-  .map-frame {
-    height: var(--map-height-mobile);
   }
 }

@@ -11,7 +11,16 @@
       We'll guide you through every step.
     </p>
 
-    <p-button label="Continue your roadmap" icon="pi pi-arrow-right">
+    <p-button
+      label="Continue your roadmap"
+      icon="pi pi-arrow-right"
+      class="roadmap-btn"
+      [style]="{
+        color: 'var(--app-primary)',
+        'background-color': 'var(--app-white)',
+        'border-color': 'var(--app-white)'
+      }"
+      routerLink="/roadmap">
     </p-button>
   </div>
 </section>

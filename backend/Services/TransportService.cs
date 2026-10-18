@@ -30,14 +30,14 @@ public class TransportService : ITransportService
           CancellationToken cancellationToken = default)
      {
           if (string.IsNullOrWhiteSpace(from))
-               throw new ArgumentException("'from' is required.", nameof(from));
+               throw new ApiException(StatusCodes.Status400BadRequest, "Invalid request", "'from' is required.");
 
           if (string.IsNullOrWhiteSpace(to))
-               throw new ArgumentException("'to' is required.", nameof(to));
+               throw new ApiException(StatusCodes.Status400BadRequest, "Invalid request", "'to' is required.");
 
           var apiKey = _configuration["ResRobot:ApiKey"];
           if (string.IsNullOrWhiteSpace(apiKey))
-               throw new InvalidOperationException("ResRobot API key is not configured.");
+               throw new ApiException(StatusCodes.Status502BadGateway, "Transport service unavailable", "ResRobot API key is not configured.");
 
           var origin = await LookupStationAsync(from.Trim(), apiKey, cancellationToken);
           var destination = await LookupStationAsync(to.Trim(), apiKey, cancellationToken);
@@ -58,7 +58,7 @@ public class TransportService : ITransportService
                     input,
                     (int)response.StatusCode,
                     errorBody);
-               throw new InvalidOperationException("Unable to resolve station location from ResRobot.");
+               throw new ApiException(StatusCodes.Status502BadGateway, "Transport service unavailable", "Unable to resolve station location from ResRobot.");
           }
 
           await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
@@ -69,7 +69,7 @@ public class TransportService : ITransportService
                .FirstOrDefault(x => x is not null && !string.IsNullOrWhiteSpace(x.ExtId));
 
           if (station is null)
-               throw new KeyNotFoundException($"No station found for '{input}'.");
+               throw new ApiException(StatusCodes.Status404NotFound, "Resource not found", $"No station found for '{input}'.");
 
           return station;
      }
@@ -116,7 +116,7 @@ public class TransportService : ITransportService
                     destinationId,
                     (int)response.StatusCode,
                     errorBody);
-               throw new InvalidOperationException("Unable to fetch trips from ResRobot.");
+               throw new ApiException(StatusCodes.Status502BadGateway, "Transport service unavailable", "Unable to fetch trips from ResRobot.");
           }
 
           await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);

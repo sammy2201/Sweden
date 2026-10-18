@@ -24,7 +24,7 @@ public class AuthService : IAuthService
         var user = await _repo.GetUserByEmailAsync(email);
         if (user is null || !user.IsActive || !PasswordHasher.Verify(password, user.PasswordHash))
         {
-            throw new UnauthorizedAccessException("Invalid credentials");
+            throw new ApiException(StatusCodes.Status401Unauthorized, "Unauthorized", "Invalid credentials");
         }
 
         return GenerateJwtToken(user);

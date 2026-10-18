@@ -171,20 +171,14 @@
 
       <div class="office-map">
         <iframe
-          class="map-frame"
           [src]="mapUrl"
-          [title]="'Skatteverket offices near ' + currentSearchLabel"
-          loading="lazy">
+          [title]="'Skatteverket service offices near ' + currentSearchLabel"
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+          allowfullscreen>
         </iframe>
-        <a
-          pButton
-          class="map-link"
-          label="Open map"
-          icon="pi pi-external-link"
-          iconPos="right"
-          [href]="externalMapUrl"
-          target="_blank"
-          rel="noopener noreferrer">
+        <a [href]="externalMapUrl" target="_blank" rel="noopener noreferrer">
+          Open this search in Google Maps
         </a>
       </div>
     </div>

@@ -54,6 +54,7 @@ export class AttractionDetailsComponent {
   private readonly exploreService = inject(ExploreService);
   private readonly authService = inject(AuthService);
   private readonly retryRequest$ = new BehaviorSubject(0);
+  readonly currentUser = this.authService.user;
 
   readonly vm$ = combineLatest([this.route.paramMap, this.retryRequest$]).pipe(
     switchMap(([params]) => {
@@ -97,13 +98,17 @@ export class AttractionDetailsComponent {
     return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
   }
 
-  planJourney(county: County | undefined, attraction: AttractionDetail): void {
-    const fallbackOrigin = county?.name || "Stockholm";
+  planJourney(attraction: AttractionDetail, userCity?: string | null): void {
     const destination = attraction.city || attraction.name;
+    const origin = userCity?.trim();
 
-    const cachedAddress = this.authService.user()?.address?.trim();
-    if (cachedAddress) {
-      this.navigateToJourney(cachedAddress, destination);
+    if (origin) {
+      this.navigateToJourney(origin, destination);
+      return;
+    }
+
+    if (!this.authService.isAuthenticated()) {
+      this.navigateToJourney(undefined, destination);
       return;
     }
 
@@ -112,19 +117,18 @@ export class AttractionDetailsComponent {
       .pipe(take(1))
       .subscribe({
         next: (profile) => {
-          const origin = profile.address?.trim() || fallbackOrigin;
-          this.navigateToJourney(origin, destination);
+          this.navigateToJourney(profile.city?.trim() || undefined, destination);
         },
         error: () => {
-          this.navigateToJourney(fallbackOrigin, destination);
+          this.navigateToJourney(undefined, destination);
         },
       });
   }
 
-  private navigateToJourney(from: string, to: string): void {
+  private navigateToJourney(from: string | undefined, to: string): void {
     this.router.navigate(["/transport"], {
       queryParams: {
-        from,
+        ...(from ? { from } : {}),
         to,
       },
     });

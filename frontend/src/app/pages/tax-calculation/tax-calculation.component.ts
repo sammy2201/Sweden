@@ -7,11 +7,11 @@ import { CheckboxModule } from "primeng/checkbox";
 import { ButtonModule } from "primeng/button";
 import { SkeletonModule } from "primeng/skeleton";
 import { SelectModule } from "primeng/select";
-import {
-  TaxService,
+import { TaxService } from "../../services/tax.service";
+import type {
   TaxCalculationRequest,
   TaxCalculationResponse,
-} from "../../services/tax.service";
+} from "../../models/tax.models";
 import { getApiErrorMessage } from "../../utils/api-error";
 
 @Component({

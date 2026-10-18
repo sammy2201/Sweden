@@ -19,7 +19,18 @@ public class VisitSwedenController : ControllerBase
      [Authorize(Roles = "Admin")]
      public async Task<ActionResult<VisitSwedenSyncResult>> Sync(CancellationToken cancellationToken)
      {
-          var result = await _visitSwedenService.SyncAttractionsAsync(cancellationToken);
-          return Ok(result);
+          try
+          {
+               var result = await _visitSwedenService.SyncAttractionsAsync(cancellationToken);
+               return Ok(result);
+          }
+          catch (HttpRequestException exception)
+          {
+               throw new ApiException(
+                    StatusCodes.Status502BadGateway,
+                    "External service unavailable",
+                    "A required external service is unavailable.",
+                    innerException: exception);
+          }
      }
 }

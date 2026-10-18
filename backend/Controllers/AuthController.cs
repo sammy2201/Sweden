@@ -38,13 +38,11 @@ public class AuthController : ControllerBase
         var created = await _authService.RegisterAsync(request.FirstName, request.LastName, request.Username, request.Email, request.City, request.Address, request.Password);
         if (!created)
         {
-            var problem = Problem(
-                statusCode: StatusCodes.Status409Conflict,
-                title: "Account already exists",
-                detail: "A user with that username or email already exists.");
-            if (problem.Value is ProblemDetails problemDetails)
-                problemDetails.Extensions["code"] = "ACCOUNT_ALREADY_EXISTS";
-            return problem;
+            throw new ApiException(
+                StatusCodes.Status409Conflict,
+                "Account already exists",
+                "A user with that username or email already exists.",
+                "ACCOUNT_ALREADY_EXISTS");
         }
 
         return CreatedAtAction(nameof(Register), new { username = request.Username });
@@ -58,11 +56,11 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> GetUser()
     {
         if (!TryGetCurrentUserId(out var id))
-            return Problem(statusCode: StatusCodes.Status401Unauthorized, title: "Unauthorized", detail: "The authenticated user could not be identified.");
+            throw new ApiException(StatusCodes.Status401Unauthorized, "Unauthorized", "The authenticated user could not be identified.");
 
         var user = await _authService.GetUserAsync(id);
         if (user == null)
-            return Problem(statusCode: StatusCodes.Status404NotFound, title: "User not found", detail: "The requested user profile was not found.");
+            throw new ApiException(StatusCodes.Status404NotFound, "User not found", "The requested user profile was not found.");
 
         var dto = MapUserDto(user);
 
@@ -76,10 +74,10 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> UpdateUser([FromBody] UpdateUserProfileRequestDto request)
     {
         if (request.TransportCountyId is not null && !CountyData.IsValidCountyId(request.TransportCountyId))
-            return Problem(statusCode: StatusCodes.Status400BadRequest, title: "Invalid transport region", detail: "Select a valid Swedish county for public transport links.");
+            throw new ApiException(StatusCodes.Status400BadRequest, "Invalid transport region", "Select a valid Swedish county for public transport links.");
 
         if (!TryGetCurrentUserId(out var id))
-            return Problem(statusCode: StatusCodes.Status401Unauthorized, title: "Unauthorized", detail: "The authenticated user could not be identified.");
+            throw new ApiException(StatusCodes.Status401Unauthorized, "Unauthorized", "The authenticated user could not be identified.");
 
         var user = await _authService.UpdateUserProfileAsync(
             id,
@@ -90,7 +88,7 @@ public class AuthController : ControllerBase
             request.TransportCountyId);
 
         if (user == null)
-            return Problem(statusCode: StatusCodes.Status404NotFound, title: "User not found", detail: "The requested user profile was not found.");
+            throw new ApiException(StatusCodes.Status404NotFound, "User not found", "The requested user profile was not found.");
 
         return Ok(MapUserDto(user));
     }

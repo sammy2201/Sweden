@@ -3,10 +3,8 @@ import { Router, RouterLink, RouterOutlet } from "@angular/router";
 import { AuthService } from "./services/auth.service";
 import { ButtonModule } from "primeng/button";
 import { SiteFooterComponent } from "./components/site-footer/site-footer.component";
-import {
-  GuideDirectoryService,
-  GuideLink,
-} from "./services/guide-directory.service";
+import { GuideDirectoryService } from "./services/guide-directory.service";
+import type { GuideLink } from "./models/guide.models";
 
 @Component({
   selector: "app-root",

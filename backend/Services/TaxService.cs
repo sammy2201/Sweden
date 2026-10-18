@@ -86,7 +86,10 @@ public class TaxService : ITaxService
                .ToList();
 
           if (matches.Count == 0)
-               throw new KeyNotFoundException("Municipality not found.");
+               throw new ApiException(
+                    StatusCodes.Status404NotFound,
+                    "Resource not found",
+                    "Municipality not found.");
 
           return AggregateMunicipality(matches);
      }

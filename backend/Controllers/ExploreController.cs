@@ -49,10 +49,10 @@ public class ExploreController : ControllerBase
 
           if (result.TotalCount == 0 && !await _exploreService.HasAnyAttractionsAsync(cancellationToken))
           {
-               return Problem(
-                    statusCode: StatusCodes.Status503ServiceUnavailable,
-                    title: "Attraction catalogue unavailable",
-                    detail: "Attraction data has not been synchronized yet. Please retry shortly.");
+               throw new ApiException(
+                    StatusCodes.Status503ServiceUnavailable,
+                    "Attraction catalogue unavailable",
+                    "Attraction data has not been synchronized yet. Please retry shortly.");
           }
 
           return Ok(new ExploreAttractionsResponseDto
@@ -76,10 +76,10 @@ public class ExploreController : ControllerBase
 
           if (attraction == null)
           {
-               return Problem(
-                    statusCode: StatusCodes.Status404NotFound,
-                    title: "Attraction not found",
-                    detail: "The requested attraction was not found.");
+               throw new ApiException(
+                    StatusCodes.Status404NotFound,
+                    "Attraction not found",
+                    "The requested attraction was not found.");
           }
 
           return Ok(new ExploreAttractionDetailResponseDto

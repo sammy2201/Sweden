@@ -21,12 +21,13 @@ import { InputTextModule } from "primeng/inputtext";
 import { ProgressBarModule } from "primeng/progressbar";
 import { SkeletonModule } from "primeng/skeleton";
 import { TagModule } from "primeng/tag";
-import { AuthService, UserProfile } from "../../services/auth.service";
-import {
+import { AuthService } from "../../services/auth.service";
+import { RoadmapService } from "../../services/roadmap.service";
+import type { UserProfile } from "../../models/auth.models";
+import type {
   RoadmapResponse,
   RoadmapTaskResponse,
-  RoadmapService,
-} from "../../services/roadmap.service";
+} from "../../models/roadmap.models";
 import { getApiErrorMessage } from "../../utils/api-error";
 import { HttpErrorResponse } from "@angular/common/http";
 

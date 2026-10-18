@@ -2,7 +2,7 @@ import { Component, DestroyRef, inject } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { TransportService } from "../../services/transport.service";
-import type { TransportTrip } from "../../services/transport.service";
+import type { TransportTrip } from "../../models/transport.models";
 import { ActivatedRoute } from "@angular/router";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { CardModule } from "primeng/card";

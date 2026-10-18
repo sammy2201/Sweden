@@ -6,7 +6,7 @@ import {
   ViewEncapsulation,
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import type { Bank } from "./bank.model";
+import type { Bank } from "../../models/banking.models";
 import { BankingIntroComponent } from "./components/banking-intro.component";
 import { BankingBanksComponent } from "./components/banking-banks.component";
 import { BankingSetupComponent } from "./components/banking-setup.component";

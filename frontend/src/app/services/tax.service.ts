@@ -3,30 +3,11 @@ import { HttpClient } from "@angular/common/http";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
 import { environment } from "../../environments/environment";
-
-export interface TaxCalculationRequest {
-  monthlySalary: number;
-  municipality: string;
-  age: number;
-  churchMember: boolean;
-}
-
-export interface TaxCalculationResponse {
-  grossSalary: number;
-  municipalTax: number;
-  stateTax: number;
-  churchFee: number;
-  taxCredits: number;
-  totalTax: number;
-  netSalary: number;
-  effectiveTaxRate: number;
-  municipality: string;
-  taxTable: number;
-}
-
-interface MunicipalityTaxRateResponse {
-  municipality: string;
-}
+import type {
+  MunicipalityTaxRateResponse,
+  TaxCalculationRequest,
+  TaxCalculationResponse,
+} from "../models/tax.models";
 
 @Injectable({
   providedIn: "root",

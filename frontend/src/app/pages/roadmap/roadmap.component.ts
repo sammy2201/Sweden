@@ -13,15 +13,15 @@ import { ProgressBarModule } from "primeng/progressbar";
 import { SelectModule } from "primeng/select";
 import { catchError, forkJoin, of, switchMap } from "rxjs";
 import { getApiErrorMessage } from "../../utils/api-error";
-import {
+import { RoadmapService } from "../../services/roadmap.service";
+import type {
   RoadmapQuestion,
   RoadmapQuestionDependency,
   RoadmapRequest,
   RoadmapResponse,
-  RoadmapService,
   RoadmapTaskResponse,
-} from "../../services/roadmap.service";
-import { GuideLink } from "../../services/guide-directory.service";
+} from "../../models/roadmap.models";
+import type { GuideLink } from "../../models/guide.models";
 import { RoadmapGuideService } from "../../services/roadmap-guide.service";
 import { AuthService } from "../../services/auth.service";
 import { ExploreService } from "../../services/explore.service";

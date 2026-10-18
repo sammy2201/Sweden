@@ -1,4 +1,5 @@
 import { Component } from "@angular/core";
+import { RouterLink } from "@angular/router";
 import { AvatarModule } from "primeng/avatar";
 import { CardModule } from "primeng/card";
 import { ProgressBarModule } from "primeng/progressbar";
@@ -14,6 +15,7 @@ import { ButtonModule } from "primeng/button";
     ProgressBarModule,
     TagModule,
     ButtonModule,
+    RouterLink,
   ],
   templateUrl: "./banking-intro.component.html",
 })

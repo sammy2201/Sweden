@@ -66,6 +66,7 @@ export class CountyAttractionsComponent {
   private readonly route: ActivatedRoute = inject(ActivatedRoute);
   private readonly router: Router = inject(Router);
   private readonly authService: AuthService = inject(AuthService);
+  readonly currentUser = this.authService.user;
 
   countyImagePath(countyId: string): string {
     return getCountyImagePath(countyId);
@@ -149,13 +150,17 @@ export class CountyAttractionsComponent {
     });
   }
 
-  planJourney(county: County | undefined, attraction: Attraction): void {
-    const fallbackOrigin = county?.name || "Stockholm";
+  planJourney(attraction: Attraction, userCity?: string | null): void {
     const destination = attraction.city || attraction.name;
+    const origin = userCity?.trim();
 
-    const cachedAddress = this.authService.user()?.address?.trim();
-    if (cachedAddress) {
-      this.navigateToJourney(cachedAddress, destination);
+    if (origin) {
+      this.navigateToJourney(origin, destination);
+      return;
+    }
+
+    if (!this.authService.isAuthenticated()) {
+      this.navigateToJourney(undefined, destination);
       return;
     }
 
@@ -164,19 +169,18 @@ export class CountyAttractionsComponent {
       .pipe(take(1))
       .subscribe({
         next: (profile) => {
-          const origin = profile.address?.trim() || fallbackOrigin;
-          this.navigateToJourney(origin, destination);
+          this.navigateToJourney(profile.city?.trim() || undefined, destination);
         },
         error: () => {
-          this.navigateToJourney(fallbackOrigin, destination);
+          this.navigateToJourney(undefined, destination);
         },
       });
   }
 
-  private navigateToJourney(from: string, to: string): void {
+  private navigateToJourney(from: string | undefined, to: string): void {
     this.router.navigate(["/transport"], {
       queryParams: {
-        from,
+        ...(from ? { from } : {}),
         to,
       },
     });

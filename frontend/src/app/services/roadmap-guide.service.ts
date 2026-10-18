@@ -1,5 +1,6 @@
 import { Injectable, inject } from "@angular/core";
-import { GuideDirectoryService, GuideLink } from "./guide-directory.service";
+import { GuideDirectoryService } from "./guide-directory.service";
+import type { GuideLink } from "../models/guide.models";
 
 /** Connect roadmap rule identifiers to guide routes that exist in the guide directory. */
 const GUIDE_ROUTE_BY_TASK_RULE: Readonly<Record<string, string>> = {

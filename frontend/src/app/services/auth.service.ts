@@ -2,46 +2,13 @@ import { Injectable, signal } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Observable, tap } from "rxjs";
 import { environment } from "../../environments/environment";
-
-export interface LoginPayload {
-  email: string;
-  password: string;
-}
-
-export interface RegisterPayload {
-  firstName: string;
-  lastName: string;
-  username: string;
-  email: string;
-  city: string;
-  address: string;
-  password: string;
-}
-
-export interface UserProfile {
-  id: string;
-  firstName: string;
-  lastName: string;
-  username: string;
-  email: string;
-  city: string;
-  address: string;
-  transportCountyId?: string | null;
-  age?: number | null;
-}
-
-export interface UpdateUserProfilePayload {
-  firstName: string;
-  lastName: string;
-  city: string;
-  address: string;
-  transportCountyId?: string | null;
-}
-
-interface AuthResponse {
-  accessToken: string;
-  expiresAt: string;
-}
+import type {
+  AuthResponse,
+  LoginPayload,
+  RegisterPayload,
+  UpdateUserProfilePayload,
+  UserProfile,
+} from "../models/auth.models";
 
 @Injectable({ providedIn: "root" })
 export class AuthService {

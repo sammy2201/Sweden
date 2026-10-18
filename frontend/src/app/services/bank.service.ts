@@ -1,7 +1,7 @@
 import { Injectable, inject } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Observable } from "rxjs";
-import { Bank } from "../pages/banking/bank.model";
+import type { Bank } from "../models/banking.models";
 import { environment } from "../../environments/environment";
 
 @Injectable({

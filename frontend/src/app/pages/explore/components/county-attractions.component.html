@@ -11,10 +11,15 @@
       <p-card>
         <div class="text-center py-6">
           <i class="pi pi-exclamation-circle text-5xl text-red-500 mb-3"></i>
-          <h2 class="mt-0">{{ vm.county?.name || "Explore" }} attractions are unavailable</h2>
+          <h2 class="mt-0">
+            {{ vm.county?.name || "Explore" }} attractions are unavailable
+          </h2>
           <p class="text-color-secondary mb-4">{{ vm.error }}</p>
           <div class="flex justify-content-center gap-2 flex-wrap">
-            <p-button label="Retry" icon="pi pi-refresh" (onClick)="retry()"></p-button>
+            <p-button
+              label="Retry"
+              icon="pi pi-refresh"
+              (onClick)="retry()"></p-button>
             <p-button
               label="All counties"
               severity="secondary"
@@ -91,7 +96,7 @@
                     <p-button
                       label="Plan Journey"
                       icon="pi pi-directions"
-                      (onClick)="planJourney(vm.county, attraction)">
+                      (onClick)="planJourney(attraction, currentUser()?.city)">
                     </p-button>
                   </div>
                 </div>
