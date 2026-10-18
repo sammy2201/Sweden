@@ -33,6 +33,9 @@
   @if (successMessage) {
     <div class="message success-message" role="status">{{ successMessage }}</div>
   }
+  @if (taskUpdateError) {
+    <div class="message error-message" role="alert">{{ taskUpdateError }}</div>
+  }
 
   @if (isLoadingExistingRoadmap) {
     <div class="state-panel" role="status">
@@ -75,7 +78,7 @@
       </div>
       @if (nextTask; as next) {
         <div class="next-action">
-          <span class="next-action-label"><i class="pi" [class.pi-clock]="next.state === 'Waiting'" [class.pi-arrow-down-right]="next.state !== 'Waiting'" aria-hidden="true"></i> {{ next.state === 'Waiting' ? 'Waiting on an update' : 'Your next step' }}</span>
+          <span class="next-action-label"><i class="pi" [class.pi-clock]="next.state === 'Waiting'" [class.pi-arrow-down-right]="next.state !== 'Waiting'" aria-hidden="true"></i> {{ next.state === 'Waiting' ? 'Waiting on an update' : isOptionalTask(next) ? 'Optional suggestion' : 'Your next step' }}</span>
           <strong>{{ next.title }}</strong>
           <span>{{ next.description }}</span>
         </div>
@@ -158,6 +161,53 @@
                       </div>
 
                       <p class="step-description">{{ task.description }}</p>
+
+                      @if (isPublicTransportTask(task)) {
+                        @if (transportCounty; as county) {
+                          <div class="transport-provider-links" aria-label="Regional public transport links">
+                            <span>Official provider: <strong>{{ county.transportProviderName }}</strong></span>
+                            <a
+                              class="resource-link"
+                              [href]="county.officialTicketUrl"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              [attr.aria-label]="'View tickets from ' + county.transportProviderName">
+                              View tickets <i class="pi pi-arrow-up-right" aria-hidden="true"></i>
+                            </a>
+                            @if (county.journeyPlannerUrl) {
+                              <a
+                                class="resource-link"
+                                [href]="county.journeyPlannerUrl"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                [attr.aria-label]="'Plan a journey with ' + county.transportProviderName">
+                                Journey planner <i class="pi pi-arrow-up-right" aria-hidden="true"></i>
+                              </a>
+                            }
+                          </div>
+                        }
+                        <div class="transport-provider-links">
+                          @if (!transportCounty) {
+                            <span>Choose your region to find its official public transport provider.</span>
+                          }
+                          <p-select
+                            [options]="transportCounties"
+                            optionLabel="name"
+                            [ngModel]="transportCounty"
+                            [ngModelOptions]="{ standalone: true }"
+                            (ngModelChange)="selectTransportCounty($event)"
+                            [disabled]="isSavingTransportCounty"
+                            placeholder="Select your region"
+                            ariaLabel="Select your county or region for public transport links">
+                          </p-select>
+                          @if (isSavingTransportCounty) {
+                            <span role="status">Saving region…</span>
+                          }
+                          @if (transportCountySaveError) {
+                            <span class="transport-save-error" role="alert">{{ transportCountySaveError }}</span>
+                          }
+                        </div>
+                      }
 
                       <div class="step-meta">
                         @if (task.state !== 'NotApplicable') {

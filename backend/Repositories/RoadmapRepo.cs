@@ -6,17 +6,22 @@ public class RoadmapRepository : IRoadmapRepository
 {
     private const string PublicTransportCardRuleId = "public-transport-card";
     private const string PublicTransportCardTitle = "Get a Public Transport Card";
-    private const string PublicTransportCardDescription = "Purchase a regional travel card for the area where you live or travel. No other roadmap steps are required first.";
-    private const string PublicTransportCardExplanation = "A regional travel card can be purchased independently of the respondent's other roadmap answers.";
+    private const string PublicTransportCardDescription = "Optional: check whether a regional travel card is useful for the area where you live or travel. You can do this independently of other roadmap steps.";
+    private const string PublicTransportCardExplanation = "A regional travel card may be useful depending on the respondent's location and travel habits; it is optional and independent of other roadmap steps.";
 
     private readonly AppDbContext _dbContext;
     private readonly ILogger<RoadmapRepository> _logger;
+    private readonly RoadmapTaskGenerator _taskGenerator;
 
 
-    public RoadmapRepository(AppDbContext dbContext, ILogger<RoadmapRepository> logger)
+    public RoadmapRepository(
+        AppDbContext dbContext,
+        ILogger<RoadmapRepository> logger,
+        RoadmapTaskGenerator taskGenerator)
     {
         _dbContext = dbContext;
         _logger = logger;
+        _taskGenerator = taskGenerator;
     }
 
     public async Task<Roadmap> SaveAsync(Roadmap roadmap)
@@ -54,15 +59,15 @@ public class RoadmapRepository : IRoadmapRepository
             .Include(r => r.Tasks)
             .FirstOrDefaultAsync(r => r.UserId == userId);
 
-        if (roadmap is not null && EnsurePublicTransportCard(roadmap))
+        if (roadmap is not null)
         {
-            await _dbContext.SaveChangesAsync();
+            await ReconcileSavedRoadmapAsync(roadmap);
         }
 
         return roadmap;
     }
 
-    private bool EnsurePublicTransportCard(Roadmap roadmap)
+    private void EnsurePublicTransportCard(Roadmap roadmap)
     {
         var matchingTasks = roadmap.Tasks
             .Where(task => task.RuleId == PublicTransportCardRuleId
@@ -71,8 +76,6 @@ public class RoadmapRepository : IRoadmapRepository
 
         var transportCard = matchingTasks.FirstOrDefault(task => task.RuleId == PublicTransportCardRuleId)
             ?? matchingTasks.FirstOrDefault();
-        var changed = false;
-
         if (transportCard is null)
         {
             transportCard = new RoadmapTask
@@ -83,28 +86,15 @@ public class RoadmapRepository : IRoadmapRepository
             };
             _dbContext.RoadmapTasks.Add(transportCard);
             roadmap.Tasks.Add(transportCard);
-            changed = true;
         }
 
         foreach (var duplicate in matchingTasks.Where(task => task.Id != transportCard.Id))
         {
             duplicate.State = "NotApplicable";
-            changed = true;
         }
 
         var completed = transportCard.Completed || transportCard.State == "Completed";
-        var desiredState = completed ? "Completed" : "Applicable";
-        changed |= transportCard.RuleId != PublicTransportCardRuleId
-            || transportCard.Title != PublicTransportCardTitle
-            || transportCard.Description != PublicTransportCardDescription
-            || transportCard.Category != "Transport"
-            || transportCard.Priority != 4
-            || transportCard.Completed != completed
-            || transportCard.State != desiredState
-            || transportCard.StateBeforeCompletion != "Applicable"
-            || transportCard.ResourceUrl is not null
-            || transportCard.RuleExplanation != PublicTransportCardExplanation
-            || transportCard.PrerequisitesJson != "[]";
+        var desiredState = completed ? "Completed" : "Optional";
 
         transportCard.RuleId = PublicTransportCardRuleId;
         transportCard.Title = PublicTransportCardTitle;
@@ -113,12 +103,10 @@ public class RoadmapRepository : IRoadmapRepository
         transportCard.Priority = 4;
         transportCard.Completed = completed;
         transportCard.State = desiredState;
-        transportCard.StateBeforeCompletion = "Applicable";
+        transportCard.StateBeforeCompletion = "Optional";
         transportCard.ResourceUrl = null;
         transportCard.RuleExplanation = PublicTransportCardExplanation;
         transportCard.PrerequisitesJson = "[]";
-
-        return changed;
     }
 
     public async Task<Roadmap> UpdateAsync(Roadmap roadmap)
@@ -178,7 +166,7 @@ public class RoadmapRepository : IRoadmapRepository
         return true;
     }
 
-    public async Task<Roadmap?> SetTaskCompletionAsync(Guid userId, Guid taskId, bool completed)
+    public async Task<Roadmap> SetTaskCompletionAsync(Guid userId, Guid taskId, bool completed)
     {
         var roadmap = await _dbContext.Roadmaps
             .Include(r => r.Tasks)
@@ -186,13 +174,32 @@ public class RoadmapRepository : IRoadmapRepository
 
         if (roadmap is null)
         {
-            return null;
+            throw new ApiException(
+                StatusCodes.Status404NotFound,
+                "Roadmap not found",
+                "No roadmap exists for this user.",
+                "ROADMAP_NOT_FOUND");
         }
 
+        await ReconcileSavedRoadmapAsync(roadmap);
+
         var task = roadmap.Tasks.FirstOrDefault(t => t.Id == taskId);
-        if (task is null || task.State == "NotApplicable")
+        if (task is null)
         {
-            return null;
+            throw new ApiException(
+                StatusCodes.Status404NotFound,
+                "Roadmap task not found",
+                "This task is no longer part of your roadmap. Refresh the roadmap and try again.",
+                "ROADMAP_TASK_NOT_FOUND");
+        }
+
+        if (task.State == "NotApplicable")
+        {
+            throw new ApiException(
+                StatusCodes.Status409Conflict,
+                "Roadmap task is no longer applicable",
+                "This task no longer applies to your answers. Refresh the roadmap to see the current steps.",
+                "ROADMAP_TASK_NOT_APPLICABLE");
         }
 
         if (completed)
@@ -230,18 +237,17 @@ public class RoadmapRepository : IRoadmapRepository
             }
         }
 
-        task.Completed = completed;
-        if (completed)
-        {
-            if (task.State != "Completed") task.StateBeforeCompletion = task.State;
-            task.State = "Completed";
-        }
-        else if (task.State == "Completed")
-        {
-            task.State = task.StateBeforeCompletion;
-        }
+        RoadmapTaskPrerequisiteGuard.ApplyCompletionState(task, completed);
         await _dbContext.SaveChangesAsync();
         return roadmap;
+    }
+
+    private async Task ReconcileSavedRoadmapAsync(Roadmap roadmap)
+    {
+        RoadmapTaskReconciler.ReconcileExistingRoadmap(roadmap, _taskGenerator);
+        EnsurePublicTransportCard(roadmap);
+        if (_dbContext.ChangeTracker.HasChanges())
+            await _dbContext.SaveChangesAsync();
     }
 
     private async Task SaveChangesOrThrowConflictAsync()

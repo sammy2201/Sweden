@@ -75,6 +75,9 @@ public class AuthController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateUser([FromBody] UpdateUserProfileRequestDto request)
     {
+        if (request.TransportCountyId is not null && !CountyData.IsValidCountyId(request.TransportCountyId))
+            return Problem(statusCode: StatusCodes.Status400BadRequest, title: "Invalid transport region", detail: "Select a valid Swedish county for public transport links.");
+
         if (!TryGetCurrentUserId(out var id))
             return Problem(statusCode: StatusCodes.Status401Unauthorized, title: "Unauthorized", detail: "The authenticated user could not be identified.");
 
@@ -83,7 +86,8 @@ public class AuthController : ControllerBase
             request.FirstName,
             request.LastName,
             request.City,
-            request.Address);
+            request.Address,
+            request.TransportCountyId);
 
         if (user == null)
             return Problem(statusCode: StatusCodes.Status404NotFound, title: "User not found", detail: "The requested user profile was not found.");
@@ -107,7 +111,8 @@ public class AuthController : ControllerBase
             Username = user.Username,
             Email = user.Email,
             City = user.City,
-            Address = user.Address
+            Address = user.Address,
+            TransportCountyId = user.TransportCountyId
         };
     }
 }

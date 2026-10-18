@@ -39,12 +39,20 @@ export class TaxCalculationComponent {
   loading = false;
   result: TaxCalculationResponse | null = null;
   errorMessage = "";
+  municipalityError = "";
 
   private readonly destroyRef = inject(DestroyRef);
 
   constructor(private taxService: TaxService) {}
 
   calculate(): void {
+    this.municipalityError = "";
+    const selectedMunicipality = this.request.municipality?.trim();
+    if (!selectedMunicipality || !this.municipalities.includes(selectedMunicipality)) {
+      this.municipalityError = "Select a municipality from the list before calculating.";
+      return;
+    }
+
     this.loading = true;
     this.errorMessage = "";
     this.taxService
@@ -63,6 +71,11 @@ export class TaxCalculationComponent {
           this.loading = false;
         },
       });
+  }
+
+  onMunicipalityChange(municipality: string | null): void {
+    this.request.municipality = municipality ?? "";
+    this.municipalityError = "";
   }
 
   municipalities: string[] = [];

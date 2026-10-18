@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace SwedenStart;
 
-public sealed class RoadmapTaskCatalog
+public class RoadmapTaskCatalog
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
     private readonly IReadOnlyList<RoadmapTaskRuleConfiguration> _rules;
@@ -20,29 +20,34 @@ public sealed class RoadmapTaskCatalog
     public IReadOnlyList<RoadmapQuestionConfiguration> Questionnaire => _questionnaire;
     public IReadOnlyList<RoadmapTaskRuleConfiguration> Rules => _rules;
 
-    public static RoadmapTaskCatalog Load(string path)
+    public static RoadmapTaskCatalog Load(string rulesPath, string questionsPath)
     {
-        if (!File.Exists(path))
-            throw new InvalidOperationException($"Roadmap task configuration was not found at '{path}'.");
+        if (!File.Exists(rulesPath))
+            throw new InvalidOperationException($"Roadmap task configuration was not found at '{rulesPath}'.");
+        if (!File.Exists(questionsPath))
+            throw new InvalidOperationException($"Roadmap question configuration was not found at '{questionsPath}'.");
 
-        var json = File.ReadAllText(path);
-        var configuration = JsonSerializer.Deserialize<RoadmapTaskCatalogConfiguration>(json, JsonOptions)
+        var rulesConfiguration = JsonSerializer.Deserialize<RoadmapTaskCatalogConfiguration>(File.ReadAllText(rulesPath), JsonOptions)
             ?? throw new InvalidOperationException("Roadmap task configuration is empty or invalid.");
+        var questionsConfiguration = JsonSerializer.Deserialize<RoadmapQuestionnaireConfiguration>(File.ReadAllText(questionsPath), JsonOptions)
+            ?? throw new InvalidOperationException("Roadmap question configuration is empty or invalid.");
 
-        Validate(configuration);
-        return new RoadmapTaskCatalog(configuration.Questionnaire, configuration.Rules);
+        Validate(questionsConfiguration.Questions, rulesConfiguration.Rules);
+        return new RoadmapTaskCatalog(questionsConfiguration.Questions, rulesConfiguration.Rules);
     }
 
-    private static void Validate(RoadmapTaskCatalogConfiguration configuration)
+    private static void Validate(
+        IReadOnlyList<RoadmapQuestionConfiguration> questionnaire,
+        IReadOnlyList<RoadmapTaskRuleConfiguration> rules)
     {
-        if (configuration.Questionnaire.Count == 0)
+        if (questionnaire.Count == 0)
             throw new InvalidOperationException("Roadmap questionnaire configuration must define at least one question.");
-        if (configuration.Rules.Count == 0)
+        if (rules.Count == 0)
             throw new InvalidOperationException("Roadmap task configuration must define at least one rule.");
 
         var questionsById = new Dictionary<string, RoadmapQuestionConfiguration>(StringComparer.Ordinal);
         var questionOrders = new HashSet<int>();
-        foreach (var question in configuration.Questionnaire)
+        foreach (var question in questionnaire)
         {
             if (string.IsNullOrWhiteSpace(question.Id) || !questionsById.TryAdd(question.Id, question))
                 throw new InvalidOperationException($"Roadmap question ID '{question.Id}' is empty or duplicated.");
@@ -57,10 +62,10 @@ public sealed class RoadmapTaskCatalog
         var expectedQuestionIds = RoadmapQuestionnaire.Answers(new RoadmapRequestDto()).Keys.ToHashSet(StringComparer.Ordinal);
         if (!expectedQuestionIds.SetEquals(questionsById.Keys))
             throw new InvalidOperationException("Roadmap questionnaire questions do not match the answer fields handled by the C# mapper.");
-        ValidateQuestionDependencies(configuration.Questionnaire, questionsById);
+        ValidateQuestionDependencies(questionnaire, questionsById);
         var rulesById = new Dictionary<string, RoadmapTaskRuleConfiguration>(StringComparer.Ordinal);
 
-        foreach (var rule in configuration.Rules)
+        foreach (var rule in rules)
         {
             if (string.IsNullOrWhiteSpace(rule.RuleId) || !rulesById.TryAdd(rule.RuleId, rule))
                 throw new InvalidOperationException($"Roadmap task rule ID '{rule.RuleId}' is empty or duplicated.");
@@ -88,12 +93,12 @@ public sealed class RoadmapTaskCatalog
             }
         }
 
-        foreach (var rule in configuration.Rules)
-        foreach (var prerequisite in rule.Prerequisites)
-            if (!rulesById.ContainsKey(prerequisite.RuleId))
-                throw new InvalidOperationException($"Roadmap task rule '{rule.RuleId}' references unknown prerequisite '{prerequisite.RuleId}'.");
+        foreach (var rule in rules)
+            foreach (var prerequisite in rule.Prerequisites)
+                if (!rulesById.ContainsKey(prerequisite.RuleId))
+                    throw new InvalidOperationException($"Roadmap task rule '{rule.RuleId}' references unknown prerequisite '{prerequisite.RuleId}'.");
 
-        ValidateDependencyGraph(configuration.Rules, rulesById);
+        ValidateDependencyGraph(rules, rulesById);
     }
 
     private static void ValidateConditions(
@@ -117,22 +122,22 @@ public sealed class RoadmapTaskCatalog
     {
         var dependencyIds = new HashSet<string>(StringComparer.Ordinal);
         foreach (var question in questions)
-        foreach (var dependency in question.Dependencies)
-        {
-            if (string.IsNullOrWhiteSpace(dependency.Id) || !dependencyIds.Add(dependency.Id))
-                throw new InvalidOperationException($"Roadmap question dependency ID '{dependency.Id}' is empty or duplicated.");
-            if (dependency.DependentQuestionId != question.Id)
-                throw new InvalidOperationException($"Roadmap question dependency '{dependency.Id}' targets a different question than '{question.Id}'.");
-            if (!questionsById.TryGetValue(dependency.SourceQuestionId, out var sourceQuestion))
-                throw new InvalidOperationException($"Roadmap question dependency '{dependency.Id}' references unknown source question '{dependency.SourceQuestionId}'.");
-            if (!sourceQuestion.Values.Contains(dependency.Answer, StringComparer.Ordinal))
-                throw new InvalidOperationException($"Roadmap question dependency '{dependency.Id}' uses unknown answer '{dependency.Answer}'.");
-            if (!Enum.TryParse<RoadmapDependencyOperator>(dependency.Operator, ignoreCase: false, out var dependencyOperator)
-                || !Enum.IsDefined(dependencyOperator)
-                || !Enum.TryParse<RoadmapDependencyEffect>(dependency.Effect, ignoreCase: false, out var dependencyEffect)
-                || !Enum.IsDefined(dependencyEffect))
-                throw new InvalidOperationException($"Roadmap question dependency '{dependency.Id}' uses an unsupported operator or effect.");
-        }
+            foreach (var dependency in question.Dependencies)
+            {
+                if (string.IsNullOrWhiteSpace(dependency.Id) || !dependencyIds.Add(dependency.Id))
+                    throw new InvalidOperationException($"Roadmap question dependency ID '{dependency.Id}' is empty or duplicated.");
+                if (dependency.DependentQuestionId != question.Id)
+                    throw new InvalidOperationException($"Roadmap question dependency '{dependency.Id}' targets a different question than '{question.Id}'.");
+                if (!questionsById.TryGetValue(dependency.SourceQuestionId, out var sourceQuestion))
+                    throw new InvalidOperationException($"Roadmap question dependency '{dependency.Id}' references unknown source question '{dependency.SourceQuestionId}'.");
+                if (!sourceQuestion.Values.Contains(dependency.Answer, StringComparer.Ordinal))
+                    throw new InvalidOperationException($"Roadmap question dependency '{dependency.Id}' uses unknown answer '{dependency.Answer}'.");
+                if (!Enum.TryParse<RoadmapDependencyOperator>(dependency.Operator, ignoreCase: false, out var dependencyOperator)
+                    || !Enum.IsDefined(dependencyOperator)
+                    || !Enum.TryParse<RoadmapDependencyEffect>(dependency.Effect, ignoreCase: false, out var dependencyEffect)
+                    || !Enum.IsDefined(dependencyEffect))
+                    throw new InvalidOperationException($"Roadmap question dependency '{dependency.Id}' uses an unsupported operator or effect.");
+            }
     }
 
     private static void ValidateDependencyGraph(
@@ -157,13 +162,17 @@ public sealed class RoadmapTaskCatalog
     }
 }
 
-public sealed class RoadmapTaskCatalogConfiguration
+public class RoadmapTaskCatalogConfiguration
 {
-    public List<RoadmapQuestionConfiguration> Questionnaire { get; set; } = [];
     public List<RoadmapTaskRuleConfiguration> Rules { get; set; } = [];
 }
 
-public sealed class RoadmapQuestionConfiguration
+public class RoadmapQuestionnaireConfiguration
+{
+    public List<RoadmapQuestionConfiguration> Questions { get; set; } = [];
+}
+
+public class RoadmapQuestionConfiguration
 {
     public string Id { get; set; } = string.Empty;
     public string Text { get; set; } = string.Empty;
@@ -176,7 +185,7 @@ public sealed class RoadmapQuestionConfiguration
     public string? Guidance { get; set; }
 }
 
-public sealed class RoadmapTaskRuleConfiguration
+public class RoadmapTaskRuleConfiguration
 {
     public string RuleId { get; set; } = string.Empty;
     public List<RoadmapAnswerConditionConfiguration> When { get; set; } = [];
@@ -191,7 +200,7 @@ public sealed class RoadmapTaskRuleConfiguration
     public List<RoadmapTaskPrerequisiteConfiguration> Prerequisites { get; set; } = [];
 }
 
-public sealed class RoadmapTaskVariantConfiguration
+public class RoadmapTaskVariantConfiguration
 {
     public List<RoadmapAnswerConditionConfiguration> When { get; set; } = [];
     public string? Title { get; set; }
@@ -199,14 +208,14 @@ public sealed class RoadmapTaskVariantConfiguration
     public string? ResourceUrl { get; set; }
 }
 
-public sealed class RoadmapTaskPrerequisiteConfiguration
+public class RoadmapTaskPrerequisiteConfiguration
 {
     public string RuleId { get; set; } = string.Empty;
     public string Explanation { get; set; } = string.Empty;
     public List<RoadmapAnswerConditionConfiguration> When { get; set; } = [];
 }
 
-public sealed class RoadmapAnswerConditionConfiguration
+public class RoadmapAnswerConditionConfiguration
 {
     public string QuestionId { get; set; } = string.Empty;
     [JsonPropertyName("equals")]

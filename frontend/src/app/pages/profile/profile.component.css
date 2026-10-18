@@ -78,6 +78,9 @@
 .roadmap-task-list li div { display: grid; gap: var(--space-1); }
 .roadmap-task-list li strong { color: var(--app-heading); font-size: var(--font-size-base); }
 .roadmap-task-list li.completed strong { color: var(--app-text-muted); text-decoration: line-through; }
+.roadmap-task-list li.not-applicable { opacity: 0.72; }
+.roadmap-task-state { flex: 0 0 auto; padding: var(--space-1) var(--space-2); border-radius: var(--radius-pill); background: var(--app-surface-alt); font-weight: var(--font-weight-semibold); }
+.roadmap-task-list li.optional .roadmap-task-state { color: var(--app-text-muted); }
 .roadmap-empty-state { margin: 0 0 var(--space-4); }
 
 .profile-error { width: min(520px, 100%); margin: var(--space-16) auto; padding: var(--space-8); border: var(--border-width) solid var(--app-border); border-radius: var(--radius-card); background: var(--app-surface); box-shadow: var(--app-shadow); text-align: center; }

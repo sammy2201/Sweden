@@ -23,6 +23,7 @@ import {
 import { buildExploreErrorMessage } from "../explore.utils";
 import { AuthService } from "../../../services/auth.service";
 import { ExploreService } from "../../../services/explore.service";
+import { getCountyImagePath } from "../county-images";
 
 interface CountyAttractionsVm {
   loading: boolean;
@@ -65,6 +66,10 @@ export class CountyAttractionsComponent {
   private readonly route: ActivatedRoute = inject(ActivatedRoute);
   private readonly router: Router = inject(Router);
   private readonly authService: AuthService = inject(AuthService);
+
+  countyImagePath(countyId: string): string {
+    return getCountyImagePath(countyId);
+  }
   private readonly requestState$ = new BehaviorSubject<{
     page: number;
     pageSize: number;

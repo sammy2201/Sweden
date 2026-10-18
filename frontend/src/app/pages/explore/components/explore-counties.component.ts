@@ -9,6 +9,7 @@ import { TagModule } from "primeng/tag";
 import { County } from "../../../models/explore.models";
 import { ExploreService } from "../../../services/explore.service";
 import { buildExploreErrorMessage } from "../explore.utils";
+import { getCountyImagePath } from "../county-images";
 
 interface CountiesVm {
   loading: boolean;
@@ -32,6 +33,10 @@ interface CountiesVm {
 })
 export class ExploreCountiesComponent {
   private readonly exploreService = inject(ExploreService);
+
+  countyImagePath(countyId: string): string {
+    return getCountyImagePath(countyId);
+  }
 
   readonly vm$: Observable<CountiesVm> = this.exploreService.getCounties().pipe(
     map(

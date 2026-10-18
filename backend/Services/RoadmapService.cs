@@ -76,12 +76,7 @@ public class RoadmapService : IRoadmapService
 
     public async Task<RoadmapResponseDto> SetTaskCompletionAsync(Guid userId, Guid taskId, bool completed)
     {
-        var roadmap = await _roadmapRepository.SetTaskCompletionAsync(userId, taskId, completed)
-            ?? throw new ApiException(
-                StatusCodes.Status404NotFound,
-                "Roadmap not found",
-                "Roadmap or task not found for this user.",
-                "ROADMAP_NOT_FOUND");
+        var roadmap = await _roadmapRepository.SetTaskCompletionAsync(userId, taskId, completed);
 
         return MapToResponse(roadmap);
     }

@@ -1,6 +1,6 @@
 namespace SwedenStart;
 
-public sealed class RoadmapTaskGenerator
+public class RoadmapTaskGenerator
 {
     private readonly RoadmapTaskCatalog _catalog;
 

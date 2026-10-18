@@ -43,6 +43,11 @@
           </p>
         </div>
 
+        <img
+          class="county-detail-image"
+          [src]="countyImagePath(county.id)"
+          [alt]="county.name" />
+
         <p-tag severity="info" [value]="vm.paged.totalCount + ' attractions'">
         </p-tag>
       </div>

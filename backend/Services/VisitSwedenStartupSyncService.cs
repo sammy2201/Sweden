@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace SwedenStart;
 
-public sealed class VisitSwedenStartupSyncService : BackgroundService
+public class VisitSwedenStartupSyncService : BackgroundService
 {
      private readonly IServiceScopeFactory _scopeFactory;
      private readonly ILogger<VisitSwedenStartupSyncService> _logger;

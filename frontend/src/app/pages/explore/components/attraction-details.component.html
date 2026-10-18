@@ -7,25 +7,39 @@
           <h2 class="mt-0">Loading attraction</h2>
         </div>
       </p-card>
-    } @else if (vm.error) {
+    } @else if (vm.attractionError) {
       <p-card>
         <div class="text-center py-6">
           <i class="pi pi-exclamation-circle text-5xl text-red-500 mb-3"></i>
           <h2 class="mt-0">Could not load attraction</h2>
-          <p class="text-color-secondary mb-4">{{ vm.error }}</p>
-          <p-button label="Back to Explore" routerLink="/explore"></p-button>
+          <p class="text-color-secondary mb-4">{{ vm.attractionError }}</p>
+          <div class="flex justify-content-center gap-2 flex-wrap">
+            <p-button label="Retry" icon="pi pi-refresh" (onClick)="retry()"></p-button>
+            <p-button label="Back to Explore" severity="secondary" variant="outlined" routerLink="/explore"></p-button>
+          </div>
         </div>
       </p-card>
-    } @else if (vm.county && vm.attraction) {
+    } @else if (vm.attraction) {
       <div class="mb-4">
-        <p-button
-          label="{{ vm.county.name }}"
-          icon="pi pi-arrow-left"
-          severity="secondary"
-          variant="text"
-          [routerLink]="['/explore', vm.county.id]">
-        </p-button>
+        @if (vm.county) {
+          <p-button
+            [label]="vm.county.name"
+            icon="pi pi-arrow-left"
+            severity="secondary"
+            variant="text"
+            [routerLink]="['/explore', vm.county.id]">
+          </p-button>
+        } @else {
+          <p-button label="Back to Explore" icon="pi pi-arrow-left" severity="secondary" variant="text" routerLink="/explore"></p-button>
+        }
       </div>
+
+      @if (vm.countyError) {
+        <div class="api-error" role="alert">
+          County information could not be loaded. {{ vm.countyError }}
+          <p-button label="Retry county information" icon="pi pi-refresh" severity="secondary" variant="text" (onClick)="retry()"></p-button>
+        </div>
+      }
 
       <div class="grid">
         <div class="col-12 lg:col-7">

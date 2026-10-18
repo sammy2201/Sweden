@@ -6,6 +6,7 @@ import {
   combineLatest,
   map,
   of,
+  BehaviorSubject,
   startWith,
   switchMap,
   take,
@@ -24,7 +25,8 @@ import { ExploreService } from "../../../services/explore.service";
 
 interface AttractionDetailVm {
   loading: boolean;
-  error: string | null;
+  countyError: string | null;
+  attractionError: string | null;
   county: County | undefined;
   attraction: AttractionDetail | undefined;
 }
@@ -51,40 +53,44 @@ export class AttractionDetailsComponent {
   private readonly router = inject(Router);
   private readonly exploreService = inject(ExploreService);
   private readonly authService = inject(AuthService);
+  private readonly retryRequest$ = new BehaviorSubject(0);
 
-  readonly vm$ = this.route.paramMap.pipe(
-    switchMap((params) => {
+  readonly vm$ = combineLatest([this.route.paramMap, this.retryRequest$]).pipe(
+    switchMap(([params]) => {
       const countyId = params.get("countyId") ?? "";
       const attractionId = params.get("attractionId") ?? "";
 
-      return combineLatest([
-        this.exploreService.getCounty(countyId),
-        this.exploreService.getAttraction(attractionId),
-      ]);
+      return combineLatest({
+        county: this.exploreService.getCounty(countyId).pipe(
+          map((county) => ({ county, error: null as string | null })),
+          catchError((error: unknown) => of({ county: undefined, error: buildExploreErrorMessage(error) })),
+        ),
+        attraction: this.exploreService.getAttraction(attractionId).pipe(
+          map((attraction) => ({ attraction, error: null as string | null })),
+          catchError((error: unknown) => of({ attraction: undefined, error: buildExploreErrorMessage(error) })),
+        ),
+      }).pipe(
+        map(({ county, attraction }): AttractionDetailVm => ({
+          loading: false,
+          countyError: county.error,
+          attractionError: attraction.error,
+          county: county.county,
+          attraction: attraction.attraction,
+        })),
+        startWith({
+          loading: true,
+          countyError: null,
+          attractionError: null,
+          county: undefined,
+          attraction: undefined,
+        }),
+      );
     }),
-    map(
-      ([county, attraction]): AttractionDetailVm => ({
-        loading: false,
-        error: null,
-        county,
-        attraction,
-      }),
-    ),
-    startWith({
-      loading: true,
-      error: null,
-      county: undefined,
-      attraction: undefined,
-    }),
-    catchError((error: unknown) =>
-      of({
-        loading: false,
-        error: buildExploreErrorMessage(error),
-        county: undefined,
-        attraction: undefined,
-      }),
-    ),
   );
+
+  retry(): void {
+    this.retryRequest$.next(this.retryRequest$.value + 1);
+  }
 
   mapsUrl(attraction: AttractionDetail): string {
     const query = attraction.address || attraction.name;

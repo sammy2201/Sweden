@@ -1,6 +1,6 @@
 namespace SwedenStart;
 
-public sealed class VisitSwedenSyncGate
+public class VisitSwedenSyncGate
 {
      private readonly SemaphoreSlim _semaphore = new(1, 1);
 

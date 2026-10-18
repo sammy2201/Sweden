@@ -114,7 +114,8 @@ builder.Services.AddAuthentication(options =>
 });
 builder.Services.AddScoped<IRoadmapRepository, RoadmapRepository>();
 builder.Services.AddSingleton(_ => RoadmapTaskCatalog.Load(
-    Path.Combine(builder.Environment.ContentRootPath, "Data", "roadmap-rules.json")));
+    Path.Combine(builder.Environment.ContentRootPath, "Data", "roadmap-rules.json"),
+    Path.Combine(builder.Environment.ContentRootPath, "Data", "roadmap-questions.json")));
 builder.Services.AddSingleton<RoadmapQuestionnaire>();
 builder.Services.AddSingleton<RoadmapTaskGenerator>();
 builder.Services.AddScoped<IRoadmapService, RoadmapService>();

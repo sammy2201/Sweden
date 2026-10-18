@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace SwedenStart;
 
-public sealed class ApiExceptionHandler(
+public class ApiExceptionHandler(
     IProblemDetailsService problemDetailsService,
     ILogger<ApiExceptionHandler> logger) : IExceptionHandler
 {

@@ -34,151 +34,196 @@ public static class CountyData
             Id = "blekinge",
             Name = "Blekinge",
             Description = "Known as Sweden's Garden with beautiful coastline and islands.",
-            ImageUrl = "/images/counties/Blekinge.jpeg",
+            TransportProviderName = "Blekingetrafiken",
+            OfficialTicketUrl = "https://www.blekingetrafiken.se/biljetter/",
+            JourneyPlannerUrl = "https://www.blekingetrafiken.se/reseinformation/sok-resa/",
         },
         new()
         {
             Id = "dalarna",
             Name = "Dalarna",
             Description = "Traditional Swedish culture, mountains and outdoor adventures.",
-            ImageUrl = "/images/counties/Dalarna.jpeg",
+            TransportProviderName = "Dalatrafik",
+            OfficialTicketUrl = "https://www.dalatrafik.se/sa-reser-du-med-oss/infor-resan/vara-biljetter/",
+            JourneyPlannerUrl = "https://www.dalatrafik.se/",
         },
         new()
         {
             Id = "gavleborg",
             Name = "Gävleborg",
             Description = "Home to coastal villages, forests and winter activities.",
-            ImageUrl = "/images/counties/G%C3%A4vleborg.jpeg",
+            TransportProviderName = "X-trafik",
+            OfficialTicketUrl = "https://xtrafik.se/biljetter",
+            JourneyPlannerUrl = "https://xtrafik.se/",
         },
         new()
         {
             Id = "gotland",
             Name = "Gotland",
             Description = "Sweden's largest island, famous for medieval Visby and beaches.",
-            ImageUrl = "/images/counties/gotland.jpeg",
+            TransportProviderName = "Gotlands kollektivtrafik",
+            OfficialTicketUrl = "https://gotland.se/rg/gotlands-kollektivtrafik/vara-biljetter",
+            JourneyPlannerUrl = "https://gotland.se/rg/gotlands-kollektivtrafik",
         },
         new()
         {
             Id = "halland",
             Name = "Halland",
             Description = "Popular for sandy beaches, cycling routes and coastal towns.",
-            ImageUrl = "/images/counties/Halland.jpeg",
+            TransportProviderName = "Hallandstrafiken",
+            OfficialTicketUrl = "https://www.hallandstrafiken.se/biljetter-och-priser",
+            JourneyPlannerUrl = "https://www.hallandstrafiken.se/res-med-oss/sok-resa/reseplaneraren",
         },
         new()
         {
             Id = "jamtlandharjedalen",
             Name = "Jämtland Härjedalen",
             Description = "A paradise for skiing, hiking and mountain adventures.",
-            ImageUrl = "/images/counties/J%C3%A4mtland%20H%C3%A4rjedalen.jpg",
+            TransportProviderName = "Länstrafiken Jämtland",
+            OfficialTicketUrl = "https://ltr.se/kundservice/60349.biljetter-och-priser.html",
+            JourneyPlannerUrl = "https://ltr.se/",
         },
         new()
         {
             Id = "jonkoping",
             Name = "Jönköping",
             Description = "Located by Lake Vättern with hiking, nature and family attractions.",
-            ImageUrl = "/images/counties/J%C3%B6nk%C3%B6ping.jpeg",
+            TransportProviderName = "Jönköpings Länstrafik",
+            OfficialTicketUrl = "https://www.jlt.se/biljetter-och-priser/kop-biljett/",
+            JourneyPlannerUrl = "https://www.jlt.se/",
         },
         new()
         {
             Id = "kalmar",
             Name = "Kalmar",
             Description = "Historic castles, coastal scenery and the gateway to Öland.",
-            ImageUrl = "/images/counties/Kalmar.jpeg",
+            TransportProviderName = "Kalmar länstrafik",
+            OfficialTicketUrl = "https://kalmarlanstrafik.se/biljetter-och-priser/kop-biljett/",
+            JourneyPlannerUrl = "https://kalmarlanstrafik.se/",
         },
         new()
         {
             Id = "kronoberg",
             Name = "Kronoberg",
             Description = "Forests, lakes and the heart of Sweden's famous glass kingdom.",
-            ImageUrl = "/images/counties/Kronoberg.jpeg",
+            TransportProviderName = "Länstrafiken Kronoberg",
+            OfficialTicketUrl = "https://lanstrafikenkron.se/biljetter",
+            JourneyPlannerUrl = "https://lanstrafikenkron.se/",
         },
         new()
         {
             Id = "norrbotten",
             Name = "Norrbotten",
             Description = "Home to Lapland, the Northern Lights and Arctic experiences.",
-            ImageUrl = "/images/counties/Norrbotten.jpeg",
+            TransportProviderName = "Länstrafiken Norrbotten",
+            OfficialTicketUrl = "https://lanstrafikennorrbotten.se/reseappen",
+            JourneyPlannerUrl = "https://lanstrafikennorrbotten.se/",
         },
         new()
         {
             Id = "orebro",
             Name = "Örebro",
             Description = "Historic castles, lakes and family-friendly attractions.",
-            ImageUrl = "/images/counties/%C3%96rebro.jpeg",
+            TransportProviderName = "Länstrafiken Örebro",
+            OfficialTicketUrl = "https://www.lanstrafiken.se/biljetter/",
+            JourneyPlannerUrl = "https://www.lanstrafiken.se/",
         },
         new()
         {
             Id = "ostergotland",
             Name = "Östergötland",
             Description = "Rich in history with castles, canals and picturesque countryside.",
-            ImageUrl = "/images/counties/%C3%96sterg%C3%B6tland.jpeg",
+            TransportProviderName = "Östgötatrafiken",
+            OfficialTicketUrl = "https://www.ostgotatrafiken.se/biljetter/biljetter-och-priser",
+            JourneyPlannerUrl = "https://www.ostgotatrafiken.se/",
         },
         new()
         {
             Id = "skane",
             Name = "Skåne",
             Description = "Sweden's southernmost county, known for beaches, castles and vibrant cities.",
-            ImageUrl = "/images/counties/skane.jpeg",
+            TransportProviderName = "Skånetrafiken",
+            OfficialTicketUrl = "https://www.skanetrafiken.se/biljetter/",
+            JourneyPlannerUrl = "https://www.skanetrafiken.se/",
         },
         new()
         {
             Id = "sormland",
             Name = "Sörmland",
             Description = "Historic manors, coastal landscapes and charming small towns.",
-            ImageUrl = "/images/counties/S%C3%B6rmland.jpeg",
+            TransportProviderName = "Sörmlandstrafiken",
+            OfficialTicketUrl = "https://sormlandstrafiken.se/biljetter/kop-biljett/",
+            JourneyPlannerUrl = "https://sormlandstrafiken.se/",
         },
         new()
         {
             Id = "stockholm",
             Name = "Stockholm",
             Description = "Home to Sweden's capital with historic districts and world-class museums.",
-            ImageUrl = "/images/counties/stockholm.jpeg",
+            TransportProviderName = "SL",
+            OfficialTicketUrl = "https://sl.se/biljetter/sa-koper-du-biljetten",
+            JourneyPlannerUrl = "https://sl.se/reseplanering",
         },
         new()
         {
             Id = "uppsala",
             Name = "Uppsala",
             Description = "Famous for its cathedral, university and Viking heritage.",
-            ImageUrl = "/images/counties/Uppsala%20.jpeg",
+            TransportProviderName = "UL",
+            OfficialTicketUrl = "https://www.ul.se/biljetter/sa-har-koper-du-biljett/",
+            JourneyPlannerUrl = "https://www.ul.se/",
         },
         new()
         {
             Id = "varmland",
             Name = "Värmland",
             Description = "A county of forests, lakes and literary heritage.",
-            ImageUrl = "/images/counties/V%C3%A4rmland.jpeg",
+            TransportProviderName = "Värmlandstrafik",
+            OfficialTicketUrl = "https://www.varmlandstrafik.se/varmlandstrafik/biljetter",
+            JourneyPlannerUrl = "https://www.varmlandstrafik.se/",
         },
         new()
         {
             Id = "vasterbotten",
             Name = "Västerbotten",
             Description = "Northern forests, rivers and the cultural city of Umeå.",
-            ImageUrl = "/images/counties/V%C3%A4sterbotten.jpeg",
+            TransportProviderName = "Länstrafiken Västerbotten",
+            OfficialTicketUrl = "https://www.tabussen.nu/lanstrafiken/biljetter-och-priser/har-koper-du-biljetten/",
+            JourneyPlannerUrl = "https://www.tabussen.nu/lanstrafiken",
         },
         new()
         {
             Id = "vasternorrland",
             Name = "Västernorrland",
             Description = "Known for the High Coast and dramatic natural landscapes.",
-            ImageUrl = "/images/counties/V%C3%A4sternorrland.jpg",
+            TransportProviderName = "Din Tur",
+            OfficialTicketUrl = "https://www.dintur.se/biljetter-och-reskort/",
+            JourneyPlannerUrl = "https://www.dintur.se/",
         },
         new()
         {
             Id = "vastmanland",
             Name = "Västmanland",
             Description = "Industrial heritage, forests and scenic lakes.",
-            ImageUrl = "/images/counties/V%C3%A4stmanland.jpeg",
+            TransportProviderName = "VL",
+            OfficialTicketUrl = "https://www.vl.se/biljetter/kopa-biljett/",
+            JourneyPlannerUrl = "https://www.vl.se/",
         },
         new()
         {
             Id = "vastragotaland",
             Name = "Västra Götaland",
             Description = "A diverse region featuring Gothenburg, archipelagos and nature.",
-            ImageUrl = "/images/counties/V%C3%A4stra%20G%C3%B6taland.jpg",
+            TransportProviderName = "Västtrafik",
+            OfficialTicketUrl = "https://www.vasttrafik.se/biljetter/",
+            JourneyPlannerUrl = "https://www.vasttrafik.se/",
         }
     ];
 
     public static IEnumerable<CountyDto> GetCounties() => Counties;
+
+    public static bool IsValidCountyId(string countyId)
+        => Counties.Any(county => string.Equals(county.Id, countyId, StringComparison.Ordinal));
 
     public static string ResolveCountyId(string? value)
     {

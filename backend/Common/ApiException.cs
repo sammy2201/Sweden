@@ -1,6 +1,6 @@
 namespace SwedenStart;
 
-public sealed class ApiException : Exception
+public class ApiException : Exception
 {
      public ApiException(
          int statusCode,

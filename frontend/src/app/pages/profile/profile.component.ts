@@ -10,14 +10,12 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import {
   FormBuilder,
-  FormsModule,
   ReactiveFormsModule,
   Validators,
 } from "@angular/forms";
 import { Router } from "@angular/router";
 import { ButtonModule } from "primeng/button";
 import { CardModule } from "primeng/card";
-import { CheckboxModule } from "primeng/checkbox";
 import { DividerModule } from "primeng/divider";
 import { InputTextModule } from "primeng/inputtext";
 import { ProgressBarModule } from "primeng/progressbar";
@@ -26,6 +24,7 @@ import { TagModule } from "primeng/tag";
 import { AuthService, UserProfile } from "../../services/auth.service";
 import {
   RoadmapResponse,
+  RoadmapTaskResponse,
   RoadmapService,
 } from "../../services/roadmap.service";
 import { getApiErrorMessage } from "../../utils/api-error";
@@ -36,11 +35,9 @@ import { HttpErrorResponse } from "@angular/common/http";
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
     ReactiveFormsModule,
     ButtonModule,
     CardModule,
-    CheckboxModule,
     DividerModule,
     InputTextModule,
     ProgressBarModule,
@@ -66,20 +63,21 @@ export class ProfileComponent implements OnInit {
   readonly roadmap = signal<RoadmapResponse | null>(null);
   readonly roadmapLoading = signal(true);
   readonly roadmapError = signal("");
-  readonly pendingRoadmapTaskIds = signal<ReadonlySet<string>>(new Set());
 
+  readonly applicableRoadmapTasks = computed(
+    () => this.roadmap()?.tasks.filter((task) =>
+      task.state !== "NotApplicable" && !this.isOptionalRoadmapTask(task),
+    ) ?? [],
+  );
   readonly completedRoadmapTasks = computed(
-    () => this.roadmap()?.tasks.filter((task) => task.completed).length ?? 0,
+    () => this.applicableRoadmapTasks().filter((task) => task.completed || task.state === "Completed").length,
   );
   readonly roadmapProgress = computed(() => {
-    const tasks = this.roadmap()?.tasks ?? [];
+    const tasks = this.applicableRoadmapTasks();
     return tasks.length === 0
       ? 0
       : Math.round((this.completedRoadmapTasks() / tasks.length) * 100);
   });
-  readonly remainingRoadmapTasks = computed(
-    () => this.roadmap()?.tasks.filter((task) => !task.completed) ?? [],
-  );
 
   readonly form = this.fb.nonNullable.group({
     firstName: ["", [Validators.required, Validators.minLength(2)]],
@@ -152,42 +150,19 @@ export class ProfileComponent implements OnInit {
       });
   }
 
-  toggleRoadmapTask(taskId: string, completed: boolean): void {
-    if (this.pendingRoadmapTaskIds().has(taskId)) {
-      return;
-    }
-
-    this.pendingRoadmapTaskIds.update((pending) =>
-      new Set(pending).add(taskId),
-    );
-    this.roadmapError.set("");
-    this.roadmapService
-      .updateTaskCompletion(taskId, completed)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (roadmap) => {
-          this.roadmap.set(roadmap);
-          this.removePendingRoadmapTask(taskId);
-        },
-        error: (error: unknown) => {
-          this.roadmapError.set(
-            getApiErrorMessage(error, "We could not update your roadmap task."),
-          );
-          this.removePendingRoadmapTask(taskId);
-        },
-      });
-  }
-
   openRoadmap(): void {
     this.router.navigateByUrl("/roadmap");
   }
 
-  private removePendingRoadmapTask(taskId: string): void {
-    this.pendingRoadmapTaskIds.update((pending) => {
-      const next = new Set(pending);
-      next.delete(taskId);
-      return next;
-    });
+  isOptionalRoadmapTask(task: RoadmapTaskResponse): boolean {
+    return task.state === "Optional" ||
+      (task.state === "Completed" && task.stateBeforeCompletion === "Optional");
+  }
+
+  roadmapTaskStatusLabel(task: RoadmapTaskResponse): string {
+    if (task.state === "NotApplicable") return "Not applicable";
+    if (task.completed || task.state === "Completed") return "Completed";
+    return this.isOptionalRoadmapTask(task) ? "Optional" : task.state;
   }
 
   startEditing(): void {
@@ -234,7 +209,10 @@ export class ProfileComponent implements OnInit {
     this.saveMessage.set("");
 
     this.authService
-      .updateUserProfile(this.form.getRawValue())
+      .updateUserProfile({
+        ...this.form.getRawValue(),
+        transportCountyId: this.profile()?.transportCountyId ?? null,
+      })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (profile) => {

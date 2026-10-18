@@ -110,12 +110,12 @@
         } @else if (roadmapError()) {
           <div class="api-error" role="alert">{{ roadmapError() }}</div>
         } @else if (roadmap(); as currentRoadmap) {
-          <div class="roadmap-progress-summary"><div><strong>{{ completedRoadmapTasks() }} / {{ currentRoadmap.tasks.length }}</strong><span>steps completed</span></div><strong>{{ roadmapProgress() }}%</strong></div>
+          <div class="roadmap-progress-summary"><div><strong>{{ completedRoadmapTasks() }} / {{ applicableRoadmapTasks().length }}</strong><span>steps completed</span></div><strong>{{ roadmapProgress() }}%</strong></div>
           <p-progressBar [value]="roadmapProgress()" [showValue]="false" styleClass="profile-roadmap-progress"></p-progressBar>
           @if (currentRoadmap.tasks.length) {
             <ul class="roadmap-task-list">
               @for (task of currentRoadmap.tasks; track task.id) {
-                <li [class.completed]="task.completed"><p-checkbox [binary]="true" [ngModel]="task.completed" [disabled]="pendingRoadmapTaskIds().has(task.id)" [ngModelOptions]="{ standalone: true }" (ngModelChange)="toggleRoadmapTask(task.id, $event)"></p-checkbox><div><strong>{{ task.title }}</strong><span>{{ task.description }}</span></div></li>
+                <li [class.completed]="task.completed || task.state === 'Completed'" [class.not-applicable]="task.state === 'NotApplicable'" [class.optional]="isOptionalRoadmapTask(task)"><div><strong>{{ task.title }}</strong><span>{{ task.description }}</span></div><span class="roadmap-task-state">{{ roadmapTaskStatusLabel(task) }}</span></li>
               }
             </ul>
           } @else { <p class="roadmap-empty-state">Your roadmap has no checklist steps yet.</p> }

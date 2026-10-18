@@ -33,6 +33,20 @@ public static class RoadmapTaskPrerequisiteGuard
             .ToArray();
     }
 
+    public static void ApplyCompletionState(RoadmapTask task, bool completed)
+    {
+        task.Completed = completed;
+        if (completed)
+        {
+            if (task.State != "Completed") task.StateBeforeCompletion = task.State;
+            task.State = "Completed";
+        }
+        else if (task.State == "Completed")
+        {
+            task.State = task.StateBeforeCompletion;
+        }
+    }
+
     private static bool IsCompleted(RoadmapTask task) =>
         task.Completed || task.State == "Completed";
 }

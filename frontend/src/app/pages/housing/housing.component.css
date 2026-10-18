@@ -203,11 +203,17 @@ li {
 }
 
 .resource-link {
-  color: var(--app-primary) !important;
+  color: #fff !important;
 }
 
-.resource-link:hover {
-  color: var(--app-primary-dark) !important;
+.resource-link ::ng-deep .p-button-label,
+.resource-link ::ng-deep .p-button-icon {
+  color: inherit;
+}
+
+.resource-link:hover,
+.resource-link:focus-visible {
+  color: #fff !important;
 }
 
 @media (max-width: 860px) {

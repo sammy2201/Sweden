@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace SwedenStart;
 
-public sealed record RoadmapTaskPrerequisite(string RuleId, string Explanation);
+public record RoadmapTaskPrerequisite(string RuleId, string Explanation);
 
 public class RoadmapTask
 {
