@@ -26,11 +26,7 @@ public class RoadmapRepository : IRoadmapRepository
 
     public async Task<Roadmap> SaveAsync(Roadmap roadmap)
     {
-        var existing = await _dbContext.Roadmaps
-            .Include(r => r.Tasks)
-            .FirstOrDefaultAsync(r => r.UserId == roadmap.UserId);
-
-        if (existing is not null)
+        if (await _dbContext.Roadmaps.AnyAsync(existingRoadmap => existingRoadmap.UserId == roadmap.UserId))
         {
             throw new ApiException(
                 StatusCodes.Status409Conflict,
@@ -56,8 +52,8 @@ public class RoadmapRepository : IRoadmapRepository
     public async Task<Roadmap?> GetByUserIdAsync(Guid userId)
     {
         var roadmap = await _dbContext.Roadmaps
-            .Include(r => r.Tasks)
-            .FirstOrDefaultAsync(r => r.UserId == userId);
+            .Include(roadmap => roadmap.Tasks)
+            .FirstOrDefaultAsync(roadmap => roadmap.UserId == userId);
 
         if (roadmap is not null)
         {
@@ -112,8 +108,8 @@ public class RoadmapRepository : IRoadmapRepository
     public async Task<Roadmap> UpdateAsync(Roadmap roadmap)
     {
         var existing = await _dbContext.Roadmaps
-            .Include(r => r.Tasks)
-            .FirstOrDefaultAsync(r => r.UserId == roadmap.UserId);
+            .Include(existingRoadmap => existingRoadmap.Tasks)
+            .FirstOrDefaultAsync(existingRoadmap => existingRoadmap.UserId == roadmap.UserId);
 
         if (existing is null)
         {
@@ -148,7 +144,7 @@ public class RoadmapRepository : IRoadmapRepository
     public async Task<bool> DeleteAsync(Guid userId)
     {
         var existing = await _dbContext.Roadmaps
-            .FirstOrDefaultAsync(r => r.UserId == userId);
+            .FirstOrDefaultAsync(roadmap => roadmap.UserId == userId);
 
         if (existing is null)
         {
@@ -169,8 +165,8 @@ public class RoadmapRepository : IRoadmapRepository
     public async Task<Roadmap> SetTaskCompletionAsync(Guid userId, Guid taskId, bool completed)
     {
         var roadmap = await _dbContext.Roadmaps
-            .Include(r => r.Tasks)
-            .FirstOrDefaultAsync(r => r.UserId == userId);
+            .Include(roadmap => roadmap.Tasks)
+            .FirstOrDefaultAsync(roadmap => roadmap.UserId == userId);
 
         if (roadmap is null)
         {
@@ -183,7 +179,7 @@ public class RoadmapRepository : IRoadmapRepository
 
         await ReconcileSavedRoadmapAsync(roadmap);
 
-        var task = roadmap.Tasks.FirstOrDefault(t => t.Id == taskId);
+        var task = roadmap.Tasks.FirstOrDefault(roadmapTask => roadmapTask.Id == taskId);
         if (task is null)
         {
             throw new ApiException(
@@ -256,7 +252,7 @@ public class RoadmapRepository : IRoadmapRepository
         {
             await _dbContext.SaveChangesAsync();
         }
-        catch (DbUpdateException ex) when (IsUserRoadmapUniqueViolation(ex))
+        catch (DbUpdateException databaseUpdateException) when (IsUserRoadmapUniqueViolation(databaseUpdateException))
         {
             throw new ApiException(
                 StatusCodes.Status409Conflict,
@@ -264,9 +260,9 @@ public class RoadmapRepository : IRoadmapRepository
                 "A roadmap already exists for this user. Cannot create new. Go to profile and update.",
                 "ROADMAP_ALREADY_EXISTS");
         }
-        catch (DbUpdateConcurrencyException ex)
+        catch (DbUpdateConcurrencyException exception)
         {
-            var entityTypes = string.Join(", ", ex.Entries.Select(entry =>
+            var entityTypes = string.Join(", ", exception.Entries.Select(entry =>
             {
                 var ruleId = entry.Metadata.FindProperty("RuleId") is { } ruleIdProperty
                     ? entry.Property(ruleIdProperty.Name).CurrentValue?.ToString()
@@ -276,7 +272,7 @@ public class RoadmapRepository : IRoadmapRepository
                     : $"{entry.Metadata.ClrType.Name}:{entry.State}:RuleId={ruleId}";
             }));
             _logger.LogWarning(
-                ex,
+                exception,
                 "Roadmap persistence encountered a concurrency conflict. Affected entity types/states: {EntityTypes}",
                 entityTypes);
 
@@ -285,19 +281,19 @@ public class RoadmapRepository : IRoadmapRepository
                 "Roadmap update conflict",
                 "Another request changed this roadmap while it was being saved. Reload the roadmap and try again.",
                 "ROADMAP_CONCURRENCY_CONFLICT",
-                ex);
+                exception);
         }
     }
 
-    private static bool IsUserRoadmapUniqueViolation(DbUpdateException ex)
+    private static bool IsUserRoadmapUniqueViolation(DbUpdateException databaseUpdateException)
     {
-        if (ex.InnerException is not PostgresException pgEx)
+        if (databaseUpdateException.InnerException is not PostgresException postgresException)
         {
             return false;
         }
 
-        return pgEx.SqlState == PostgresErrorCodes.UniqueViolation
-            && string.Equals(pgEx.ConstraintName, "IX_Roadmaps_UserId", StringComparison.Ordinal);
+        return postgresException.SqlState == PostgresErrorCodes.UniqueViolation
+            && string.Equals(postgresException.ConstraintName, "IX_Roadmaps_UserId", StringComparison.Ordinal);
     }
 
 }

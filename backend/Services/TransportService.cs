@@ -65,8 +65,8 @@ public class TransportService : ITransportService
           var payload = await JsonSerializer.DeserializeAsync<ResRobotLocationResponseDto>(stream, JsonOptions, cancellationToken);
 
           var station = payload?.StopLocationOrCoordLocation
-               .Select(x => x.StopLocation)
-               .FirstOrDefault(x => x is not null && !string.IsNullOrWhiteSpace(x.ExtId));
+               .Select(locationResult => locationResult.StopLocation)
+               .FirstOrDefault(stopLocation => stopLocation is not null && !string.IsNullOrWhiteSpace(stopLocation.ExtId));
 
           if (station is null)
                throw new ApiException(StatusCodes.Status404NotFound, "Resource not found", $"No station found for '{input}'.");
@@ -124,7 +124,7 @@ public class TransportService : ITransportService
 
           var result = (payload?.Trips ?? [])
                .Select(TransportMapper.MapTrip)
-               .Where(x => x is not null)
+               .Where(trip => trip is not null)
                .Cast<TransportTripDto>()
                .ToList();
 

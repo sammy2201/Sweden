@@ -21,7 +21,7 @@ public class RoadmapController : ControllerBase
     [HttpGet("questions")]
     [AllowAnonymous]
     public ActionResult<IReadOnlyList<RoadmapQuestionDto>> GetQuestions()
-        => Ok(_questionnaire.Questions.OrderBy(q => q.Order).ToArray());
+        => Ok(_questionnaire.Questions.OrderBy(question => question.Order).ToArray());
 
     [HttpPost]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]

@@ -24,9 +24,9 @@ public class HealthService : IHealthService
                 Database = "Healthy"
             };
         }
-        catch (Exception ex)
+        catch (Exception exception)
         {
-            _logger.LogError(ex, "Health check failed.");
+            _logger.LogError(exception, "Health check failed.");
             return new HealthResponseDto
             {
                 Status = "Unhealthy",

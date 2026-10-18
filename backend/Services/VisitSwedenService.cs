@@ -238,13 +238,14 @@ public class VisitSwedenService : IVisitSwedenService
           if (!latitude.HasValue || !longitude.HasValue)
                return false;
 
-          var lat = latitude.Value;
-          var lon = longitude.Value;
+          var latitudeValue = latitude.Value;
+          var longitudeValue = longitude.Value;
 
-          if (double.IsNaN(lat) || double.IsInfinity(lat) || double.IsNaN(lon) || double.IsInfinity(lon))
+          if (double.IsNaN(latitudeValue) || double.IsInfinity(latitudeValue)
+               || double.IsNaN(longitudeValue) || double.IsInfinity(longitudeValue))
                return false;
 
-          return lat is >= -90 and <= 90 && lon is >= -180 and <= 180;
+          return latitudeValue is >= -90 and <= 90 && longitudeValue is >= -180 and <= 180;
      }
 
      private static List<JsonElement> GetChildren(JsonElement root)
@@ -275,7 +276,7 @@ public class VisitSwedenService : IVisitSwedenService
                return null;
 
           var description = GetLocalizedTexts(node, "schema:description");
-          var geo = GetGeo(child, node);
+          var geographicCoordinates = GetGeo(child, node);
           var county = CountyData.ResolveCountyId(GetCountySlug(node));
 
           return new Attraction
@@ -290,8 +291,8 @@ public class VisitSwedenService : IVisitSwedenService
                Address = BuildAddress(node),
                Category = TrimSchemaPrefix(GetString(node, "@type")),
                ImageUrl = ResolveImageUrl(child, node),
-               Latitude = geo.Latitude,
-               Longitude = geo.Longitude,
+               Latitude = geographicCoordinates.Latitude,
+               Longitude = geographicCoordinates.Longitude,
                LastSynced = DateTime.UtcNow
           };
      }
@@ -308,8 +309,8 @@ public class VisitSwedenService : IVisitSwedenService
 
                foreach (var item in graph.EnumerateArray())
                {
-                    var type = GetString(item, "@type");
-                    if (type.StartsWith("schema:", StringComparison.OrdinalIgnoreCase) &&
+                    var nodeType = GetString(item, "@type");
+                    if (nodeType.StartsWith("schema:", StringComparison.OrdinalIgnoreCase) &&
                         !string.IsNullOrWhiteSpace(GetLocalizedText(item, "schema:name")))
                     {
                          node = item;
@@ -325,8 +326,8 @@ public class VisitSwedenService : IVisitSwedenService
 
           foreach (var item in topGraph.EnumerateArray())
           {
-               var type = GetString(item, "@type");
-               if (type.StartsWith("schema:", StringComparison.OrdinalIgnoreCase) &&
+               var nodeType = GetString(item, "@type");
+               if (nodeType.StartsWith("schema:", StringComparison.OrdinalIgnoreCase) &&
                    !string.IsNullOrWhiteSpace(GetLocalizedText(item, "schema:name")))
                {
                     node = item;
@@ -342,16 +343,16 @@ public class VisitSwedenService : IVisitSwedenService
           if (!node.TryGetProperty("dcterms:spatial", out var spatial) || spatial.ValueKind != JsonValueKind.Object)
                return string.Empty;
 
-          var id = GetString(spatial, "@id");
-          if (string.IsNullOrWhiteSpace(id))
+          var spatialIdentifier = GetString(spatial, "@id");
+          if (string.IsNullOrWhiteSpace(spatialIdentifier))
                return string.Empty;
 
           var marker = "/region/";
-          var idx = id.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
-          if (idx < 0)
+          var markerPosition = spatialIdentifier.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
+          if (markerPosition < 0)
                return string.Empty;
 
-          return id[(idx + marker.Length)..].Trim().ToLowerInvariant();
+          return spatialIdentifier[(markerPosition + marker.Length)..].Trim().ToLowerInvariant();
      }
 
      private static string GetCity(JsonElement node)
@@ -387,24 +388,24 @@ public class VisitSwedenService : IVisitSwedenService
                GetLocalizedText(address, "schema:streetAddress"),
                GetLocalizedText(address, "schema:postalCode"),
                GetLocalizedText(address, "schema:addressLocality")
-          }.Where(x => !string.IsNullOrWhiteSpace(x));
+          }.Where(addressPart => !string.IsNullOrWhiteSpace(addressPart));
 
           return string.Join(", ", parts);
      }
 
      private static (double? Latitude, double? Longitude) GetGeo(JsonElement source, JsonElement node)
      {
-          if (!node.TryGetProperty("schema:geo", out var geo) || geo.ValueKind != JsonValueKind.Object)
+          if (!node.TryGetProperty("schema:geo", out var geographicElement) || geographicElement.ValueKind != JsonValueKind.Object)
                return (null, null);
 
-          var latitude = GetDouble(geo, "schema:latitude");
-          var longitude = GetDouble(geo, "schema:longitude");
+          var latitude = GetDouble(geographicElement, "schema:latitude");
+          var longitude = GetDouble(geographicElement, "schema:longitude");
 
           if (latitude.HasValue && longitude.HasValue)
                return (latitude, longitude);
 
-          var geoId = GetString(geo, "@id");
-          if (string.IsNullOrWhiteSpace(geoId))
+          var geographicIdentifier = GetString(geographicElement, "@id");
+          if (string.IsNullOrWhiteSpace(geographicIdentifier))
                return (null, null);
 
           if (!TryGetGraph(source, out var graph))
@@ -412,7 +413,7 @@ public class VisitSwedenService : IVisitSwedenService
 
           foreach (var item in graph.EnumerateArray())
           {
-               if (!GetString(item, "@id").Equals(geoId, StringComparison.Ordinal))
+               if (!GetString(item, "@id").Equals(geographicIdentifier, StringComparison.Ordinal))
                     continue;
 
                latitude = GetDouble(item, "schema:latitude");

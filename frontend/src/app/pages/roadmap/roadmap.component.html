@@ -233,11 +233,6 @@
 
                       <footer class="step-footer">
                         <div class="step-links">
-                          @if (guideForTask(task); as guide) {
-                            <a class="resource-link guide-link" [routerLink]="guide.route">
-                              <i [class]="guide.icon" aria-hidden="true"></i>Read guide
-                            </a>
-                          }
                           @if (task.resourceUrl) {
                             <a class="resource-link" [href]="task.resourceUrl" target="_blank" rel="noopener noreferrer">
                               Official information <i class="pi pi-arrow-up-right" aria-hidden="true"></i>
@@ -335,9 +330,6 @@
         <span class="completion-dialog-icon" aria-hidden="true"><i class="pi" [class.pi-check-circle]="selectedCompletion" [class.pi-undo]="!selectedCompletion"></i></span>
         <h2>{{ task.title }}</h2>
         <p>{{ selectedCompletion ? 'Marking this step complete updates your roadmap progress and may unlock a dependent step.' : 'This will return the step to your active roadmap and update your progress.' }}</p>
-        @if (selectedCompletion && guideForTask(task); as guide) {
-          <a class="dialog-resource-link guide-link" [routerLink]="guide.route"><i [class]="guide.icon" aria-hidden="true"></i>Read {{ guide.title }}<i class="pi pi-arrow-right" aria-hidden="true"></i></a>
-        }
         @if (task.resourceUrl) {
           <a class="dialog-resource-link" [href]="task.resourceUrl" target="_blank" rel="noopener noreferrer">Official information <i class="pi pi-arrow-up-right" aria-hidden="true"></i></a>
         }

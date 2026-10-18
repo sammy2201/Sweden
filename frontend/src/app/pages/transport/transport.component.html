@@ -167,9 +167,6 @@
             {{ trip.origin.name }}
           </div>
 
-          <small *ngIf="trip.originPlatform">
-            Platform {{ trip.originPlatform }}
-          </small>
         </div>
 
         <div class="col-12 md:col-2">
@@ -189,9 +186,6 @@
             {{ trip.destination.name }}
           </div>
 
-          <small *ngIf="trip.destinationPlatform">
-            Platform {{ trip.destinationPlatform }}
-          </small>
         </div>
       </div>
 
@@ -229,10 +223,6 @@
                 -
 
                 {{ leg.arrivalTime | date: "HH:mm" }}
-              </div>
-
-              <div *ngIf="leg.originPlatform" class="mt-1 text-sm">
-                Platform {{ leg.originPlatform }}
               </div>
 
               <p-divider></p-divider>

@@ -36,7 +36,9 @@ export class TaxService {
                   Boolean(municipality),
                 ),
             ),
-          ).sort((a, b) => a.localeCompare(b)),
+          ).sort((firstMunicipality, secondMunicipality) =>
+            firstMunicipality.localeCompare(secondMunicipality),
+          ),
         ),
       );
   }

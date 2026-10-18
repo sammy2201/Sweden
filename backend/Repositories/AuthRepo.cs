@@ -16,22 +16,22 @@ public class AuthRepo : IAuthRepo
     public Task<User?> GetUserByUsernameAsync(string username)
         => _dbContext.Users
             .AsNoTracking()
-            .FirstOrDefaultAsync(u => u.Username == username);
+            .FirstOrDefaultAsync(user => user.Username == username);
 
     public Task<User?> GetUserByEmailAsync(string email)
         => _dbContext.Users
             .AsNoTracking()
-            .FirstOrDefaultAsync(u => u.Email == email);
+            .FirstOrDefaultAsync(user => user.Email == email);
 
     public Task<User?> GetUserByIdAsync(Guid id)
         => _dbContext.Users
             .AsNoTracking()
-            .FirstOrDefaultAsync(u => u.Id == id);
+            .FirstOrDefaultAsync(user => user.Id == id);
 
     public Task<bool> UserExistsAsync(string username, string email)
         => _dbContext.Users
             .AsNoTracking()
-            .AnyAsync(u => u.Username == username || u.Email == email);
+            .AnyAsync(user => user.Username == username || user.Email == email);
 
     public async Task CreateUserAsync(User user)
     {
@@ -61,4 +61,6 @@ public class AuthRepo : IAuthRepo
         _dbContext.Users.Remove(user);
         await _dbContext.SaveChangesAsync();
     }
+
+
 }

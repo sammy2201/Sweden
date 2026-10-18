@@ -23,14 +23,14 @@ public class ExploreController : ControllerBase
 
           return Ok(new ExploreCountiesResponseDto
           {
-               Counties = counties.Select(c => new CountyDto
+               Counties = counties.Select(county => new CountyDto
                {
-                    Id = c.Id,
-                    Name = c.Name,
-                    Description = c.Description,
-                    TransportProviderName = c.TransportProviderName,
-                    OfficialTicketUrl = c.OfficialTicketUrl,
-                    JourneyPlannerUrl = c.JourneyPlannerUrl
+                    Id = county.Id,
+                    Name = county.Name,
+                    Description = county.Description,
+                    TransportProviderName = county.TransportProviderName,
+                    OfficialTicketUrl = county.OfficialTicketUrl,
+                    JourneyPlannerUrl = county.JourneyPlannerUrl
                 }).ToList()
           });
      }

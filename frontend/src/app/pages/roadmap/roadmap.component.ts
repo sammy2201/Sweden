@@ -3,7 +3,6 @@ import { HttpErrorResponse } from "@angular/common/http";
 import { Component, DestroyRef, OnInit, inject } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FormsModule, NgModel } from "@angular/forms";
-import { RouterLink } from "@angular/router";
 import { ConfirmationService } from "primeng/api";
 import { ButtonModule } from "primeng/button";
 import { CheckboxModule } from "primeng/checkbox";
@@ -21,8 +20,6 @@ import type {
   RoadmapResponse,
   RoadmapTaskResponse,
 } from "../../models/roadmap.models";
-import type { GuideLink } from "../../models/guide.models";
-import { RoadmapGuideService } from "../../services/roadmap-guide.service";
 import { AuthService } from "../../services/auth.service";
 import { ExploreService } from "../../services/explore.service";
 import { County } from "../../models/explore.models";
@@ -44,7 +41,6 @@ interface RoadmapPhase {
   imports: [
     CommonModule,
     FormsModule,
-    RouterLink,
     ButtonModule,
     CheckboxModule,
     ConfirmDialogModule,
@@ -60,7 +56,6 @@ export class RoadmapComponent implements OnInit {
   private readonly roadmapService = inject(RoadmapService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly confirmationService = inject(ConfirmationService);
-  private readonly roadmapGuideService = inject(RoadmapGuideService);
   private readonly authService = inject(AuthService);
   private readonly exploreService = inject(ExploreService);
 
@@ -177,7 +172,7 @@ export class RoadmapComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (questions) => {
-          this.fields = [...questions].sort((a, b) => a.order - b.order);
+          this.fields = [...questions].sort((firstQuestion, secondQuestion) => firstQuestion.order - secondQuestion.order);
           this.isLoadingQuestions = false;
         },
         error: (error: unknown) => {
@@ -514,10 +509,6 @@ export class RoadmapComponent implements OnInit {
           );
         },
       });
-  }
-
-  guideForTask(task: RoadmapTaskResponse): GuideLink | null {
-    return this.roadmapGuideService.forTaskRule(task.ruleId);
   }
 
   unmetPrerequisiteTitles(task: RoadmapTaskResponse): string[] {

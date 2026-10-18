@@ -27,19 +27,19 @@ public class AttractionRepository : IAttractionRepository
                var countyId = CountyData.ResolveCountyId(county);
                var countyValues = CountyData.GetCountyFilterValues(county);
                query = string.IsNullOrWhiteSpace(countyId)
-                    ? query.Where(a => countyValues.Contains(a.County ?? string.Empty))
-                    : query.Where(a => a.County == countyId || countyValues.Contains(a.County ?? string.Empty));
+                    ? query.Where(attraction => countyValues.Contains(attraction.County ?? string.Empty))
+                    : query.Where(attraction => attraction.County == countyId || countyValues.Contains(attraction.County ?? string.Empty));
           }
 
 
           if (!string.IsNullOrWhiteSpace(category))
           {
-               query = query.Where(a => a.Category == category);
+               query = query.Where(attraction => attraction.Category == category);
           }
           var totalCount = await query.CountAsync();
 
           var items = await query
-              .OrderBy(a => a.Name)
+              .OrderBy(attraction => attraction.Name)
               .Skip((page - 1) * pageSize)
               .Take(pageSize)
               .ToListAsync();
@@ -56,6 +56,6 @@ public class AttractionRepository : IAttractionRepository
      public async Task<Attraction?> GetAttractionByIdAsync(string externalId)
      {
           return await _dbContext.Attractions
-              .FirstOrDefaultAsync(a => a.ExternalId == externalId);
+              .FirstOrDefaultAsync(attraction => attraction.ExternalId == externalId);
      }
 }

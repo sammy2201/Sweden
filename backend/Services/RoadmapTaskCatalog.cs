@@ -77,7 +77,7 @@ public class RoadmapTaskCatalog
             if (visited.Contains(ruleId)) return;
             if (!visiting.Add(ruleId))
                 throw new InvalidOperationException($"Roadmap task prerequisite cycle includes '{ruleId}'.");
-            foreach (var prerequisiteId in rulesById[ruleId].Prerequisites.Select(p => p.RuleId))
+            foreach (var prerequisiteId in rulesById[ruleId].Prerequisites.Select(prerequisite => prerequisite.RuleId))
                 Visit(prerequisiteId);
             visiting.Remove(ruleId);
             visited.Add(ruleId);

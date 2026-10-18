@@ -29,13 +29,13 @@ public class ExploreService : IExploreService
 
           return new PagedResponse<AttractionDto>
           {
-               Items = attractions.Items.Select(a => new AttractionDto
+               Items = attractions.Items.Select(attraction => new AttractionDto
                {
-                    Id = a.ExternalId,
-                    Name = a.Name,
-                    City = a.City ?? string.Empty,
-                    Category = a.Category ?? string.Empty,
-                    ImageUrl = a.ImageUrl ?? string.Empty
+                    Id = attraction.ExternalId,
+                    Name = attraction.Name,
+                    City = attraction.City ?? string.Empty,
+                    Category = attraction.Category ?? string.Empty,
+                    ImageUrl = attraction.ImageUrl ?? string.Empty
                }).ToList(),
                Page = attractions.Page,
                PageSize = attractions.PageSize,

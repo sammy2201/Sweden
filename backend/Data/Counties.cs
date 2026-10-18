@@ -233,11 +233,11 @@ public static class CountyData
             return string.Empty;
         }
 
-        foreach (var (id, names) in CountyAliases)
+        foreach (var (countyId, countyNames) in CountyAliases)
         {
-            if (Normalize(id) == key || names.Any(name => Normalize(name) == key))
+            if (Normalize(countyId) == key || countyNames.Any(name => Normalize(name) == key))
             {
-                return id;
+                return countyId;
             }
         }
 

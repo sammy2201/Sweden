@@ -6,13 +6,10 @@ export interface TransportStation {
 export interface TransportTripLeg {
   operator: string;
   transportType: string;
-  line: string;
   from: string;
   to: string;
   departureTime: string;
   arrivalTime: string;
-  originPlatform: string;
-  destinationPlatform: string;
   direction: string;
   isCancelled: boolean;
 }
@@ -25,8 +22,6 @@ export interface TransportTrip {
   numberOfChanges: number;
   isDirect: boolean;
   transportType: string;
-  originPlatform: string;
-  destinationPlatform: string;
   direction: string;
   isCancelled: boolean;
   origin: TransportStation;

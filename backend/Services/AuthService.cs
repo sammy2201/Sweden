@@ -93,7 +93,10 @@ public class AuthService : IAuthService
         var key = _config["Jwt:Key"] ?? _config["Jwt:Secret"] ?? throw new InvalidOperationException("JWT key is not configured.");
         var issuer = _config["Jwt:Issuer"] ?? "sweden-start";
         var audience = _config["Jwt:Audience"] ?? "sweden-start-audience";
-        var expiresMinutes = int.TryParse(_config["Jwt:ExpiresMinutes"], out var m) || int.TryParse(_config["Jwt:ExpiryMinutes"], out m) ? m : 60;
+        var expiresMinutes = int.TryParse(_config["Jwt:ExpiresMinutes"], out var configuredExpirationMinutes)
+            || int.TryParse(_config["Jwt:ExpiryMinutes"], out configuredExpirationMinutes)
+            ? configuredExpirationMinutes
+            : 60;
 
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
         var creds = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);

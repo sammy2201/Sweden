@@ -7,25 +7,23 @@ public static class TransportMapper
 {
      public static TransportTripDto? MapTrip(ResRobotTripDto trip)
      {
-          var firstLeg = trip.LegList?.Legs.FirstOrDefault();
-          var lastLeg = trip.LegList?.Legs.LastOrDefault();
+          var firstSegment = trip.LegList?.Legs.FirstOrDefault();
+          var lastSegment = trip.LegList?.Legs.LastOrDefault();
 
-          if (firstLeg?.Origin is null || lastLeg?.Destination is null)
+          if (firstSegment?.Origin is null || lastSegment?.Destination is null)
                return null;
 
-          var operatorName = NormalizeOperatorName(GetOperator(firstLeg.Product));
-          var departureTime = ParseDateTime(firstLeg.Origin.Date, firstLeg.Origin.Time);
-          var arrivalTime = ParseDateTime(lastLeg.Destination.Date, lastLeg.Destination.Time);
-          var transportType = MapTransportType(firstLeg.Product, firstLeg.Type, firstLeg.Name);
+          var operatorName = GetOperator(firstSegment.Product);
+          var departureTime = ParseDateTime(firstSegment.Origin.Date, firstSegment.Origin.Time);
+          var arrivalTime = ParseDateTime(lastSegment.Destination.Date, lastSegment.Destination.Time);
+          var transportType = MapTransportType(firstSegment.Product, firstSegment.Type, firstSegment.Name);
           var duration = ResolveDuration(trip.Duration, departureTime, arrivalTime);
           var numberOfChanges = ResolveNumberOfChanges(trip);
-          var originPlatform = GetPlatform(firstLeg.Origin);
-          var destinationPlatform = GetPlatform(lastLeg.Destination);
-          var direction = ResolveDirection(firstLeg);
+          var direction = ResolveDirection(firstSegment);
           var isCancelled = ResolveCancelled(trip);
-          var legs = (trip.LegList?.Legs ?? [])
-               .Select(MapLeg)
-               .Where(x => x is not null)
+          var segments = (trip.LegList?.Legs ?? [])
+               .Select(MapSegment)
+               .Where(segment => segment is not null)
                .Cast<TransportTripLegDto>()
                .ToList();
 
@@ -38,77 +36,61 @@ public static class TransportMapper
                NumberOfChanges = numberOfChanges,
                IsDirect = numberOfChanges == 0,
                TransportType = transportType,
-               OriginPlatform = originPlatform,
-               DestinationPlatform = destinationPlatform,
                Direction = direction,
                IsCancelled = isCancelled,
                Origin = new TransportStationDto
                {
-                    Name = firstLeg.Origin.Name,
-                    StationId = firstLeg.Origin.ExtId
+                    Name = firstSegment.Origin.Name,
+                    StationId = firstSegment.Origin.ExtId
                },
                Destination = new TransportStationDto
                {
-                    Name = lastLeg.Destination.Name,
-                    StationId = lastLeg.Destination.ExtId
+                    Name = lastSegment.Destination.Name,
+                    StationId = lastSegment.Destination.ExtId
                },
-               Legs = legs
+               Legs = segments
           };
      }
 
-     private static TransportTripLegDto? MapLeg(ResRobotLegDto leg)
+     private static TransportTripLegDto? MapSegment(ResRobotLegDto segment)
      {
-          if (leg.Origin is null || leg.Destination is null)
+          if (segment.Origin is null || segment.Destination is null)
           {
                return null;
           }
 
-          var originPlatform = GetPlatform(leg.Origin);
-
           return new TransportTripLegDto
           {
-               Operator = NormalizeOperatorName(GetOperator(leg.Product)),
-               TransportType = MapTransportType(leg.Product, leg.Type, leg.Name),
-               Line = ResolveLine(leg),
-               From = leg.Origin.Name,
-               To = leg.Destination.Name,
-               DepartureTime = ParseDateTime(leg.Origin.Date, leg.Origin.Time),
-               ArrivalTime = ParseDateTime(leg.Destination.Date, leg.Destination.Time),
-               OriginPlatform = originPlatform,
-               DestinationPlatform = GetPlatform(leg.Destination),
-               Direction = ResolveDirection(leg),
-               IsCancelled = leg.Cancelled == true
-                    || leg.Origin.Cancelled == true
-                    || leg.Destination.Cancelled == true,
+               Operator = GetOperator(segment.Product),
+               TransportType = MapTransportType(segment.Product, segment.Type, segment.Name),
+               From = segment.Origin.Name,
+               To = segment.Destination.Name,
+               DepartureTime = ParseDateTime(segment.Origin.Date, segment.Origin.Time),
+               ArrivalTime = ParseDateTime(segment.Destination.Date, segment.Destination.Time),
+               Direction = ResolveDirection(segment),
+               IsCancelled = segment.Cancelled == true
+                    || segment.Origin.Cancelled == true
+                    || segment.Destination.Cancelled == true,
           };
      }
 
      private static string GetOperator(JsonElement product)
      {
           if (product.ValueKind == JsonValueKind.Object)
-               return product.TryGetProperty("operator", out var op) ? op.GetString() ?? string.Empty : string.Empty;
+               return product.TryGetProperty("operator", out var operatorElement) ? operatorElement.GetString() ?? string.Empty : string.Empty;
 
           if (product.ValueKind == JsonValueKind.Array)
           {
                foreach (var item in product.EnumerateArray())
                {
-                    if (item.ValueKind == JsonValueKind.Object && item.TryGetProperty("operator", out var op))
-                         return op.GetString() ?? string.Empty;
+                    if (item.ValueKind == JsonValueKind.Object && item.TryGetProperty("operator", out var operatorElement))
+                         return operatorElement.GetString() ?? string.Empty;
                }
           }
 
           return string.Empty;
      }
 
-     private static string NormalizeOperatorName(string value)
-     {
-          if (string.Equals(value, "Flixbus", StringComparison.OrdinalIgnoreCase))
-          {
-               return "FlixBus";
-          }
-
-          return value;
-     }
 
      private static string MapTransportType(JsonElement product, string legType, string legName)
      {
@@ -176,61 +158,6 @@ public static class TransportMapper
           return "Train";
      }
 
-     private static string ResolveLine(ResRobotLegDto leg)
-     {
-          if (!string.IsNullOrWhiteSpace(leg.Name))
-          {
-               return leg.Name;
-          }
-
-          if (leg.Product.ValueKind == JsonValueKind.Object)
-          {
-               return GetProductLine(leg.Product);
-          }
-
-          if (leg.Product.ValueKind == JsonValueKind.Array)
-          {
-               foreach (var item in leg.Product.EnumerateArray())
-               {
-                    if (item.ValueKind != JsonValueKind.Object)
-                    {
-                         continue;
-                    }
-
-                    var line = GetProductLine(item);
-                    if (!string.IsNullOrWhiteSpace(line))
-                    {
-                         return line;
-                    }
-               }
-          }
-
-          return string.Empty;
-     }
-
-     private static string GetProductLine(JsonElement product)
-     {
-          var line = GetJsonPropertyString(product, "line");
-          if (!string.IsNullOrWhiteSpace(line))
-          {
-               return line;
-          }
-
-          var name = GetJsonPropertyString(product, "name");
-          if (!string.IsNullOrWhiteSpace(name))
-          {
-               return name;
-          }
-
-          var displayNumber = GetJsonPropertyString(product, "displayNumber");
-          if (!string.IsNullOrWhiteSpace(displayNumber))
-          {
-               return displayNumber;
-          }
-
-          return GetJsonPropertyString(product, "num");
-     }
-
      private static void AddJsonString(JsonElement source, string propertyName, List<string> destination)
      {
           if (source.TryGetProperty(propertyName, out var value) && value.ValueKind == JsonValueKind.String)
@@ -250,10 +177,10 @@ public static class TransportMapper
                return apiDuration;
           }
 
-          if (departureTime is DateTime dep && arrivalTime is DateTime arr && arr >= dep)
+          if (departureTime is DateTime departureDateTime && arrivalTime is DateTime arrivalDateTime && arrivalDateTime >= departureDateTime)
           {
-               var diff = arr - dep;
-               return FormatDuration(diff);
+               var duration = arrivalDateTime - departureDateTime;
+               return FormatDuration(duration);
           }
 
           return string.Empty;
@@ -261,19 +188,19 @@ public static class TransportMapper
 
      private static int ResolveNumberOfChanges(ResRobotTripDto trip)
      {
-          var legs = trip.LegList?.Legs ?? [];
-          if (legs.Count == 0)
+          var segments = trip.LegList?.Legs ?? [];
+          if (segments.Count == 0)
           {
                return Math.Max(0, trip.NumberOfChanges);
           }
 
-          var serviceLegCount = legs.Count(IsServiceLeg);
-          if (serviceLegCount > 0)
+          var serviceSegmentCount = segments.Count(IsServiceLeg);
+          if (serviceSegmentCount > 0)
           {
-               return Math.Max(0, serviceLegCount - 1);
+               return Math.Max(0, serviceSegmentCount - 1);
           }
 
-          return Math.Max(0, legs.Count - 1);
+          return Math.Max(0, segments.Count - 1);
      }
 
      private static bool IsServiceLeg(ResRobotLegDto leg)
@@ -294,30 +221,6 @@ public static class TransportMapper
           return true;
      }
 
-     private static string GetPlatform(ResRobotStopPointDto? stopPoint)
-     {
-          if (stopPoint is null)
-          {
-               return string.Empty;
-          }
-
-          if (!string.IsNullOrWhiteSpace(stopPoint.RtTrack))
-          {
-               return stopPoint.RtTrack;
-          }
-
-          if (!string.IsNullOrWhiteSpace(stopPoint.Track))
-          {
-               return stopPoint.Track;
-          }
-
-          if (!string.IsNullOrWhiteSpace(stopPoint.RtStop))
-          {
-               return stopPoint.RtStop;
-          }
-
-          return stopPoint.Stop;
-     }
 
      private static string ResolveDirection(ResRobotLegDto leg)
      {
@@ -353,10 +256,10 @@ public static class TransportMapper
 
      private static bool ResolveCancelled(ResRobotTripDto trip)
      {
-          var legs = trip.LegList?.Legs ?? [];
-          return legs.Any(leg => leg.Cancelled == true
-               || leg.Origin?.Cancelled == true
-               || leg.Destination?.Cancelled == true);
+          var segments = trip.LegList?.Legs ?? [];
+          return segments.Any(segment => segment.Cancelled == true
+               || segment.Origin?.Cancelled == true
+               || segment.Destination?.Cancelled == true);
      }
 
      private static string GetJsonPropertyString(JsonElement source, string propertyName)

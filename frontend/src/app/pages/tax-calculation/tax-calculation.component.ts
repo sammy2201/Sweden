@@ -59,8 +59,8 @@ export class TaxCalculationComponent {
       .calculateTax(this.request)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (res) => {
-          this.result = res;
+        next: (calculationResponse) => {
+          this.result = calculationResponse;
           this.loading = false;
         },
         error: (error: unknown) => {
@@ -85,8 +85,8 @@ export class TaxCalculationComponent {
       .getMunicipalities()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (res) => {
-          this.municipalities = res;
+        next: (municipalityResponse) => {
+          this.municipalities = municipalityResponse;
         },
         error: (error: unknown) => {
           this.errorMessage = getApiErrorMessage(

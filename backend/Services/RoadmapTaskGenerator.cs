@@ -70,14 +70,14 @@ public static class RoadmapTaskOrdering
         {
             if (visited.Contains(task.RuleId)) return;
             if (!visiting.Add(task.RuleId)) throw new InvalidOperationException($"Roadmap task prerequisite cycle at '{task.RuleId}'.");
-            foreach (var prerequisite in task.Prerequisites.Select(p => p.RuleId).Where(tasks.ContainsKey).Order(StringComparer.Ordinal))
+            foreach (var prerequisite in task.Prerequisites.Select(prerequisite => prerequisite.RuleId).Where(tasks.ContainsKey).Order(StringComparer.Ordinal))
                 Visit(tasks[prerequisite]);
             visiting.Remove(task.RuleId);
             visited.Add(task.RuleId);
             ordered.Add(task);
         }
 
-        foreach (var task in tasks.Values.OrderBy(t => t.Priority).ThenBy(t => t.RuleId, StringComparer.Ordinal)) Visit(task);
+        foreach (var task in tasks.Values.OrderBy(roadmapTask => roadmapTask.Priority).ThenBy(roadmapTask => roadmapTask.RuleId, StringComparer.Ordinal)) Visit(task);
         return ordered;
     }
 }

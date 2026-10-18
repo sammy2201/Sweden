@@ -55,16 +55,16 @@ public class AuthController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetUser()
     {
-        if (!TryGetCurrentUserId(out var id))
+        if (!TryGetCurrentUserId(out var userId))
             throw new ApiException(StatusCodes.Status401Unauthorized, "Unauthorized", "The authenticated user could not be identified.");
 
-        var user = await _authService.GetUserAsync(id);
+        var user = await _authService.GetUserAsync(userId);
         if (user == null)
             throw new ApiException(StatusCodes.Status404NotFound, "User not found", "The requested user profile was not found.");
 
-        var dto = MapUserDto(user);
+        var userDto = MapUserDto(user);
 
-        return Ok(dto);
+        return Ok(userDto);
     }
 
     [HttpPut("user")]
@@ -76,11 +76,11 @@ public class AuthController : ControllerBase
         if (request.TransportCountyId is not null && !CountyData.IsValidCountyId(request.TransportCountyId))
             throw new ApiException(StatusCodes.Status400BadRequest, "Invalid transport region", "Select a valid Swedish county for public transport links.");
 
-        if (!TryGetCurrentUserId(out var id))
+        if (!TryGetCurrentUserId(out var userId))
             throw new ApiException(StatusCodes.Status401Unauthorized, "Unauthorized", "The authenticated user could not be identified.");
 
         var user = await _authService.UpdateUserProfileAsync(
-            id,
+            userId,
             request.FirstName,
             request.LastName,
             request.City,
@@ -93,10 +93,10 @@ public class AuthController : ControllerBase
         return Ok(MapUserDto(user));
     }
 
-    private bool TryGetCurrentUserId(out Guid id)
+    private bool TryGetCurrentUserId(out Guid userId)
     {
-        var sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        return Guid.TryParse(sub, out id);
+        var userIdentifierClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        return Guid.TryParse(userIdentifierClaim, out userId);
     }
 
     private static UserDto MapUserDto(User user)
