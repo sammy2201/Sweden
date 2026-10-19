@@ -37,7 +37,7 @@ public class VisitSwedenStartupSyncService : BackgroundService
                          attempt,
                          maxAttempts);
                     var visitSwedenService = scope.ServiceProvider.GetRequiredService<IVisitSwedenService>();
-                    var result = await visitSwedenService.SyncAttractionsAsync();
+                    var result = await visitSwedenService.SyncAttractionsServiceAsync();
                     _logger.LogInformation(
                          "Visit Sweden startup sync finished successfully. Attempts: {Attempt}/{MaxAttempts}; fetched: {Fetched}; mapped: {Mapped}; inserted: {Inserted}; updated: {Updated}; skipped records: {SkippedRecords} (missing image: {MissingImage}, missing coordinates: {MissingCoordinates}, unmappable: {Unmappable}; reason counts can overlap).",
                          attempt,

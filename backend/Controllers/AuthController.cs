@@ -20,9 +20,9 @@ public class AuthController : ControllerBase
 
     [HttpPost("login")]
     [AllowAnonymous]
-    public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
+    public async Task<IActionResult> LoginControllerAsync([FromBody] LoginRequestDto request)
     {
-        var token = await _authService.LoginAsync(
+        var token = await _authService.LoginServiceAsync(
             request.Email,
             request.Password);
 
@@ -39,10 +39,10 @@ public class AuthController : ControllerBase
 
     [HttpPost("register")]
     [AllowAnonymous]
-    public async Task<IActionResult> Register(
+    public async Task<IActionResult> RegisterControllerAsync(
         [FromBody] RegisterRequestDto request)
     {
-        var created = await _authService.RegisterAsync(
+        var created = await _authService.RegisterServiceAsync(
             request.FirstName,
             request.LastName,
             request.Username,
@@ -67,7 +67,7 @@ public class AuthController : ControllerBase
 
     [HttpGet("user")]
     [Authorize]
-    public async Task<IActionResult> GetUser()
+    public async Task<IActionResult> GetUserControllerAsync()
     {
         var userId = GetCurrentUserId();
 
@@ -79,7 +79,7 @@ public class AuthController : ControllerBase
                 "The authenticated user could not be identified.");
         }
 
-        var user = await _authService.GetUserAsync(userId.Value);
+        var user = await _authService.GetUserServiceAsync(userId.Value);
 
         if (user == null)
         {
@@ -94,7 +94,7 @@ public class AuthController : ControllerBase
 
     [HttpPut("user")]
     [Authorize]
-    public async Task<IActionResult> UpdateUser(
+    public async Task<IActionResult> UpdateUserControllerAsync(
         [FromBody] UpdateUserProfileRequestDto request)
     {
         var userId = GetCurrentUserId();
@@ -107,7 +107,7 @@ public class AuthController : ControllerBase
                 "The authenticated user could not be identified.");
         }
 
-        var user = await _authService.UpdateUserProfileAsync(
+        var user = await _authService.UpdateUserProfileServiceAsync(
             userId.Value,
             request.FirstName,
             request.LastName,

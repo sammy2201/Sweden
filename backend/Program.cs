@@ -133,7 +133,6 @@ builder.Services.AddHttpClient<ITransportService, TransportService>((serviceProv
 builder.Services.AddScoped<IExploreService, ExploreService>();
 builder.Services.AddScoped<IAttractionRepository, AttractionRepository>();
 builder.Services.AddScoped<IVisitSwedenRepository, VisitSwedenRepository>();
-builder.Services.AddSingleton<VisitSwedenSyncGate>();
 builder.Services.AddHostedService<VisitSwedenStartupSyncService>();
 builder.Services.AddHttpClient<IVisitSwedenService, VisitSwedenService>((serviceProvider, client) =>
 {

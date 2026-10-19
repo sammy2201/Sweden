@@ -16,7 +16,7 @@ public class TransportController : ControllerBase
      }
 
      [HttpGet("search")]
-     public async Task<ActionResult<IReadOnlyList<TransportTripDto>>> Search(
+     public async Task<ActionResult<IReadOnlyList<TransportTripDto>>> SearchControllerAsync(
           [FromQuery] string from,
           [FromQuery] string to,
           [FromQuery] DateTime? departureTime = null,
@@ -30,7 +30,7 @@ public class TransportController : ControllerBase
 
           try
           {
-               var trips = await _transportService.SearchTripsAsync(from, to, departureTime, arrivalTime);
+               var trips = await _transportService.SearchTripsServiceAsync(from, to, departureTime, arrivalTime);
                return Ok(trips);
           }
           catch (HttpRequestException exception)

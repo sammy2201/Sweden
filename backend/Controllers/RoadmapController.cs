@@ -23,7 +23,7 @@ public class RoadmapController : ControllerBase
 
     [HttpGet("questions")]
     [AllowAnonymous]
-    public ActionResult<IReadOnlyList<RoadmapQuestionDto>> GetQuestions()
+    public ActionResult<IReadOnlyList<RoadmapQuestionDto>> GetQuestionsController()
     {
         return Ok(_questionnaire.Questions
             .OrderBy(question => question.Order)
@@ -31,7 +31,7 @@ public class RoadmapController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<RoadmapResponseDto>> GenerateRoadmap(
+    public async Task<ActionResult<RoadmapResponseDto>> GenerateRoadmapControllerAsync(
         RoadmapRequestDto request)
     {
         var validation = RoadmapAnswerValidator.Validate(request, _questionnaire);
@@ -49,14 +49,14 @@ public class RoadmapController : ControllerBase
                 "The authenticated user could not be identified.");
         }
 
-        var response = await _roadmapService.GenerateRoadmapAsync(
+        var response = await _roadmapService.GenerateRoadmapServiceAsync(
             request, userId.Value);
 
         return Ok(response);
     }
 
     [HttpGet]
-    public async Task<ActionResult<RoadmapResponseDto>> GetRoadmap()
+    public async Task<ActionResult<RoadmapResponseDto>> GetRoadmapControllerAsync()
     {
         var userId = GetUserId();
 
@@ -68,7 +68,7 @@ public class RoadmapController : ControllerBase
                 "The authenticated user could not be identified.");
         }
 
-        var response = await _roadmapService.GetRoadmapAsync(userId.Value);
+        var response = await _roadmapService.GetRoadmapServiceAsync(userId.Value);
 
         if (response == null)
         {
@@ -82,7 +82,7 @@ public class RoadmapController : ControllerBase
     }
 
     [HttpPut]
-    public async Task<ActionResult<RoadmapResponseDto>> UpdateRoadmap(
+    public async Task<ActionResult<RoadmapResponseDto>> UpdateRoadmapControllerAsync(
         RoadmapRequestDto request)
     {
         var validation = RoadmapAnswerValidator.Validate(request, _questionnaire);
@@ -100,14 +100,14 @@ public class RoadmapController : ControllerBase
                 "The authenticated user could not be identified.");
         }
 
-        var response = await _roadmapService.UpdateRoadmapAsync(
+        var response = await _roadmapService.UpdateRoadmapServiceAsync(
             request, userId.Value);
 
         return Ok(response);
     }
 
     [HttpDelete]
-    public async Task<IActionResult> DeleteRoadmap()
+    public async Task<IActionResult> DeleteRoadmapControllerAsync()
     {
         var userId = GetUserId();
 
@@ -119,7 +119,7 @@ public class RoadmapController : ControllerBase
                 "The authenticated user could not be identified.");
         }
 
-        var deleted = await _roadmapService.DeleteRoadmapAsync(userId.Value);
+        var deleted = await _roadmapService.DeleteRoadmapServiceAsync(userId.Value);
 
         if (!deleted)
         {
@@ -133,7 +133,7 @@ public class RoadmapController : ControllerBase
     }
 
     [HttpPatch("tasks/{taskId:guid}")]
-    public async Task<ActionResult<RoadmapResponseDto>> UpdateTaskCompletion(
+    public async Task<ActionResult<RoadmapResponseDto>> UpdateTaskCompletionControllerAsync(
         Guid taskId,
         UpdateTaskCompletionDto request)
     {
@@ -157,7 +157,7 @@ public class RoadmapController : ControllerBase
                 "The authenticated user could not be identified.");
         }
 
-        var response = await _roadmapService.SetTaskCompletionAsync(
+        var response = await _roadmapService.SetTaskCompletionServiceAsync(
             userId.Value, taskId, completed);
 
         return Ok(response);

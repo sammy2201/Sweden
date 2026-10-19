@@ -13,7 +13,7 @@ public class HealthService : IHealthService
         _logger = logger;
     }
 
-    public async Task<HealthResponseDto> GetHealthAsync()
+    public async Task<HealthResponseDto> GetHealthServiceAsync()
     {
         try
         {

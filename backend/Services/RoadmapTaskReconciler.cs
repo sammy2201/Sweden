@@ -4,6 +4,8 @@ public static class RoadmapTaskReconciler
 {
     private const string PublicTransportCardRuleId = "public-transport-card";
     private const string PublicTransportCardTitle = "Get a Public Transport Card";
+    private const string PublicTransportCardDescription = "Optional: check whether a regional travel card is useful for the area where you live or travel. You can do this independently of other roadmap steps.";
+    private const string PublicTransportCardExplanation = "A regional travel card may be useful depending on the respondent's location and travel habits; it is optional and independent of other roadmap steps.";
 
     public static IReadOnlyList<RoadmapTask> Reconcile(
         ICollection<RoadmapTask> existing,
@@ -84,5 +86,43 @@ public static class RoadmapTaskReconciler
 
         var newTasks = Reconcile(roadmap.Tasks, generatedTasks, roadmap.Id, preserveExistingState: true);
         roadmap.Tasks.AddRange(newTasks);
+        EnsurePublicTransportCard(roadmap);
+    }
+
+    private static void EnsurePublicTransportCard(Roadmap roadmap)
+    {
+        var matchingTasks = roadmap.Tasks
+            .Where(task => task.RuleId == PublicTransportCardRuleId
+                || string.Equals(task.Title, PublicTransportCardTitle, StringComparison.OrdinalIgnoreCase))
+            .ToArray();
+
+        var transportCard = matchingTasks.FirstOrDefault(task => task.RuleId == PublicTransportCardRuleId)
+            ?? matchingTasks.FirstOrDefault();
+        if (transportCard is null)
+        {
+            transportCard = new RoadmapTask
+            {
+                Id = Guid.NewGuid(),
+                RoadmapId = roadmap.Id,
+                RuleId = PublicTransportCardRuleId,
+            };
+            roadmap.Tasks.Add(transportCard);
+        }
+
+        foreach (var duplicate in matchingTasks.Where(task => task.Id != transportCard.Id))
+            duplicate.State = "NotApplicable";
+
+        var completed = transportCard.Completed || transportCard.State == "Completed";
+        transportCard.RuleId = PublicTransportCardRuleId;
+        transportCard.Title = PublicTransportCardTitle;
+        transportCard.Description = PublicTransportCardDescription;
+        transportCard.Category = "Transport";
+        transportCard.Priority = 4;
+        transportCard.Completed = completed;
+        transportCard.State = completed ? "Completed" : "Optional";
+        transportCard.StateBeforeCompletion = "Optional";
+        transportCard.ResourceUrl = null;
+        transportCard.RuleExplanation = PublicTransportCardExplanation;
+        transportCard.PrerequisitesJson = "[]";
     }
 }

@@ -13,7 +13,7 @@ public class RoadmapRequestDto
     [Required, StringLength(50)]
     public string LiveInSweden { get; set; } = string.Empty;
 
-    [Required, StringLength(50)]
+    [Required, StringLength(12, MinimumLength = 12)]
     public string Personnummer { get; set; } = string.Empty;
 
     [Required, StringLength(50)]

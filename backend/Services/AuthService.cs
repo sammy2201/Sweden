@@ -17,11 +17,11 @@ public class AuthService : IAuthService
         _config = config;
     }
 
-    public async Task<string> LoginAsync(string email, string password)
+    public async Task<string> LoginServiceAsync(string email, string password)
 
     {
         email = email.Trim().ToLowerInvariant();
-        var user = await _repo.GetUserByEmailAsync(email);
+        var user = await _repo.GetUserByEmailRepoAsync(email);
         if (user is null || !user.IsActive || !PasswordHasher.Verify(password, user.PasswordHash))
         {
             throw new ApiException(StatusCodes.Status401Unauthorized, "Unauthorized", "Invalid credentials");
@@ -30,7 +30,7 @@ public class AuthService : IAuthService
         return GenerateJwtToken(user);
     }
 
-    public async Task<bool> RegisterAsync(string firstName, string lastName, string username, string email, string city, string address, string password)
+    public async Task<bool> RegisterServiceAsync(string firstName, string lastName, string username, string email, string city, string address, string password)
     {
 
         firstName = firstName.Trim();
@@ -40,7 +40,7 @@ public class AuthService : IAuthService
         city = city.Trim();
         address = address.Trim();
 
-        if (await _repo.UserExistsAsync(username, email))
+        if (await _repo.UserExistsRepoAsync(username, email))
         {
             return false;
         }
@@ -60,19 +60,19 @@ public class AuthService : IAuthService
             CreatedAt = DateTime.UtcNow
         };
 
-        await _repo.CreateUserAsync(user);
+        await _repo.CreateUserRepoAsync(user);
         return true;
     }
 
 
-    public Task<User?> GetUserAsync(Guid id)
+    public Task<User?> GetUserServiceAsync(Guid id)
     {
-        return _repo.GetUserByIdAsync(id);
+        return _repo.GetUserByIdRepoAsync(id);
     }
 
-    public async Task<User?> UpdateUserProfileAsync(Guid id, string firstName, string lastName, string city, string address)
+    public async Task<User?> UpdateUserProfileServiceAsync(Guid id, string firstName, string lastName, string city, string address)
     {
-        var user = await _repo.GetUserByIdAsync(id);
+        var user = await _repo.GetUserByIdRepoAsync(id);
         if (user is null)
         {
             return null;
@@ -82,7 +82,7 @@ public class AuthService : IAuthService
         user.LastName = lastName.Trim();
         user.City = city.Trim();
         user.Address = address.Trim();
-        await _repo.UpdateUserAsync(user);
+        await _repo.UpdateUserRepoAsync(user);
         return user;
     }
 

@@ -10,10 +10,10 @@ public class BankService : IBankService
      public BankService(IWebHostEnvironment environment)
      {
           _environment = environment;
-          _banks = new Lazy<List<BankDto>>(LoadBanks, LazyThreadSafetyMode.ExecutionAndPublication);
+          _banks = new Lazy<List<BankDto>>(LoadBanks);
      }
 
-     public IEnumerable<BankDto> GetBanks()
+     public IEnumerable<BankDto> GetBanksService()
           => _banks.Value;
 
      private List<BankDto> LoadBanks()

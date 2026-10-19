@@ -5,7 +5,7 @@ namespace SwedenStart;
 public class TransportService : ITransportService
 {
      private readonly HttpClient _httpClient;
-     private readonly IConfiguration _configuration;
+     private readonly IConfiguration _config;
      private readonly ILogger<TransportService> _logger;
      private static readonly JsonSerializerOptions JsonOptions = new()
      {
@@ -14,15 +14,15 @@ public class TransportService : ITransportService
 
      public TransportService(
           HttpClient httpClient,
-          IConfiguration configuration,
+          IConfiguration config,
           ILogger<TransportService> logger)
      {
           _httpClient = httpClient;
-          _configuration = configuration;
+          _config = config;
           _logger = logger;
      }
 
-     public async Task<IReadOnlyList<TransportTripDto>> SearchTripsAsync(
+     public async Task<IReadOnlyList<TransportTripDto>> SearchTripsServiceAsync(
           string from,
           string to,
           DateTime? departureTime = null,
@@ -34,7 +34,7 @@ public class TransportService : ITransportService
           if (string.IsNullOrWhiteSpace(to))
                throw new ApiException(StatusCodes.Status400BadRequest, "Invalid request", "'to' is required.");
 
-          var apiKey = _configuration["ResRobot:ApiKey"];
+          var apiKey = _config["ResRobot:ApiKey"];
           if (string.IsNullOrWhiteSpace(apiKey))
                throw new ApiException(StatusCodes.Status502BadGateway, "Transport service unavailable", "ResRobot API key is not configured.");
 

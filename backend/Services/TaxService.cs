@@ -19,7 +19,7 @@ public class TaxService : ITaxService
                throw new InvalidOperationException("Tax data source returned no municipality rates.");
      }
 
-     public IEnumerable<MunicipalityTaxRate> GetTaxRates()
+     public IEnumerable<MunicipalityTaxRate> GetTaxRatesService()
      {
           return _rates
                .GroupBy(rate => NormalizeMunicipality(rate.Municipality), StringComparer.OrdinalIgnoreCase)
@@ -27,9 +27,8 @@ public class TaxService : ITaxService
                .OrderBy(rate => rate.Municipality, StringComparer.Create(new CultureInfo("sv-SE"), true));
      }
 
-     public TaxCalculationResponse Calculate(TaxCalculationRequest request)
+     public TaxCalculationResponse CalculateService(TaxCalculationRequest request)
      {
-
 
           var annualGrossIncome = RoundDownToHundred(request.MonthlySalary * 12m);
           var rate = FindMunicipalityRate(request.Municipality);
@@ -280,7 +279,7 @@ public class TaxService : ITaxService
      }
 
 
-     public IEnumerable<string> GetMunicipalities()
+     public IEnumerable<string> GetMunicipalitiesService()
      {
           return _rates
               .Select(rate => ToDisplayMunicipality(rate.Municipality))

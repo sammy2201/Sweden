@@ -11,7 +11,7 @@ public class VisitSwedenRepository : IVisitSwedenRepository
           _dbContext = dbContext;
      }
 
-     public async Task<VisitSwedenUpsertResult> UpsertAttractionsAsync(IEnumerable<Attraction> attractions  )
+     public async Task<VisitSwedenUpsertResult> UpsertAttractionsRepoAsync(IEnumerable<Attraction> attractions)
      {
           var incoming = attractions
                .Where(attraction => !string.IsNullOrWhiteSpace(attraction.ExternalId))

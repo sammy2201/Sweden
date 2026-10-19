@@ -2,5 +2,5 @@ namespace SwedenStart;
 
 public interface IVisitSwedenRepository
 {
-     Task<VisitSwedenUpsertResult> UpsertAttractionsAsync(IEnumerable<Attraction> attractions);
+     Task<VisitSwedenUpsertResult> UpsertAttractionsRepoAsync(IEnumerable<Attraction> attractions);
 }

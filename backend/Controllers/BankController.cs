@@ -16,8 +16,8 @@ public class BankController : ControllerBase
      }
 
      [HttpGet]
-     public ActionResult<IEnumerable<BankDto>> GetBanks()
+     public ActionResult<IEnumerable<BankDto>> GetBanksController()
      {
-          return Ok(_bankService.GetBanks());
+          return Ok(_bankService.GetBanksService());
      }
 }

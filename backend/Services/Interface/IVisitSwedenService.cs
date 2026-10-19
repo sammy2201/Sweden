@@ -2,7 +2,7 @@ namespace SwedenStart;
 
 public interface IVisitSwedenService
 {
-     Task<VisitSwedenSyncResult> SyncAttractionsAsync();
+     Task<VisitSwedenSyncResult> SyncAttractionsServiceAsync();
 }
 
 public record VisitSwedenUpsertResult(int Inserted, int Updated);

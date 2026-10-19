@@ -9,19 +9,13 @@ public class ExploreService : IExploreService
           _attractionRepository = attractionRepository;
      }
 
-     public IEnumerable<CountyDto> GetCounties()
-          => CountyData.GetCounties();
-
-     public Task<bool> HasAnyAttractionsAsync()
-          => _attractionRepository.HasAnyAttractionsAsync();
-
-     public async Task<PagedResponse<AttractionDto>> GetAttractionsAsync(
+     public async Task<PagedResponse<AttractionDto>> GetAttractionsServiceAsync(
          string county,
          int page,
          int pageSize,
            string? category)
      {
-          var attractions = await _attractionRepository.GetAttractionsAsync(
+          var attractions = await _attractionRepository.GetAttractionsRepoAsync(
               county,
               page,
               pageSize,
@@ -43,9 +37,9 @@ public class ExploreService : IExploreService
           };
      }
 
-     public async Task<AttractionDetailDto?> GetAttractionAsync(string id)
+     public async Task<AttractionDetailDto?> GetAttractionServiceAsync(string id)
      {
-          var attraction = await _attractionRepository.GetAttractionByIdAsync(id);
+          var attraction = await _attractionRepository.GetAttractionByIdRepoAsync(id);
 
           if (attraction is null)
                return null;

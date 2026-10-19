@@ -11,10 +11,12 @@ public class AttractionRepository : IAttractionRepository
           _dbContext = dbContext;
      }
 
-     public Task<bool> HasAnyAttractionsAsync()
-          => _dbContext.Attractions.AnyAsync();
+     public async Task<bool> HasAnyAttractionsRepoAsync()
+     {
+          return await _dbContext.Attractions.AnyAsync();
+     }
 
-     public async Task<PagedResponse<Attraction>> GetAttractionsAsync(
+     public async Task<PagedResponse<Attraction>> GetAttractionsRepoAsync(
          string? county,
          int page,
          int pageSize,
@@ -53,7 +55,7 @@ public class AttractionRepository : IAttractionRepository
           };
      }
 
-     public async Task<Attraction?> GetAttractionByIdAsync(string externalId)
+     public async Task<Attraction?> GetAttractionByIdRepoAsync(string externalId)
      {
           return await _dbContext.Attractions
               .FirstOrDefaultAsync(attraction => attraction.ExternalId == externalId);
