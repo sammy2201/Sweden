@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace SwedenStart;
 
@@ -14,7 +15,25 @@ public class RoadmapRepository : IRoadmapRepository
     public async Task<Roadmap> SaveRoadmapRepoAsync(Roadmap roadmap)
     {
         await _dbContext.Roadmaps.AddAsync(roadmap);
-        await _dbContext.SaveChangesAsync();
+        try
+        {
+            await _dbContext.SaveChangesAsync();
+        }
+        catch (DbUpdateException exception) when (
+            exception.InnerException is PostgresException
+            {
+                SqlState: PostgresErrorCodes.UniqueViolation,
+                ConstraintName: "IX_Roadmaps_UserId"
+            })
+        {
+            throw new ApiException(
+                StatusCodes.Status409Conflict,
+                "Roadmap already exists",
+                "A roadmap already exists for this user.",
+                "ROADMAP_ALREADY_EXISTS",
+                exception);
+        }
+
         return roadmap;
     }
 

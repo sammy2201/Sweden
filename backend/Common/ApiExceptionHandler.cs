@@ -13,7 +13,11 @@ public class ApiExceptionHandler(
         CancellationToken _)
     {
         var apiException = exception as ApiException;
-        var status = apiException?.StatusCode ?? StatusCodes.Status500InternalServerError;
+        var upstreamException = exception as HttpRequestException;
+        var status = apiException?.StatusCode
+            ?? (upstreamException is not null
+                ? StatusCodes.Status502BadGateway
+                : StatusCodes.Status500InternalServerError);
 
         if (status >= StatusCodes.Status500InternalServerError)
         {
@@ -27,8 +31,12 @@ public class ApiExceptionHandler(
         var problem = new ProblemDetails
         {
             Status = status,
-            Title = apiException?.Title ?? "Server error",
-            Detail = apiException?.Message ?? "An unexpected error occurred.",
+            Title = apiException?.Title
+                ?? (upstreamException is not null ? "Upstream service unavailable" : "Server error"),
+            Detail = apiException?.Message
+                ?? (upstreamException is not null
+                    ? "A required external service is unavailable."
+                    : "An unexpected error occurred."),
             Instance = httpContext.Request.Path
         };
         if (!string.IsNullOrWhiteSpace(apiException?.Code))

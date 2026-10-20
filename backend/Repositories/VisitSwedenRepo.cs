@@ -11,7 +11,9 @@ public class VisitSwedenRepository : IVisitSwedenRepository
           _dbContext = dbContext;
      }
 
-     public async Task<VisitSwedenUpsertResult> UpsertAttractionsRepoAsync(IEnumerable<Attraction> attractions)
+     public async Task<VisitSwedenUpsertResult> UpsertAttractionsRepoAsync(
+          IEnumerable<Attraction> attractions,
+          CancellationToken cancellationToken = default)
      {
           var incoming = attractions
                .Where(attraction => !string.IsNullOrWhiteSpace(attraction.ExternalId))
@@ -26,7 +28,7 @@ public class VisitSwedenRepository : IVisitSwedenRepository
 
           var existingByExternalId = await _dbContext.Attractions
                .Where(attraction => externalIds.Contains(attraction.ExternalId))
-               .ToDictionaryAsync(attraction => attraction.ExternalId);
+               .ToDictionaryAsync(attraction => attraction.ExternalId, cancellationToken);
 
           var inserted = 0;
           var updated = 0;
@@ -56,7 +58,7 @@ public class VisitSwedenRepository : IVisitSwedenRepository
                }
           }
 
-          await _dbContext.SaveChangesAsync();
+          await _dbContext.SaveChangesAsync(cancellationToken);
           return new VisitSwedenUpsertResult(inserted, updated);
      }
 }

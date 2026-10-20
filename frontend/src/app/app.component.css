@@ -269,3 +269,25 @@
 .page-content {
   flex: 1 0 auto;
 }
+
+@media (max-width: 800px) {
+  .top-nav-inner {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-3);
+    padding-block: var(--space-3);
+  }
+
+  .header-search {
+    width: 100%;
+  }
+
+  .desktop-actions {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    white-space: normal;
+  }
+
+  .nav-separator {
+    display: none;
+  }
+}

@@ -15,9 +15,9 @@ public class VisitSwedenStartupSyncService : BackgroundService
           _logger = logger;
      }
 
-     protected override async Task ExecuteAsync(CancellationToken _)
+     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
      {
-          await Task.Delay(TimeSpan.FromSeconds(5));
+          await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
 
           const int maxAttempts = 3;
           for (var attempt = 1; attempt <= maxAttempts; attempt++)
@@ -26,7 +26,7 @@ public class VisitSwedenStartupSyncService : BackgroundService
                {
                     await using var scope = _scopeFactory.CreateAsyncScope();
                     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                    if (await dbContext.Attractions.AnyAsync())
+                    if (await dbContext.Attractions.AnyAsync(stoppingToken))
                     {
                          _logger.LogInformation("Visit Sweden startup sync skipped because attraction data already exists.");
                          return;
@@ -37,7 +37,7 @@ public class VisitSwedenStartupSyncService : BackgroundService
                          attempt,
                          maxAttempts);
                     var visitSwedenService = scope.ServiceProvider.GetRequiredService<IVisitSwedenService>();
-                    var result = await visitSwedenService.SyncAttractionsServiceAsync();
+                    var result = await visitSwedenService.SyncAttractionsServiceAsync(stoppingToken);
                     _logger.LogInformation(
                          "Visit Sweden startup sync finished successfully. Attempts: {Attempt}/{MaxAttempts}; fetched: {Fetched}; mapped: {Mapped}; inserted: {Inserted}; updated: {Updated}; skipped records: {SkippedRecords} (missing image: {MissingImage}, missing coordinates: {MissingCoordinates}, unmappable: {Unmappable}; reason counts can overlap).",
                          attempt,
@@ -52,6 +52,10 @@ public class VisitSwedenStartupSyncService : BackgroundService
                          result.SkippedUnmappable);
                     return;
                }
+               catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+               {
+                    return;
+               }
                catch (Exception exception) when (attempt < maxAttempts)
                {
                     _logger.LogWarning(
@@ -59,7 +63,7 @@ public class VisitSwedenStartupSyncService : BackgroundService
                          "Visit Sweden startup sync attempt {Attempt}/{MaxAttempts} failed. Retrying in 30 seconds.",
                          attempt,
                          maxAttempts);
-                    await Task.Delay(TimeSpan.FromSeconds(30));
+                    await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
                }
                catch (Exception exception)
                {

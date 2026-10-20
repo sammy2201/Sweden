@@ -19,7 +19,7 @@ public class VisitSwedenController : ControllerBase
      [Authorize(Roles = "Admin")]
      public async Task<ActionResult<VisitSwedenSyncResult>> SyncControllerAsync()
      {
-          var result = await _visitSwedenService.SyncAttractionsServiceAsync();
+          var result = await _visitSwedenService.SyncAttractionsServiceAsync(HttpContext.RequestAborted);
           return Ok(result);
      }
 }

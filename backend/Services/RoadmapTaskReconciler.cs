@@ -58,7 +58,6 @@ public static class RoadmapTaskReconciler
         var newTasks = generatedByRule.Values.ToArray();
         foreach (var task in newTasks)
         {
-            task.Id = Guid.NewGuid();
             task.RoadmapId = roadmapId;
         }
 
@@ -102,7 +101,6 @@ public static class RoadmapTaskReconciler
         {
             transportCard = new RoadmapTask
             {
-                Id = Guid.NewGuid(),
                 RoadmapId = roadmap.Id,
                 RuleId = PublicTransportCardRuleId,
             };

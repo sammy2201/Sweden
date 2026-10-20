@@ -25,12 +25,13 @@ public class VisitSwedenService : IVisitSwedenService
           _repository = repository;
 
      }
-     public Task<VisitSwedenSyncResult> SyncAttractionsServiceAsync()
+     public Task<VisitSwedenSyncResult> SyncAttractionsServiceAsync(
+          CancellationToken cancellationToken = default)
      {
-          return SyncAttractionsCoreAsync();
+          return SyncAttractionsCoreAsync(cancellationToken);
      }
 
-     private async Task<VisitSwedenSyncResult> SyncAttractionsCoreAsync()
+     private async Task<VisitSwedenSyncResult> SyncAttractionsCoreAsync(CancellationToken cancellationToken)
      {
           var attractions = new List<Attraction>();
           var skippedMissingImage = 0;
@@ -48,7 +49,7 @@ public class VisitSwedenService : IVisitSwedenService
                    $"&limit={SourcePageSize}&offset={offset}" +
                    "&rdfFormat=application/ld+json";
 
-               using var response = await _httpClient.GetAsync(endpoint);
+               using var response = await _httpClient.GetAsync(endpoint, cancellationToken);
 
                if (!response.IsSuccessStatusCode)
                {
@@ -58,7 +59,7 @@ public class VisitSwedenService : IVisitSwedenService
                         response.StatusCode);
                }
 
-               using var document = await ReadResponseAsync(response, offset);
+               using var document = await ReadResponseAsync(response, offset, cancellationToken);
                var root = document.RootElement;
 
                if (!root.TryGetProperty("results", out var results) ||
@@ -135,7 +136,7 @@ public class VisitSwedenService : IVisitSwedenService
                    "to usable county attractions.");
           }
 
-          var upsert = await _repository.UpsertAttractionsRepoAsync(attractions);
+          var upsert = await _repository.UpsertAttractionsRepoAsync(attractions, cancellationToken);
 
           var result = new VisitSwedenSyncResult(
               pagesFetched,
@@ -167,12 +168,13 @@ public class VisitSwedenService : IVisitSwedenService
 
      private async Task<JsonDocument> ReadResponseAsync(
          HttpResponseMessage response,
-         int offset)
+         int offset,
+         CancellationToken cancellationToken)
      {
           try
           {
-               await using var stream = await response.Content.ReadAsStreamAsync();
-               return await JsonDocument.ParseAsync(stream);
+               await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+               return await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken);
           }
           catch (JsonException exception)
           {
