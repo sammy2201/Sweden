@@ -27,7 +27,6 @@ public class RegisterRequestDto
     [StringLength(100, MinimumLength = 2)]
     public string City { get; set; } = string.Empty;
 
-    [Required]
     [StringLength(255, MinimumLength = 3)]
     public string Address { get; set; } = string.Empty;
 
