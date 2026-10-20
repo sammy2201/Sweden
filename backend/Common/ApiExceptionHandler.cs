@@ -21,11 +21,11 @@ public class ApiExceptionHandler(
 
         if (status >= StatusCodes.Status500InternalServerError)
         {
-            logger.LogError(exception, "Unhandled API exception for {Path}", httpContext.Request.Path);
+            logger.LogError(exception, "Unhandled API exception");
         }
         else
         {
-            logger.LogInformation("API request failed with status {StatusCode} for {Path}", status, httpContext.Request.Path);
+            logger.LogInformation("API request failed with status {StatusCode}", status);
         }
 
         var problem = new ProblemDetails
