@@ -1,11 +1,4 @@
-import {
-  Component,
-  DestroyRef,
-  inject,
-  signal,
-  ViewEncapsulation,
-} from "@angular/core";
-import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { Component, inject, signal, ViewEncapsulation } from "@angular/core";
 import type { Bank } from "../../models/banking.models";
 import { BankingIntroComponent } from "./components/banking-intro.component";
 import { BankingBanksComponent } from "./components/banking-banks.component";
@@ -29,27 +22,16 @@ import { getApiErrorMessage } from "../../utils/api-error";
 })
 export class BankingComponent {
   private bankService = inject(BankService);
-  private readonly destroyRef = inject(DestroyRef);
   readonly banks = signal<Bank[]>([]);
   readonly errorMessage = signal("");
 
-  ngOnInit(): void {
-    this.bankService
-      .getBanks()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (banks) => {
-          this.banks.set(banks);
-          this.errorMessage.set("");
-        },
-        error: (error: unknown) => {
-          this.errorMessage.set(
-            getApiErrorMessage(
-              error,
-              "We could not load the bank list right now.",
-            ),
-          );
-        },
-      });
+  async ngOnInit(): Promise<void> {
+    try {
+      this.banks.set(await this.bankService.getBanks());
+    } catch (error: unknown) {
+      this.errorMessage.set(
+        getApiErrorMessage(error, "We could not load the bank list right now."),
+      );
+    }
   }
 }

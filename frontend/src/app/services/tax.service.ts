@@ -1,8 +1,7 @@
-import { Injectable, inject } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
-import { Observable } from "rxjs";
-import { map } from "rxjs/operators";
+import { Injectable } from "@angular/core";
+import axios from "axios";
 import { environment } from "../../environments/environment";
+import { AuthService } from "./auth.service";
 import type {
   MunicipalityTaxRateResponse,
   TaxCalculationRequest,
@@ -13,33 +12,54 @@ import type {
   providedIn: "root",
 })
 export class TaxService {
-  private http = inject(HttpClient);
-  private readonly apiUrl = `${environment.apiUrl}/tax/calculate`;
+  constructor(private readonly authService: AuthService) {}
 
-  calculateTax(
+  async calculateTax(
     request: TaxCalculationRequest,
-  ): Observable<TaxCalculationResponse> {
-    return this.http.post<TaxCalculationResponse>(this.apiUrl, request);
+  ): Promise<TaxCalculationResponse> {
+    try {
+      const response = await axios.post<TaxCalculationResponse>(
+        `${environment.apiUrl}/tax/calculate`,
+        request,
+        this.requestConfig(),
+      );
+      return response.data;
+    } catch (error: unknown) {
+      this.handleUnauthorized(error);
+    }
   }
 
-  getMunicipalities(): Observable<string[]> {
-    const url = `${environment.apiUrl}/tax/rates`;
-    return this.http
-      .get<MunicipalityTaxRateResponse[]>(url)
-      .pipe(
-        map((rates) =>
-          Array.from(
-            new Set(
-              rates
-                .map((rate) => rate.municipality?.trim())
-                .filter((municipality): municipality is string =>
-                  Boolean(municipality),
-                ),
-            ),
-          ).sort((firstMunicipality, secondMunicipality) =>
-            firstMunicipality.localeCompare(secondMunicipality),
-          ),
-        ),
+  async getMunicipalities(): Promise<string[]> {
+    try {
+      const response = await axios.get<MunicipalityTaxRateResponse[]>(
+        `${environment.apiUrl}/tax/rates`,
+        this.requestConfig(),
       );
+      return Array.from(
+        new Set(
+          response.data
+            .map((rate) => rate.municipality?.trim())
+            .filter((municipality): municipality is string =>
+              Boolean(municipality),
+            ),
+        ),
+      ).sort((firstMunicipality, secondMunicipality) =>
+        firstMunicipality.localeCompare(secondMunicipality),
+      );
+    } catch (error: unknown) {
+      this.handleUnauthorized(error);
+    }
+  }
+
+  private requestConfig() {
+    const token = this.authService.getValidAccessToken();
+    return token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  }
+
+  private handleUnauthorized(error: unknown): never {
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      this.authService.logout();
+    }
+    throw error;
   }
 }

@@ -1,6 +1,5 @@
 import { Injectable, signal } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
-import { Observable, tap } from "rxjs";
+import axios from "axios";
 import { environment } from "../../environments/environment";
 import type {
   AuthResponse,
@@ -18,39 +17,63 @@ export class AuthService {
   readonly isAuthenticated = signal(false);
   readonly user = signal<UserProfile | null>(null);
 
-  constructor(private readonly httpClient: HttpClient) {
+  constructor() {
     this.restoreAuthenticatedSession();
   }
 
-  login(loginPayload: LoginPayload): Observable<AuthResponse> {
-    return this.httpClient
-      .post<AuthResponse>(`${environment.apiUrl}/auth/login`, loginPayload)
-      .pipe(
-        tap((authenticationResponse) =>
-          this.storeAuthenticatedSession(authenticationResponse),
-        ),
+  async login(loginPayload: LoginPayload): Promise<AuthResponse> {
+    try {
+      const response = await axios.post<AuthResponse>(
+        `${environment.apiUrl}/auth/login`,
+        loginPayload,
+        this.requestConfig(),
       );
+      this.storeAuthenticatedSession(response.data);
+      return response.data;
+    } catch (error: unknown) {
+      this.handleUnauthorized(error);
+    }
   }
 
-  register(registrationPayload: RegisterPayload): Observable<void> {
-    return this.httpClient.post<void>(
-      `${environment.apiUrl}/auth/register`,
-      registrationPayload,
-    );
+  async register(registrationPayload: RegisterPayload): Promise<void> {
+    try {
+      await axios.post<void>(
+        `${environment.apiUrl}/auth/register`,
+        registrationPayload,
+        this.requestConfig(),
+      );
+    } catch (error: unknown) {
+      this.handleUnauthorized(error);
+    }
   }
 
-  loadUserProfile(): Observable<UserProfile> {
-    return this.httpClient
-      .get<UserProfile>(`${environment.apiUrl}/auth/user`)
-      .pipe(tap((userProfile) => this.user.set(userProfile)));
+  async loadUserProfile(): Promise<UserProfile> {
+    try {
+      const response = await axios.get<UserProfile>(
+        `${environment.apiUrl}/auth/user`,
+        this.requestConfig(),
+      );
+      this.user.set(response.data);
+      return response.data;
+    } catch (error: unknown) {
+      this.handleUnauthorized(error);
+    }
   }
 
   updateUserProfile(
     profileUpdatePayload: UpdateUserProfilePayload,
-  ): Observable<UserProfile> {
-    return this.httpClient
-      .put<UserProfile>(`${environment.apiUrl}/auth/user`, profileUpdatePayload)
-      .pipe(tap((updatedUserProfile) => this.user.set(updatedUserProfile)));
+  ): Promise<UserProfile> {
+    return axios
+      .put<UserProfile>(
+        `${environment.apiUrl}/auth/user`,
+        profileUpdatePayload,
+        this.requestConfig(),
+      )
+      .then((response) => {
+        this.user.set(response.data);
+        return response.data;
+      })
+      .catch((error: unknown) => this.handleUnauthorized(error));
   }
 
   logout(): void {
@@ -101,6 +124,18 @@ export class AuthService {
     } else {
       this.logout();
     }
+  }
+
+  private requestConfig() {
+    const token = this.getValidAccessToken();
+    return token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  }
+
+  private handleUnauthorized(error: unknown): never {
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      this.logout();
+    }
+    throw error;
   }
 
   private restoreAuthenticatedSession(): void {

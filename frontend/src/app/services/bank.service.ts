@@ -1,18 +1,36 @@
-import { Injectable, inject } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
-import { Observable } from "rxjs";
-import type { Bank } from "../models/banking.models";
+import { Injectable } from "@angular/core";
+import axios from "axios";
 import { environment } from "../../environments/environment";
+import { AuthService } from "./auth.service";
+import type { Bank } from "../models/banking.models";
 
 @Injectable({
   providedIn: "root",
 })
 export class BankService {
-  private http = inject(HttpClient);
+  constructor(private readonly authService: AuthService) {}
 
-  private readonly apiUrl = `${environment.apiUrl}/bank-details`;
+  async getBanks(): Promise<Bank[]> {
+    try {
+      const response = await axios.get<Bank[]>(
+        `${environment.apiUrl}/bank-details`,
+        this.requestConfig(),
+      );
+      return response.data;
+    } catch (error: unknown) {
+      this.handleUnauthorized(error);
+    }
+  }
 
-  getBanks(): Observable<Bank[]> {
-    return this.http.get<Bank[]>(this.apiUrl);
+  private requestConfig() {
+    const token = this.authService.getValidAccessToken();
+    return token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  }
+
+  private handleUnauthorized(error: unknown): never {
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      this.authService.logout();
+    }
+    throw error;
   }
 }

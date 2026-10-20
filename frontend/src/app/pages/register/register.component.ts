@@ -45,7 +45,7 @@ export class RegisterComponent {
   errorMessage = "";
   successMessage = "";
 
-  submit(): void {
+  async submit(): Promise<void> {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -55,21 +55,18 @@ export class RegisterComponent {
     this.errorMessage = "";
     this.successMessage = "";
 
-    this.authService.register(this.form.getRawValue()).subscribe({
-      next: () => {
-        this.isSubmitting = false;
-        this.successMessage =
-          "Account created successfully. You can now log in.";
-        this.form.reset();
-        setTimeout(() => this.router.navigate(["/login"]), 800);
-      },
-      error: (error: unknown) => {
-        this.isSubmitting = false;
-        this.errorMessage = getApiErrorMessage(
-          error,
-          "We could not create your account. Please try again.",
-        );
-      },
-    });
+    try {
+      await this.authService.register(this.form.getRawValue());
+      this.successMessage = "Account created successfully. You can now log in.";
+      this.form.reset();
+      setTimeout(() => this.router.navigate(["/login"]), 800);
+    } catch (error: unknown) {
+      this.errorMessage = getApiErrorMessage(
+        error,
+        "We could not create your account. Please try again.",
+      );
+    } finally {
+      this.isSubmitting = false;
+    }
   }
 }

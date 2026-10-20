@@ -73,7 +73,7 @@ export class TransportComponent {
       });
   }
 
-  searchTrips(): void {
+  async searchTrips(): Promise<void> {
     if (!this.from.trim() || !this.to.trim()) {
       return;
     }
@@ -93,21 +93,21 @@ export class TransportComponent {
 
     this.loading = true;
 
-    this.transportService
-      .searchTrips(this.from, this.to, this.departureTime, this.arrivalTime)
-      .subscribe({
-        next: (trips) => {
-          this.trips = trips;
-          this.loading = false;
-        },
-        error: (error: unknown) => {
-          this.apiErrorMessage = getApiErrorMessage(
-            error,
-            "We could not search transport right now.",
-          );
-          this.loading = false;
-        },
-      });
+    try {
+      this.trips = await this.transportService.searchTrips(
+        this.from,
+        this.to,
+        this.departureTime,
+        this.arrivalTime,
+      );
+    } catch (error: unknown) {
+      this.apiErrorMessage = getApiErrorMessage(
+        error,
+        "We could not search transport right now.",
+      );
+    } finally {
+      this.loading = false;
+    }
   }
 
   onDatePickerOpen(): void {

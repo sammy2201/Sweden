@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
-import { Observable } from "rxjs";
+import axios from "axios";
 import { environment } from "../../environments/environment";
+import { AuthService } from "./auth.service";
 import type {
   RoadmapQuestion,
   RoadmapRequest,
@@ -10,43 +10,94 @@ import type {
 
 @Injectable({ providedIn: "root" })
 export class RoadmapService {
-  constructor(private readonly http: HttpClient) {}
+  constructor(private readonly authService: AuthService) {}
 
-  getQuestions(): Observable<RoadmapQuestion[]> {
-    return this.http.get<RoadmapQuestion[]>(`${environment.apiUrl}/roadmap/questions`);
+  async getQuestions(): Promise<RoadmapQuestion[]> {
+    try {
+      const response = await axios.get<RoadmapQuestion[]>(
+        `${environment.apiUrl}/roadmap/questions`,
+        this.requestConfig(),
+      );
+      return response.data;
+    } catch (error: unknown) {
+      this.handleUnauthorized(error);
+    }
   }
 
-  getRoadmap(): Observable<RoadmapResponse | null> {
-    return this.http.get<RoadmapResponse | null>(
-      `${environment.apiUrl}/roadmap`,
-    );
+  async getRoadmap(): Promise<RoadmapResponse | null> {
+    try {
+      const response = await axios.get<RoadmapResponse | null>(
+        `${environment.apiUrl}/roadmap`,
+        this.requestConfig(),
+      );
+      return response.data;
+    } catch (error: unknown) {
+      this.handleUnauthorized(error);
+    }
   }
 
-  generateRoadmap(request: RoadmapRequest): Observable<RoadmapResponse> {
-    return this.http.post<RoadmapResponse>(
-      `${environment.apiUrl}/roadmap`,
-      request,
-    );
+  async generateRoadmap(request: RoadmapRequest): Promise<RoadmapResponse> {
+    try {
+      const response = await axios.post<RoadmapResponse>(
+        `${environment.apiUrl}/roadmap`,
+        request,
+        this.requestConfig(),
+      );
+      return response.data;
+    } catch (error: unknown) {
+      this.handleUnauthorized(error);
+    }
   }
 
-  updateRoadmap(request: RoadmapRequest): Observable<RoadmapResponse> {
-    return this.http.put<RoadmapResponse>(
-      `${environment.apiUrl}/roadmap`,
-      request,
-    );
+  async updateRoadmap(request: RoadmapRequest): Promise<RoadmapResponse> {
+    try {
+      const response = await axios.put<RoadmapResponse>(
+        `${environment.apiUrl}/roadmap`,
+        request,
+        this.requestConfig(),
+      );
+      return response.data;
+    } catch (error: unknown) {
+      this.handleUnauthorized(error);
+    }
   }
 
-  deleteRoadmap(): Observable<void> {
-    return this.http.delete<void>(`${environment.apiUrl}/roadmap`);
+  async deleteRoadmap(): Promise<void> {
+    try {
+      await axios.delete<void>(
+        `${environment.apiUrl}/roadmap`,
+        this.requestConfig(),
+      );
+    } catch (error: unknown) {
+      this.handleUnauthorized(error);
+    }
   }
 
-  updateTaskCompletion(
+  async updateTaskCompletion(
     taskId: string,
     completed: boolean,
-  ): Observable<RoadmapResponse> {
-    return this.http.patch<RoadmapResponse>(
-      `${environment.apiUrl}/roadmap/tasks/${taskId}`,
-      { completed },
-    );
+  ): Promise<RoadmapResponse> {
+    try {
+      const response = await axios.patch<RoadmapResponse>(
+        `${environment.apiUrl}/roadmap/tasks/${taskId}`,
+        { completed },
+        this.requestConfig(),
+      );
+      return response.data;
+    } catch (error: unknown) {
+      this.handleUnauthorized(error);
+    }
+  }
+
+  private requestConfig() {
+    const token = this.authService.getValidAccessToken();
+    return token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  }
+
+  private handleUnauthorized(error: unknown): never {
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      this.authService.logout();
+    }
+    throw error;
   }
 }
