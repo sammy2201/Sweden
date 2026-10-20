@@ -36,7 +36,9 @@ These instructions apply to the entire Sweden Start repository.
 
 ## Frontend Conventions
 
-- Use Angular's built-in `HttpClient` through an injectable feature service for backend communication. Keep API calls out of templates and avoid duplicating calls already owned by a service.
+- Use the repository's existing HTTP client (Axios) through an injectable feature service for backend communication. Keep API calls out of templates and avoid duplicating calls already owned by a service.
+- Use the configured API base URL and keep request and response types aligned with backend DTOs.
+- Preserve the existing Axios configuration, including authentication headers, interceptors, and error-handling behavior. Do not migrate to Angular `HttpClient` unless explicitly requested.
 - Use the configured API base URL from the environment files. Keep request and response types aligned with backend DTOs.
 - Keep `HttpClient` response types aligned with the backend's direct success DTOs; do not expect a `{ message, data }` wrapper unless that API explicitly defines one.
 - Route HTTP failures through the shared `getApiErrorMessage` utility in `frontend/src/app/utils/api-error.ts`. It understands Problem Details and validation errors and provides status-aware fallbacks. Do not duplicate backend error parsing or cast response errors to `any`; receive errors as `unknown` and narrow them safely.
