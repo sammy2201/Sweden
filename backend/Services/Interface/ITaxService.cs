@@ -2,9 +2,9 @@ namespace SwedenStart;
 
 public interface ITaxService
 {
-     IEnumerable<MunicipalityTaxRate> GetTaxRates();
+     IEnumerable<MunicipalityTaxRate> GetTaxRatesService();
 
-     TaxCalculationResponse Calculate(TaxCalculationRequest request);
+     TaxCalculationResponse CalculateService(TaxCalculationRequest request);
 
-     IEnumerable<string> GetMunicipalities();
+     IEnumerable<string> GetMunicipalitiesService();
 }

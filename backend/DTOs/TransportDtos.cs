@@ -12,8 +12,6 @@ public class TransportTripDto
      public int NumberOfChanges { get; set; }
      public bool IsDirect { get; set; }
      public string TransportType { get; set; } = string.Empty;
-     public string OriginPlatform { get; set; } = string.Empty;
-     public string DestinationPlatform { get; set; } = string.Empty;
      public string Direction { get; set; } = string.Empty;
      public bool IsCancelled { get; set; }
      public TransportStationDto Origin { get; set; } = new();
@@ -31,13 +29,10 @@ public class TransportTripLegDto
 {
      public string Operator { get; set; } = string.Empty;
      public string TransportType { get; set; } = string.Empty;
-     public string Line { get; set; } = string.Empty;
      public string From { get; set; } = string.Empty;
      public string To { get; set; } = string.Empty;
      public DateTime? DepartureTime { get; set; }
      public DateTime? ArrivalTime { get; set; }
-     public string OriginPlatform { get; set; } = string.Empty;
-     public string DestinationPlatform { get; set; } = string.Empty;
      public string Direction { get; set; } = string.Empty;
      public bool IsCancelled { get; set; }
 
@@ -126,18 +121,6 @@ public class ResRobotStopPointDto
 
      [JsonPropertyName("time")]
      public string Time { get; set; } = string.Empty;
-
-     [JsonPropertyName("track")]
-     public string Track { get; set; } = string.Empty;
-
-     [JsonPropertyName("rtTrack")]
-     public string RtTrack { get; set; } = string.Empty;
-
-     [JsonPropertyName("stop")]
-     public string Stop { get; set; } = string.Empty;
-
-     [JsonPropertyName("rtStop")]
-     public string RtStop { get; set; } = string.Empty;
 
      [JsonPropertyName("cancelled")]
      public bool? Cancelled { get; set; }

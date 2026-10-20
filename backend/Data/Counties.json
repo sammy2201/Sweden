@@ -1,0 +1,193 @@
+{
+  "counties": [
+    {
+      "id": "blekinge",
+      "name": "Blekinge",
+      "description": "Known as Sweden's Garden with beautiful coastline and islands.",
+      "transportProviderName": "Blekingetrafiken",
+      "officialTicketUrl": "https://www.blekingetrafiken.se/biljetter/",
+      "journeyPlannerUrl": "https://www.blekingetrafiken.se/reseinformation/sok-resa/",
+      "aliases": ["Blekinge"]
+    },
+    {
+      "id": "dalarna",
+      "name": "Dalarna",
+      "description": "Traditional Swedish culture, mountains and outdoor adventures.",
+      "transportProviderName": "Dalatrafik",
+      "officialTicketUrl": "https://www.dalatrafik.se/sa-reser-du-med-oss/infor-resan/vara-biljetter/",
+      "journeyPlannerUrl": "https://www.dalatrafik.se/",
+      "aliases": ["Dalarna"]
+    },
+    {
+      "id": "gavleborg",
+      "name": "Gävleborg",
+      "description": "Home to coastal villages, forests and winter activities.",
+      "transportProviderName": "X-trafik",
+      "officialTicketUrl": "https://xtrafik.se/biljetter",
+      "journeyPlannerUrl": "https://xtrafik.se/",
+      "aliases": ["Gävleborg", "Gävleborgs"]
+    },
+    {
+      "id": "gotland",
+      "name": "Gotland",
+      "description": "Sweden's largest island, famous for medieval Visby and beaches.",
+      "transportProviderName": "Gotlands kollektivtrafik",
+      "officialTicketUrl": "https://gotland.se/rg/gotlands-kollektivtrafik/vara-biljetter",
+      "journeyPlannerUrl": "https://gotland.se/rg/gotlands-kollektivtrafik",
+      "aliases": ["Gotland"]
+    },
+    {
+      "id": "halland",
+      "name": "Halland",
+      "description": "Popular for sandy beaches, cycling routes and coastal towns.",
+      "transportProviderName": "Hallandstrafiken",
+      "officialTicketUrl": "https://www.hallandstrafiken.se/biljetter-och-priser",
+      "journeyPlannerUrl": "https://www.hallandstrafiken.se/res-med-oss/sok-resa/reseplaneraren",
+      "aliases": ["Halland", "Hallands"]
+    },
+    {
+      "id": "jamtlandharjedalen",
+      "name": "Jämtland Härjedalen",
+      "description": "A paradise for skiing, hiking and mountain adventures.",
+      "transportProviderName": "Länstrafiken Jämtland",
+      "officialTicketUrl": "https://ltr.se/kundservice/60349.biljetter-och-priser.html",
+      "journeyPlannerUrl": "https://ltr.se/",
+      "aliases": ["Jämtland", "Jämtlands", "Jämtland Härjedalen"]
+    },
+    {
+      "id": "jonkoping",
+      "name": "Jönköping",
+      "description": "Located by Lake Vättern with hiking, nature and family attractions.",
+      "transportProviderName": "Jönköpings Länstrafik",
+      "officialTicketUrl": "https://www.jlt.se/biljetter-och-priser/kop-biljett/",
+      "journeyPlannerUrl": "https://www.jlt.se/",
+      "aliases": ["Jönköping", "Jönköpings"]
+    },
+    {
+      "id": "kalmar",
+      "name": "Kalmar",
+      "description": "Historic castles, coastal scenery and the gateway to Öland.",
+      "transportProviderName": "Kalmar länstrafik",
+      "officialTicketUrl": "https://kalmarlanstrafik.se/biljetter-och-priser/kop-biljett/",
+      "journeyPlannerUrl": "https://kalmarlanstrafik.se/",
+      "aliases": ["Kalmar"]
+    },
+    {
+      "id": "kronoberg",
+      "name": "Kronoberg",
+      "description": "Forests, lakes and the heart of Sweden's famous glass kingdom.",
+      "transportProviderName": "Länstrafiken Kronoberg",
+      "officialTicketUrl": "https://lanstrafikenkron.se/biljetter",
+      "journeyPlannerUrl": "https://lanstrafikenkron.se/",
+      "aliases": ["Kronoberg", "Kronobergs"]
+    },
+    {
+      "id": "norrbotten",
+      "name": "Norrbotten",
+      "description": "Home to Lapland, the Northern Lights and Arctic experiences.",
+      "transportProviderName": "Länstrafiken Norrbotten",
+      "officialTicketUrl": "https://lanstrafikennorrbotten.se/reseappen",
+      "journeyPlannerUrl": "https://lanstrafikennorrbotten.se/",
+      "aliases": ["Norrbotten", "Norrbottens"]
+    },
+    {
+      "id": "orebro",
+      "name": "Örebro",
+      "description": "Historic castles, lakes and family-friendly attractions.",
+      "transportProviderName": "Länstrafiken Örebro",
+      "officialTicketUrl": "https://www.lanstrafiken.se/biljetter/",
+      "journeyPlannerUrl": "https://www.lanstrafiken.se/",
+      "aliases": ["Örebro"]
+    },
+    {
+      "id": "ostergotland",
+      "name": "Östergötland",
+      "description": "Rich in history with castles, canals and picturesque countryside.",
+      "transportProviderName": "Östgötatrafiken",
+      "officialTicketUrl": "https://www.ostgotatrafiken.se/biljetter/biljetter-och-priser",
+      "journeyPlannerUrl": "https://www.ostgotatrafiken.se/",
+      "aliases": ["Östergötland", "Östergötlands"]
+    },
+    {
+      "id": "skane",
+      "name": "Skåne",
+      "description": "Sweden's southernmost county, known for beaches, castles and vibrant cities.",
+      "transportProviderName": "Skånetrafiken",
+      "officialTicketUrl": "https://www.skanetrafiken.se/biljetter/",
+      "journeyPlannerUrl": "https://www.skanetrafiken.se/",
+      "aliases": ["Skåne"]
+    },
+    {
+      "id": "sormland",
+      "name": "Sörmland",
+      "description": "Historic manors, coastal landscapes and charming small towns.",
+      "transportProviderName": "Sörmlandstrafiken",
+      "officialTicketUrl": "https://sormlandstrafiken.se/biljetter/kop-biljett/",
+      "journeyPlannerUrl": "https://sormlandstrafiken.se/",
+      "aliases": ["Sörmland", "Södermanland", "Södermanlands"]
+    },
+    {
+      "id": "stockholm",
+      "name": "Stockholm",
+      "description": "Home to Sweden's capital with historic districts and world-class museums.",
+      "transportProviderName": "SL",
+      "officialTicketUrl": "https://sl.se/biljetter/sa-koper-du-biljetten",
+      "journeyPlannerUrl": "https://sl.se/reseplanering",
+      "aliases": ["Stockholm", "Stockholms"]
+    },
+    {
+      "id": "uppsala",
+      "name": "Uppsala",
+      "description": "Famous for its cathedral, university and Viking heritage.",
+      "transportProviderName": "UL",
+      "officialTicketUrl": "https://www.ul.se/biljetter/sa-har-koper-du-biljett/",
+      "journeyPlannerUrl": "https://www.ul.se/",
+      "aliases": ["Uppsala"]
+    },
+    {
+      "id": "varmland",
+      "name": "Värmland",
+      "description": "A county of forests, lakes and literary heritage.",
+      "transportProviderName": "Värmlandstrafik",
+      "officialTicketUrl": "https://www.varmlandstrafik.se/varmlandstrafik/biljetter",
+      "journeyPlannerUrl": "https://www.varmlandstrafik.se/",
+      "aliases": ["Värmland", "Värmlands"]
+    },
+    {
+      "id": "vasterbotten",
+      "name": "Västerbotten",
+      "description": "Northern forests, rivers and the cultural city of Umeå.",
+      "transportProviderName": "Länstrafiken Västerbotten",
+      "officialTicketUrl": "https://www.tabussen.nu/lanstrafiken/biljetter-och-priser/har-koper-du-biljetten/",
+      "journeyPlannerUrl": "https://www.tabussen.nu/lanstrafiken",
+      "aliases": ["Västerbotten", "Västerbottens"]
+    },
+    {
+      "id": "vasternorrland",
+      "name": "Västernorrland",
+      "description": "Known for the High Coast and dramatic natural landscapes.",
+      "transportProviderName": "Din Tur",
+      "officialTicketUrl": "https://www.dintur.se/biljetter-och-reskort/",
+      "journeyPlannerUrl": "https://www.dintur.se/",
+      "aliases": ["Västernorrland", "Västernorrlands"]
+    },
+    {
+      "id": "vastmanland",
+      "name": "Västmanland",
+      "description": "Industrial heritage, forests and scenic lakes.",
+      "transportProviderName": "VL",
+      "officialTicketUrl": "https://www.vl.se/biljetter/kopa-biljett/",
+      "journeyPlannerUrl": "https://www.vl.se/",
+      "aliases": ["Västmanland", "Västmanlands"]
+    },
+    {
+      "id": "vastragotaland",
+      "name": "Västra Götaland",
+      "description": "A diverse region featuring Gothenburg, archipelagos and nature.",
+      "transportProviderName": "Västtrafik",
+      "officialTicketUrl": "https://www.vasttrafik.se/biljetter/",
+      "journeyPlannerUrl": "https://www.vasttrafik.se/",
+      "aliases": ["Västra Götaland", "Västra Götalands"]
+    }
+  ]
+}

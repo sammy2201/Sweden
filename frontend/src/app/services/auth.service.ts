@@ -1,162 +1,204 @@
 import { Injectable, signal } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
-import { Observable, tap } from "rxjs";
+import axios from "axios";
 import { environment } from "../../environments/environment";
-
-export interface LoginPayload {
-  email: string;
-  password: string;
-}
-
-export interface RegisterPayload {
-  firstName: string;
-  lastName: string;
-  username: string;
-  email: string;
-  city: string;
-  address: string;
-  password: string;
-}
-
-export interface UserProfile {
-  id: string;
-  firstName: string;
-  lastName: string;
-  username: string;
-  email: string;
-  city: string;
-  address: string;
-  age?: number | null;
-}
-
-export interface UpdateUserProfilePayload {
-  firstName: string;
-  lastName: string;
-  city: string;
-  address: string;
-}
-
-interface AuthResponse {
-  accessToken: string;
-  expiresAt: string;
-}
+import type {
+  AuthResponse,
+  LoginPayload,
+  RegisterPayload,
+  UpdateUserProfilePayload,
+  UserProfile,
+} from "../models/auth.models";
 
 @Injectable({ providedIn: "root" })
 export class AuthService {
-  private readonly storageKey = "sweden-start-token";
-  private logoutTimerId: number | null = null;
+  private readonly accessTokenStorageKey = "sweden-start-token";
+  private logoutTimeoutId: number | null = null;
+
   readonly isAuthenticated = signal(false);
   readonly user = signal<UserProfile | null>(null);
 
-  constructor(private readonly http: HttpClient) {
-    this.restoreSession();
+  constructor() {
+    this.restoreAuthenticatedSession();
   }
 
-  login(payload: LoginPayload): Observable<AuthResponse> {
-    return this.http
-      .post<AuthResponse>(`${environment.apiUrl}/auth/login`, payload)
-      .pipe(tap((response) => this.storeSession(response)));
+  async login(loginPayload: LoginPayload): Promise<AuthResponse> {
+    try {
+      const response = await axios.post<AuthResponse>(
+        `${environment.apiUrl}/auth/login`,
+        loginPayload,
+        this.requestConfig(),
+      );
+      this.storeAuthenticatedSession(response.data);
+      return response.data;
+    } catch (error: unknown) {
+      this.handleUnauthorized(error);
+    }
   }
 
-  register(payload: RegisterPayload): Observable<void> {
-    return this.http.post<void>(`${environment.apiUrl}/auth/register`, payload);
+  async register(registrationPayload: RegisterPayload): Promise<void> {
+    try {
+      await axios.post<void>(
+        `${environment.apiUrl}/auth/register`,
+        registrationPayload,
+        this.requestConfig(),
+      );
+    } catch (error: unknown) {
+      this.handleUnauthorized(error);
+    }
   }
 
-  loadUserProfile(): Observable<UserProfile> {
-    return this.http
-      .get<UserProfile>(`${environment.apiUrl}/auth/user`)
-      .pipe(tap((profile) => this.user.set(profile)));
+  async loadUserProfile(): Promise<UserProfile> {
+    try {
+      const response = await axios.get<UserProfile>(
+        `${environment.apiUrl}/auth/user`,
+        this.requestConfig(),
+      );
+      this.user.set(response.data);
+      return response.data;
+    } catch (error: unknown) {
+      this.handleUnauthorized(error);
+    }
   }
 
   updateUserProfile(
-    payload: UpdateUserProfilePayload,
-  ): Observable<UserProfile> {
-    return this.http
-      .put<UserProfile>(`${environment.apiUrl}/auth/user`, payload)
-      .pipe(tap((profile) => this.user.set(profile)));
+    profileUpdatePayload: UpdateUserProfilePayload,
+  ): Promise<UserProfile> {
+    return axios
+      .put<UserProfile>(
+        `${environment.apiUrl}/auth/user`,
+        profileUpdatePayload,
+        this.requestConfig(),
+      )
+      .then((response) => {
+        this.user.set(response.data);
+        return response.data;
+      })
+      .catch((error: unknown) => this.handleUnauthorized(error));
   }
 
   logout(): void {
-    this.clearLogoutTimer();
-    localStorage.removeItem(this.storageKey);
+    this.clearLogoutTimeout();
+    localStorage.removeItem(this.accessTokenStorageKey);
     this.isAuthenticated.set(false);
     this.user.set(null);
   }
 
-  getValidToken(): string | null {
-    const token = localStorage.getItem(this.storageKey);
-    if (!token) {
+  getValidAccessToken(): string | null {
+    const accessToken = localStorage.getItem(this.accessTokenStorageKey);
+
+    if (!accessToken) {
       this.isAuthenticated.set(false);
       return null;
     }
 
-    const expiresAtMs = this.getTokenExpiryMs(token);
-    if (!expiresAtMs || Date.now() >= expiresAtMs) {
+    const accessTokenExpirationTime =
+      this.getAccessTokenExpirationTime(accessToken);
+
+    if (
+      accessTokenExpirationTime === null ||
+      Date.now() >= accessTokenExpirationTime
+    ) {
       this.logout();
       return null;
     }
 
     this.isAuthenticated.set(true);
-    this.scheduleAutoLogout(expiresAtMs);
-    return token;
+    this.scheduleAutomaticLogout(accessTokenExpirationTime);
+
+    return accessToken;
   }
 
-  private storeSession(response: AuthResponse): void {
-    localStorage.setItem(this.storageKey, response.accessToken);
+  private storeAuthenticatedSession(
+    authenticationResponse: AuthResponse,
+  ): void {
+    const accessToken = authenticationResponse.accessToken;
+
+    localStorage.setItem(this.accessTokenStorageKey, accessToken);
     this.isAuthenticated.set(true);
-    const expiresAtMs = this.getTokenExpiryMs(response.accessToken);
-    if (expiresAtMs) {
-      this.scheduleAutoLogout(expiresAtMs);
+
+    const accessTokenExpirationTime =
+      this.getAccessTokenExpirationTime(accessToken);
+
+    if (accessTokenExpirationTime !== null) {
+      this.scheduleAutomaticLogout(accessTokenExpirationTime);
+    } else {
+      this.logout();
     }
   }
 
-  private restoreSession(): void {
-    this.getValidToken();
+  private requestConfig() {
+    const token = this.getValidAccessToken();
+    return token ? { headers: { Authorization: `Bearer ${token}` } } : {};
   }
 
-  private scheduleAutoLogout(expiresAtMs: number): void {
-    this.clearLogoutTimer();
+  private handleUnauthorized(error: unknown): never {
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      this.logout();
+    }
+    throw error;
+  }
 
-    const msUntilExpiry = expiresAtMs - Date.now();
-    if (msUntilExpiry <= 0) {
+  private restoreAuthenticatedSession(): void {
+    this.getValidAccessToken();
+  }
+
+  private scheduleAutomaticLogout(accessTokenExpirationTime: number): void {
+    this.clearLogoutTimeout();
+
+    const millisecondsUntilTokenExpiration =
+      accessTokenExpirationTime - Date.now();
+
+    if (millisecondsUntilTokenExpiration <= 0) {
       this.logout();
       return;
     }
 
-    this.logoutTimerId = window.setTimeout(() => {
+    this.logoutTimeoutId = window.setTimeout(() => {
       this.logout();
-    }, msUntilExpiry);
+    }, millisecondsUntilTokenExpiration);
   }
 
-  private clearLogoutTimer(): void {
-    if (this.logoutTimerId !== null) {
-      window.clearTimeout(this.logoutTimerId);
-      this.logoutTimerId = null;
+  private clearLogoutTimeout(): void {
+    if (this.logoutTimeoutId !== null) {
+      window.clearTimeout(this.logoutTimeoutId);
+      this.logoutTimeoutId = null;
     }
   }
 
-  private getTokenExpiryMs(token: string): number | null {
+  private getAccessTokenExpirationTime(accessToken: string): number | null {
     try {
-      const tokenParts = token.split(".");
-      if (tokenParts.length !== 3) {
+      const accessTokenParts = accessToken.split(".");
+
+      if (accessTokenParts.length !== 3) {
         return null;
       }
 
-      const payloadJson = this.decodeBase64Url(tokenParts[1]);
-      const payload = JSON.parse(payloadJson) as { exp?: number };
-      if (typeof payload.exp !== "number") {
+      const encodedTokenPayload = accessTokenParts[1];
+      const decodedTokenPayload = this.decodeBase64Url(encodedTokenPayload);
+
+      const tokenPayload = JSON.parse(decodedTokenPayload) as {
+        exp?: number;
+      };
+
+      if (typeof tokenPayload.exp !== "number") {
         return null;
       }
 
-      return payload.exp * 1000;
+      // JWT expiration is expressed in seconds; JavaScript timestamps use milliseconds.
+      return tokenPayload.exp * 1000;
     } catch {
       return null;
     }
   }
 
-  private decodeBase64Url(value: string): string {
-    const base64 = value.replace(/-/g, "+").replace(/_/g, "/");
-    const padded = base64.padEnd(Math.ceil(base64.length / 4) * 4, "=");
-    return atob(padded);
+  private decodeBase64Url(encodedValue: string): string {
+    const base64Value = encodedValue.replace(/-/g, "+").replace(/_/g, "/");
+
+    const paddedBase64Value = base64Value.padEnd(
+      Math.ceil(base64Value.length / 4) * 4,
+      "=",
+    );
+
+    return atob(paddedBase64Value);
   }
 }

@@ -1,5 +1,4 @@
-import { Component, DestroyRef, inject } from "@angular/core";
-import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { Component } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { InputNumberModule } from "primeng/inputnumber";
@@ -7,11 +6,11 @@ import { CheckboxModule } from "primeng/checkbox";
 import { ButtonModule } from "primeng/button";
 import { SkeletonModule } from "primeng/skeleton";
 import { SelectModule } from "primeng/select";
-import {
-  TaxService,
+import { TaxService } from "../../services/tax.service";
+import type {
   TaxCalculationRequest,
   TaxCalculationResponse,
-} from "../../services/tax.service";
+} from "../../models/tax.models";
 import { getApiErrorMessage } from "../../utils/api-error";
 
 @Component({
@@ -39,48 +38,51 @@ export class TaxCalculationComponent {
   loading = false;
   result: TaxCalculationResponse | null = null;
   errorMessage = "";
-
-  private readonly destroyRef = inject(DestroyRef);
+  municipalityError = "";
 
   constructor(private taxService: TaxService) {}
 
-  calculate(): void {
+  async calculate(): Promise<void> {
+    this.municipalityError = "";
+    const selectedMunicipality = this.request.municipality?.trim();
+    if (
+      !selectedMunicipality ||
+      !this.municipalities.includes(selectedMunicipality)
+    ) {
+      this.municipalityError =
+        "Select a municipality from the list before calculating.";
+      return;
+    }
+
     this.loading = true;
     this.errorMessage = "";
-    this.taxService
-      .calculateTax(this.request)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (res) => {
-          this.result = res;
-          this.loading = false;
-        },
-        error: (error: unknown) => {
-          this.errorMessage = getApiErrorMessage(
-            error,
-            "We could not calculate your tax right now.",
-          );
-          this.loading = false;
-        },
-      });
+    try {
+      this.result = await this.taxService.calculateTax(this.request);
+    } catch (error: unknown) {
+      this.errorMessage = getApiErrorMessage(
+        error,
+        "We could not calculate your tax right now.",
+      );
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  onMunicipalityChange(municipality: string | null): void {
+    this.request.municipality = municipality ?? "";
+    this.municipalityError = "";
   }
 
   municipalities: string[] = [];
 
-  ngOnInit(): void {
-    this.taxService
-      .getMunicipalities()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (res) => {
-          this.municipalities = res;
-        },
-        error: (error: unknown) => {
-          this.errorMessage = getApiErrorMessage(
-            error,
-            "We could not load the municipality list right now.",
-          );
-        },
-      });
+  async ngOnInit(): Promise<void> {
+    try {
+      this.municipalities = await this.taxService.getMunicipalities();
+    } catch (error: unknown) {
+      this.errorMessage = getApiErrorMessage(
+        error,
+        "We could not load the municipality list right now.",
+      );
+    }
   }
 }

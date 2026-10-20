@@ -1,46 +1,31 @@
 import { CommonModule } from "@angular/common";
-import {
-  Component,
-  DestroyRef,
-  OnInit,
-  computed,
-  inject,
-  signal,
-} from "@angular/core";
-import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import {
-  FormBuilder,
-  FormsModule,
-  ReactiveFormsModule,
-  Validators,
-} from "@angular/forms";
+import { Component, OnInit, computed, inject, signal } from "@angular/core";
+import { FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
 import { ButtonModule } from "primeng/button";
 import { CardModule } from "primeng/card";
-import { CheckboxModule } from "primeng/checkbox";
 import { DividerModule } from "primeng/divider";
 import { InputTextModule } from "primeng/inputtext";
 import { ProgressBarModule } from "primeng/progressbar";
 import { SkeletonModule } from "primeng/skeleton";
 import { TagModule } from "primeng/tag";
-import { AuthService, UserProfile } from "../../services/auth.service";
-import {
+import { AuthService } from "../../services/auth.service";
+import { RoadmapService } from "../../services/roadmap.service";
+import type { UserProfile } from "../../models/auth.models";
+import type {
   RoadmapResponse,
-  RoadmapService,
-} from "../../services/roadmap.service";
-import { getApiErrorMessage } from "../../utils/api-error";
-import { HttpErrorResponse } from "@angular/common/http";
+  RoadmapTaskResponse,
+} from "../../models/roadmap.models";
+import { getApiErrorMessage, getApiErrorStatus } from "../../utils/api-error";
 
 @Component({
   selector: "app-profile",
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
     ReactiveFormsModule,
     ButtonModule,
     CardModule,
-    CheckboxModule,
     DividerModule,
     InputTextModule,
     ProgressBarModule,
@@ -54,7 +39,6 @@ export class ProfileComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly roadmapService = inject(RoadmapService);
   private readonly fb = inject(FormBuilder);
-  private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
 
   readonly profile = signal<UserProfile | null>(null);
@@ -66,20 +50,26 @@ export class ProfileComponent implements OnInit {
   readonly roadmap = signal<RoadmapResponse | null>(null);
   readonly roadmapLoading = signal(true);
   readonly roadmapError = signal("");
-  readonly pendingRoadmapTaskIds = signal<ReadonlySet<string>>(new Set());
 
+  readonly applicableRoadmapTasks = computed(
+    () =>
+      this.roadmap()?.tasks.filter(
+        (task) =>
+          task.state !== "NotApplicable" && !this.isOptionalRoadmapTask(task),
+      ) ?? [],
+  );
   readonly completedRoadmapTasks = computed(
-    () => this.roadmap()?.tasks.filter((task) => task.completed).length ?? 0,
+    () =>
+      this.applicableRoadmapTasks().filter(
+        (task) => task.completed || task.state === "Completed",
+      ).length,
   );
   readonly roadmapProgress = computed(() => {
-    const tasks = this.roadmap()?.tasks ?? [];
+    const tasks = this.applicableRoadmapTasks();
     return tasks.length === 0
       ? 0
       : Math.round((this.completedRoadmapTasks() / tasks.length) * 100);
   });
-  readonly remainingRoadmapTasks = computed(
-    () => this.roadmap()?.tasks.filter((task) => !task.completed) ?? [],
-  );
 
   readonly form = this.fb.nonNullable.group({
     firstName: ["", [Validators.required, Validators.minLength(2)]],
@@ -100,8 +90,8 @@ export class ProfileComponent implements OnInit {
       .toUpperCase();
   });
 
-  ngOnInit(): void {
-    this.loadRoadmap();
+  async ngOnInit(): Promise<void> {
+    void this.loadRoadmap();
     const cachedProfile = this.authService.user();
 
     if (cachedProfile) {
@@ -110,84 +100,47 @@ export class ProfileComponent implements OnInit {
       return;
     }
 
-    this.authService
-      .loadUserProfile()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (profile) => {
-          this.setProfile(profile);
-          this.loading.set(false);
-        },
-        error: (error: unknown) => {
-          this.errorMessage.set(
-            getApiErrorMessage(
-              error,
-              "We could not load your profile right now.",
-            ),
-          );
-          this.loading.set(false);
-        },
-      });
-  }
-
-  private loadRoadmap(): void {
-    this.roadmapService
-      .getRoadmap()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (roadmap) => {
-          this.roadmap.set(roadmap);
-          this.roadmapLoading.set(false);
-        },
-        error: (error: unknown) => {
-          if (error instanceof HttpErrorResponse && error.status === 404) {
-            this.roadmap.set(null);
-          } else {
-            this.roadmapError.set(
-              getApiErrorMessage(error, "We could not load your roadmap."),
-            );
-          }
-          this.roadmapLoading.set(false);
-        },
-      });
-  }
-
-  toggleRoadmapTask(taskId: string, completed: boolean): void {
-    if (this.pendingRoadmapTaskIds().has(taskId)) {
-      return;
+    try {
+      this.setProfile(await this.authService.loadUserProfile());
+    } catch (error: unknown) {
+      this.errorMessage.set(
+        getApiErrorMessage(error, "We could not load your profile right now."),
+      );
+    } finally {
+      this.loading.set(false);
     }
+  }
 
-    this.pendingRoadmapTaskIds.update((pending) =>
-      new Set(pending).add(taskId),
-    );
-    this.roadmapError.set("");
-    this.roadmapService
-      .updateTaskCompletion(taskId, completed)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (roadmap) => {
-          this.roadmap.set(roadmap);
-          this.removePendingRoadmapTask(taskId);
-        },
-        error: (error: unknown) => {
-          this.roadmapError.set(
-            getApiErrorMessage(error, "We could not update your roadmap task."),
-          );
-          this.removePendingRoadmapTask(taskId);
-        },
-      });
+  private async loadRoadmap(): Promise<void> {
+    try {
+      this.roadmap.set(await this.roadmapService.getRoadmap());
+    } catch (error: unknown) {
+      if (getApiErrorStatus(error) !== 404) {
+        this.roadmapError.set(
+          getApiErrorMessage(error, "We could not load your roadmap."),
+        );
+      }
+      this.roadmap.set(null);
+    } finally {
+      this.roadmapLoading.set(false);
+    }
   }
 
   openRoadmap(): void {
     this.router.navigateByUrl("/roadmap");
   }
 
-  private removePendingRoadmapTask(taskId: string): void {
-    this.pendingRoadmapTaskIds.update((pending) => {
-      const next = new Set(pending);
-      next.delete(taskId);
-      return next;
-    });
+  isOptionalRoadmapTask(task: RoadmapTaskResponse): boolean {
+    return (
+      task.state === "Optional" ||
+      (task.state === "Completed" && task.stateBeforeCompletion === "Optional")
+    );
+  }
+
+  roadmapTaskStatusLabel(task: RoadmapTaskResponse): string {
+    if (task.state === "NotApplicable") return "Not applicable";
+    if (task.completed || task.state === "Completed") return "Completed";
+    return this.isOptionalRoadmapTask(task) ? "Optional" : task.state;
   }
 
   startEditing(): void {
@@ -223,7 +176,7 @@ export class ProfileComponent implements OnInit {
     this.isEditing.set(false);
   }
 
-  saveProfile(): void {
+  async saveProfile(): Promise<void> {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -233,26 +186,20 @@ export class ProfileComponent implements OnInit {
     this.errorMessage.set("");
     this.saveMessage.set("");
 
-    this.authService
-      .updateUserProfile(this.form.getRawValue())
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (profile) => {
-          this.setProfile(profile);
-          this.isEditing.set(false);
-          this.isSaving.set(false);
-          this.saveMessage.set("Profile updated successfully.");
-        },
-        error: (error: unknown) => {
-          this.errorMessage.set(
-            getApiErrorMessage(
-              error,
-              "We could not save your profile changes.",
-            ),
-          );
-          this.isSaving.set(false);
-        },
+    try {
+      const profile = await this.authService.updateUserProfile({
+        ...this.form.getRawValue(),
       });
+      this.setProfile(profile);
+      this.isEditing.set(false);
+      this.saveMessage.set("Profile updated successfully.");
+    } catch (error: unknown) {
+      this.errorMessage.set(
+        getApiErrorMessage(error, "We could not save your profile changes."),
+      );
+    } finally {
+      this.isSaving.set(false);
+    }
   }
 
   isInvalid(controlName: keyof typeof this.form.controls): boolean {

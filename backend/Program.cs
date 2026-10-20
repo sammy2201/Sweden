@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
@@ -64,25 +63,19 @@ builder.Services.AddOpenApi(options =>
     options.AddDocumentTransformer((document, context, cancellationToken) =>
     {
         document.Components ??= new OpenApiComponents();
-        document.Components.SecuritySchemes ??= new Dictionary<string, IOpenApiSecurityScheme>();
+        document.Components.SecuritySchemes ??=
+            new Dictionary<string, IOpenApiSecurityScheme>();
 
-        document.Components.SecuritySchemes["Bearer"] = new OpenApiSecurityScheme
-        {
-            Type = SecuritySchemeType.Http,
-            Scheme = "bearer",
-            BearerFormat = "JWT",
-            In = ParameterLocation.Header,
-            Name = "Authorization",
-            Description = "Enter 'Bearer' followed by your JWT token."
-        };
-
-        document.Security =
-        [
-            new OpenApiSecurityRequirement
+        document.Components.SecuritySchemes["Bearer"] =
+            new OpenApiSecurityScheme
             {
-                [new OpenApiSecuritySchemeReference("Bearer", null)] = []
-            }
-        ];
+                Type = SecuritySchemeType.Http,
+                Scheme = "bearer",
+                BearerFormat = "JWT",
+                In = ParameterLocation.Header,
+                Name = "Authorization",
+                Description = "Enter your JWT token."
+            };
 
         return Task.CompletedTask;
     });
@@ -112,9 +105,11 @@ builder.Services.AddAuthentication(options =>
     };
 
 });
+
 builder.Services.AddScoped<IRoadmapRepository, RoadmapRepository>();
 builder.Services.AddSingleton(_ => RoadmapTaskCatalog.Load(
-    Path.Combine(builder.Environment.ContentRootPath, "Data", "roadmap-rules.json")));
+    Path.Combine(builder.Environment.ContentRootPath, "Data", "roadmap-rules.json"),
+    Path.Combine(builder.Environment.ContentRootPath, "Data", "roadmap-questions.json")));
 builder.Services.AddSingleton<RoadmapQuestionnaire>();
 builder.Services.AddSingleton<RoadmapTaskGenerator>();
 builder.Services.AddScoped<IRoadmapService, RoadmapService>();
@@ -122,9 +117,9 @@ builder.Services.AddScoped<IBankService, BankService>();
 builder.Services.AddSingleton<IHealthService, HealthService>();
 builder.Services.AddSingleton<TaxDataProvider>();
 builder.Services.AddScoped<ITaxService, TaxService>();
-builder.Services.AddHttpClient<ITransportService, TransportService>((sp, client) =>
+builder.Services.AddHttpClient<ITransportService, TransportService>((serviceProvider, client) =>
 {
-    var config = sp.GetRequiredService<IConfiguration>();
+    var config = serviceProvider.GetRequiredService<IConfiguration>();
     var baseUrl = config["ResRobot:BaseUrl"] ?? "https://api.resrobot.se/v2.1/";
 
     if (!baseUrl.EndsWith('/'))
@@ -138,11 +133,10 @@ builder.Services.AddHttpClient<ITransportService, TransportService>((sp, client)
 builder.Services.AddScoped<IExploreService, ExploreService>();
 builder.Services.AddScoped<IAttractionRepository, AttractionRepository>();
 builder.Services.AddScoped<IVisitSwedenRepository, VisitSwedenRepository>();
-builder.Services.AddSingleton<VisitSwedenSyncGate>();
 builder.Services.AddHostedService<VisitSwedenStartupSyncService>();
-builder.Services.AddHttpClient<IVisitSwedenService, VisitSwedenService>((sp, client) =>
+builder.Services.AddHttpClient<IVisitSwedenService, VisitSwedenService>((serviceProvider, client) =>
 {
-    var config = sp.GetRequiredService<IConfiguration>();
+    var config = serviceProvider.GetRequiredService<IConfiguration>();
     var baseUrl = config["VisitSweden:BaseUrl"] ?? "https://data.visitsweden.com/store/";
 
     if (!baseUrl.EndsWith('/'))
@@ -164,7 +158,7 @@ if (string.IsNullOrWhiteSpace(defaultConnection))
 
 var connectionStringBuilder = new NpgsqlConnectionStringBuilder(defaultConnection);
 
-builder.Services.AddSingleton(sp => NpgsqlDataSource.Create(defaultConnection));
+builder.Services.AddSingleton(serviceProvider => NpgsqlDataSource.Create(defaultConnection));
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(defaultConnection));
 
@@ -189,8 +183,6 @@ if (app.Environment.IsDevelopment())
         options.AddPreferredSecuritySchemes(["Bearer"]);
         options.EnablePersistentAuthentication();
     });
-    app.MapGet("/docs", () => Results.Redirect("/scalar"));
-    app.MapGet("/swagger", () => Results.Redirect("/scalar"));
 }
 
 app.UseForwardedHeaders();
@@ -212,9 +204,9 @@ app.Lifetime.ApplicationStarted.Register(() =>
         connection.Open();
         app.Logger.LogInformation("PostgreSQL connection established successfully.");
     }
-    catch (Exception ex)
+    catch (Exception exception)
     {
-        app.Logger.LogWarning(ex, "PostgreSQL is not reachable yet. The API will continue starting.");
+        app.Logger.LogWarning(exception, "PostgreSQL is not reachable yet. The API will continue starting.");
     }
 });
 

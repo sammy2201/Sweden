@@ -3,7 +3,6 @@ namespace SwedenStart;
 public class Roadmap
 {
     public Guid Id { get; set; }
-
     public Guid UserId { get; set; }
     public User User { get; set; } = null!;
     public DateTime CreatedAt { get; set; }
@@ -20,6 +19,5 @@ public class Roadmap
     public string DrivingLicenceType { get; set; } = string.Empty;
     public string Purpose { get; set; } = string.Empty;
     public string Insurance { get; set; } = string.Empty;
-
     public List<RoadmapTask> Tasks { get; set; } = [];
 }

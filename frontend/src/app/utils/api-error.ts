@@ -1,4 +1,4 @@
-import { HttpErrorResponse } from "@angular/common/http";
+import axios from "axios";
 
 interface ProblemDetailsPayload {
   title?: unknown;
@@ -10,11 +10,12 @@ export function getApiErrorMessage(
   error: unknown,
   fallbackMessage: string,
 ): string {
-  if (!(error instanceof HttpErrorResponse)) {
+  if (!axios.isAxiosError(error)) {
     return fallbackMessage;
   }
 
-  const payload = asProblemDetails(error.error);
+  const status = error.response?.status ?? 0;
+  const payload = asProblemDetails(error.response?.data);
   const detail = asNonEmptyString(payload?.detail);
   if (detail) {
     return detail;
@@ -25,7 +26,7 @@ export function getApiErrorMessage(
     return validationMessage;
   }
 
-  switch (error.status) {
+  switch (status) {
     case 0:
       return "The server could not be reached. Check your connection and try again.";
     case 400:
@@ -39,11 +40,19 @@ export function getApiErrorMessage(
     case 409:
       return "This request conflicts with the current data.";
     default:
-      if (error.status >= 500) {
+      if (status >= 500) {
         return "The server encountered a problem. Please try again later.";
       }
       return asNonEmptyString(payload?.title) ?? fallbackMessage;
   }
+}
+
+export function getApiErrorStatus(error: unknown): number | undefined {
+  return axios.isAxiosError(error) ? error.response?.status : undefined;
+}
+
+export function getApiErrorResponseData(error: unknown): unknown {
+  return axios.isAxiosError(error) ? error.response?.data : undefined;
 }
 
 function asProblemDetails(value: unknown): ProblemDetailsPayload | null {

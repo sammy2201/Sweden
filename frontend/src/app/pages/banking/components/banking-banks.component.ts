@@ -1,5 +1,5 @@
 import { Component, input } from "@angular/core";
-import type { Bank } from "../bank.model";
+import type { Bank } from "../../../models/banking.models";
 import { ButtonModule } from "primeng/button";
 import { CardModule } from "primeng/card";
 import { TableModule } from "primeng/table";

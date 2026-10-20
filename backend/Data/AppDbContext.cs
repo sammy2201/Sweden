@@ -12,7 +12,6 @@ public class AppDbContext : DbContext
     public DbSet<User> Users => Set<User>();
     public DbSet<Roadmap> Roadmaps => Set<Roadmap>();
     public DbSet<RoadmapTask> RoadmapTasks => Set<RoadmapTask>();
-
     public DbSet<Attraction> Attractions => Set<Attraction>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -24,19 +23,23 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<RoadmapTask>().ToTable("RoadmapTasks");
         modelBuilder.Entity<Attraction>().ToTable("Attractions");
 
-        modelBuilder.Entity<Roadmap>()
-            .HasIndex(r => r.UserId)
+        modelBuilder.Entity<User>()
+            .HasIndex(user => user.Username)
             .IsUnique();
 
         modelBuilder.Entity<Roadmap>()
-            .HasOne(r => r.User)
-            .WithMany(u => u.Roadmaps)
-            .HasForeignKey(r => r.UserId)
+            .HasIndex(roadmap => roadmap.UserId)
+            .IsUnique();
+
+        modelBuilder.Entity<Roadmap>()
+            .HasOne(roadmap => roadmap.User)
+            .WithMany(user => user.Roadmaps)
+            .HasForeignKey(roadmap => roadmap.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<Roadmap>()
-            .HasMany(r => r.Tasks)
-            .WithOne(t => t.Roadmap)
-            .HasForeignKey(t => t.RoadmapId);
+            .HasMany(roadmap => roadmap.Tasks)
+            .WithOne(task => task.Roadmap)
+            .HasForeignKey(task => task.RoadmapId);
     }
 }

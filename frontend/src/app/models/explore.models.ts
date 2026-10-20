@@ -2,7 +2,9 @@ export interface County {
   id: string;
   name: string;
   description: string;
-  imageUrl: string;
+  transportProviderName: string;
+  officialTicketUrl: string;
+  journeyPlannerUrl?: string | null;
 }
 
 export interface Attraction {

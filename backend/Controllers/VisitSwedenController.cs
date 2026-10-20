@@ -17,9 +17,9 @@ public class VisitSwedenController : ControllerBase
 
      [HttpPost("sync")]
      [Authorize(Roles = "Admin")]
-     public async Task<ActionResult<VisitSwedenSyncResult>> Sync(CancellationToken cancellationToken)
+     public async Task<ActionResult<VisitSwedenSyncResult>> SyncControllerAsync()
      {
-          var result = await _visitSwedenService.SyncAttractionsAsync(cancellationToken);
+          var result = await _visitSwedenService.SyncAttractionsServiceAsync(HttpContext.RequestAborted);
           return Ok(result);
      }
 }

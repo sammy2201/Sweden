@@ -1,13 +1,4 @@
-import {
-  Component,
-  DestroyRef,
-  OnInit,
-  computed,
-  inject,
-  signal,
-} from "@angular/core";
-import { HttpErrorResponse } from "@angular/common/http";
-import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { Component, OnInit, computed, inject, signal } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { RouterLink } from "@angular/router";
 import { ButtonModule } from "primeng/button";
@@ -17,6 +8,7 @@ import { AuthService } from "../../services/auth.service";
 import { ChatWidgetComponent } from "../../components/chat-widget/chat-widget.component";
 import { GuideDirectoryService } from "../../services/guide-directory.service";
 import { RoadmapService } from "../../services/roadmap.service";
+import { getApiErrorStatus } from "../../utils/api-error";
 
 @Component({
   selector: "app-home",
@@ -36,7 +28,6 @@ export class HomeComponent implements OnInit {
   private readonly guideDirectory = inject(GuideDirectoryService);
   private readonly authService = inject(AuthService);
   private readonly roadmapService = inject(RoadmapService);
-  private readonly destroyRef = inject(DestroyRef);
   readonly searchQuery = signal("");
   readonly isAuthenticated = this.authService.isAuthenticated;
   readonly hasRoadmap = signal(false);
@@ -50,28 +41,21 @@ export class HomeComponent implements OnInit {
     return query ? matches : matches.filter((guide) => !guide.essential);
   });
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     if (!this.authService.isAuthenticated()) {
       this.roadmapLookupComplete.set(true);
       return;
     }
 
-    this.roadmapService
-      .getRoadmap()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (roadmap) => {
-          this.hasRoadmap.set(Boolean(roadmap?.id));
-          this.roadmapLookupComplete.set(true);
-        },
-        error: (error: unknown) => {
-          const roadmapIsMissing =
-            error instanceof HttpErrorResponse && error.status === 404;
-          this.hasRoadmap.set(false);
-          this.roadmapLookupFailed.set(!roadmapIsMissing);
-          this.roadmapLookupComplete.set(true);
-        },
-      });
+    try {
+      const roadmap = await this.roadmapService.getRoadmap();
+      this.hasRoadmap.set(Boolean(roadmap?.id));
+    } catch (error: unknown) {
+      this.hasRoadmap.set(false);
+      this.roadmapLookupFailed.set(getApiErrorStatus(error) !== 404);
+    } finally {
+      this.roadmapLookupComplete.set(true);
+    }
   }
 
   clearSearch(): void {

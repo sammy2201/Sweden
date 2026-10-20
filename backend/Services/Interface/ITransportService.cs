@@ -2,10 +2,9 @@ namespace SwedenStart;
 
 public interface ITransportService
 {
-     Task<IReadOnlyList<TransportTripDto>> SearchTripsAsync(
+     Task<IReadOnlyList<TransportTripDto>> SearchTripsServiceAsync(
           string from,
           string to,
           DateTime? departureTime = null,
-          DateTime? arrivalTime = null,
-          CancellationToken cancellationToken = default);
+          DateTime? arrivalTime = null);
 }

@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace SwedenStart;
 
-public sealed class VisitSwedenStartupSyncService : BackgroundService
+public class VisitSwedenStartupSyncService : BackgroundService
 {
      private readonly IServiceScopeFactory _scopeFactory;
      private readonly ILogger<VisitSwedenStartupSyncService> _logger;
@@ -37,7 +37,7 @@ public sealed class VisitSwedenStartupSyncService : BackgroundService
                          attempt,
                          maxAttempts);
                     var visitSwedenService = scope.ServiceProvider.GetRequiredService<IVisitSwedenService>();
-                    var result = await visitSwedenService.SyncAttractionsAsync(stoppingToken);
+                    var result = await visitSwedenService.SyncAttractionsServiceAsync(stoppingToken);
                     _logger.LogInformation(
                          "Visit Sweden startup sync finished successfully. Attempts: {Attempt}/{MaxAttempts}; fetched: {Fetched}; mapped: {Mapped}; inserted: {Inserted}; updated: {Updated}; skipped records: {SkippedRecords} (missing image: {MissingImage}, missing coordinates: {MissingCoordinates}, unmappable: {Unmappable}; reason counts can overlap).",
                          attempt,

@@ -117,12 +117,14 @@
   display: none;
 }
 
-.search-clear,
-.mobile-icon-button {
+.search-clear {
   display: grid;
+  width: 30px;
+  height: 30px;
   flex: 0 0 auto;
   place-items: center;
   border: 0;
+  border-radius: 50%;
   background: transparent;
   color: var(--app-text-muted);
   cursor: pointer;
@@ -131,14 +133,7 @@
     color var(--app-transition);
 }
 
-.search-clear {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-}
-
-.search-clear:hover,
-.mobile-icon-button:hover {
+.search-clear:hover {
   background: var(--app-surface-alt);
   color: var(--app-primary);
 }
@@ -236,6 +231,7 @@
     opacity: 0;
     transform: translateY(-4px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -270,120 +266,28 @@
   background: var(--app-border);
 }
 
-.mobile-controls,
-.mobile-menu {
-  display: none;
-}
-
 .page-content {
   flex: 1 0 auto;
 }
 
-@media (max-width: 1100px) and (min-width: 921px) {
+@media (max-width: 800px) {
   .top-nav-inner {
-    grid-template-columns: minmax(160px, 190px) minmax(220px, 1fr) auto;
-    gap: var(--space-4);
-  }
-
-  .desktop-actions {
-    gap: var(--space-2);
-  }
-
-  .explore-guides-link {
-    font-size: var(--font-size-sm);
-  }
-}
-
-@media (max-width: 920px) {
-  .top-nav-inner {
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: var(--space-3) var(--space-4);
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-3);
     padding-block: var(--space-3);
   }
 
-  .brand {
-    grid-column: 1;
-    grid-row: 1;
+  .header-search {
+    width: 100%;
   }
 
   .desktop-actions {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    white-space: normal;
+  }
+
+  .nav-separator {
     display: none;
-  }
-
-  .mobile-controls {
-    display: flex;
-    grid-column: 2;
-    grid-row: 1;
-    align-items: center;
-    gap: var(--space-1);
-  }
-
-  .mobile-icon-button {
-    width: 42px;
-    height: 42px;
-    border-radius: var(--radius-sm);
-    color: var(--app-heading);
-    font-size: var(--font-size-lg);
-  }
-
-  .header-search {
-    display: none;
-    width: 100%;
-    grid-column: 1 / -1;
-    grid-row: 2;
-    justify-self: stretch;
-  }
-
-  .search-open .header-search {
-    display: block;
-  }
-
-  .mobile-menu {
-    display: grid;
-    grid-column: 1 / -1;
-    grid-row: 3;
-    gap: var(--space-1);
-    padding-top: var(--space-3);
-    border-top: var(--border-width) solid var(--app-border);
-  }
-
-  .mobile-menu a,
-  .mobile-menu button {
-    display: flex;
-    width: 100%;
-    min-height: 44px;
-    align-items: center;
-    justify-content: space-between;
-    padding: var(--space-2) var(--space-3);
-    border: 0;
-    border-radius: var(--radius-sm);
-    background: transparent;
-    color: var(--app-text-soft);
-    font: inherit;
-    text-align: left;
-    text-decoration: none;
-  }
-
-  .mobile-menu a:hover,
-  .mobile-menu button:hover {
-    background: var(--app-surface-alt);
-    color: var(--app-primary);
-  }
-
-  .mobile-menu .mobile-signup {
-    justify-content: center;
-    margin-top: var(--space-2);
-    background: var(--app-primary);
-    color: var(--app-white);
-    font-weight: var(--font-weight-semibold);
-  }
-
-  .mobile-menu .mobile-signup:hover {
-    background: var(--app-primary-hover);
-    color: var(--app-white);
-  }
-
-  .search-suggestions {
-    max-height: min(60vh, 360px);
   }
 }

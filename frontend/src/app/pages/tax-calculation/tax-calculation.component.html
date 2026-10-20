@@ -33,10 +33,16 @@
           inputId="municipality"
           [options]="municipalities"
           [(ngModel)]="request.municipality"
+          (ngModelChange)="onMunicipalityChange($event)"
           [filter]="true"
           [showClear]="true"
+          [invalid]="!!municipalityError"
+          [attr.aria-describedby]="municipalityError ? 'municipality-error' : null"
           placeholder="Select municipality">
         </p-select>
+        @if (municipalityError) {
+          <small id="municipality-error" class="field-error" role="alert">{{ municipalityError }}</small>
+        }
       </div>
 
       <div class="field">

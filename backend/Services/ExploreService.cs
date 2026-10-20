@@ -9,19 +9,13 @@ public class ExploreService : IExploreService
           _attractionRepository = attractionRepository;
      }
 
-     public IEnumerable<CountyDto> GetCounties()
-          => CountyData.GetCounties();
-
-     public Task<bool> HasAnyAttractionsAsync(CancellationToken cancellationToken = default)
-          => _attractionRepository.HasAnyAttractionsAsync(cancellationToken);
-
-     public async Task<PagedResponse<AttractionDto>> GetAttractionsAsync(
+     public async Task<PagedResponse<AttractionDto>> GetAttractionsServiceAsync(
          string county,
          int page,
          int pageSize,
            string? category)
      {
-          var attractions = await _attractionRepository.GetAttractionsAsync(
+          var attractions = await _attractionRepository.GetAttractionsRepoAsync(
               county,
               page,
               pageSize,
@@ -29,13 +23,13 @@ public class ExploreService : IExploreService
 
           return new PagedResponse<AttractionDto>
           {
-               Items = attractions.Items.Select(a => new AttractionDto
+               Items = attractions.Items.Select(attraction => new AttractionDto
                {
-                    Id = a.ExternalId,
-                    Name = a.Name,
-                    City = a.City ?? string.Empty,
-                    Category = a.Category ?? string.Empty,
-                    ImageUrl = a.ImageUrl ?? string.Empty
+                    Id = attraction.ExternalId,
+                    Name = attraction.Name,
+                    City = attraction.City ?? string.Empty,
+                    Category = attraction.Category ?? string.Empty,
+                    ImageUrl = attraction.ImageUrl ?? string.Empty
                }).ToList(),
                Page = attractions.Page,
                PageSize = attractions.PageSize,
@@ -43,9 +37,9 @@ public class ExploreService : IExploreService
           };
      }
 
-     public async Task<AttractionDetailDto?> GetAttractionAsync(string id)
+     public async Task<AttractionDetailDto?> GetAttractionServiceAsync(string id)
      {
-          var attraction = await _attractionRepository.GetAttractionByIdAsync(id);
+          var attraction = await _attractionRepository.GetAttractionByIdRepoAsync(id);
 
           if (attraction is null)
                return null;

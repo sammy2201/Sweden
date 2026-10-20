@@ -13,27 +13,27 @@ public class AuthRepo : IAuthRepo
 
     }
 
-    public Task<User?> GetUserByUsernameAsync(string username)
+    public Task<User?> GetUserByUsernameRepoAsync(string username)
         => _dbContext.Users
             .AsNoTracking()
-            .FirstOrDefaultAsync(u => u.Username == username);
+            .FirstOrDefaultAsync(user => user.Username == username);
 
-    public Task<User?> GetUserByEmailAsync(string email)
+    public Task<User?> GetUserByEmailRepoAsync(string email)
         => _dbContext.Users
             .AsNoTracking()
-            .FirstOrDefaultAsync(u => u.Email == email);
+            .FirstOrDefaultAsync(user => user.Email == email);
 
-    public Task<User?> GetUserByIdAsync(Guid id)
+    public Task<User?> GetUserByIdRepoAsync(Guid id)
         => _dbContext.Users
             .AsNoTracking()
-            .FirstOrDefaultAsync(u => u.Id == id);
+            .FirstOrDefaultAsync(user => user.Id == id);
 
-    public Task<bool> UserExistsAsync(string username, string email)
+    public Task<bool> UserExistsRepoAsync(string username, string email)
         => _dbContext.Users
             .AsNoTracking()
-            .AnyAsync(u => u.Username == username || u.Email == email);
+            .AnyAsync(user => user.Username == username || user.Email == email);
 
-    public async Task CreateUserAsync(User user)
+    public async Task CreateUserRepoAsync(User user)
     {
         user.Id = user.Id == Guid.Empty ? Guid.NewGuid() : user.Id;
         user.CreatedAt = user.CreatedAt == default ? DateTime.UtcNow : user.CreatedAt;
@@ -42,7 +42,7 @@ public class AuthRepo : IAuthRepo
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task UpdateUserAsync(User user)
+    public async Task UpdateUserRepoAsync(User user)
     {
         user.UpdatedAt = DateTime.UtcNow;
 
@@ -50,7 +50,7 @@ public class AuthRepo : IAuthRepo
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task DeleteUserAsync(Guid id)
+    public async Task DeleteUserRepoAsync(Guid id)
     {
         var user = await _dbContext.Users.FindAsync(id);
         if (user == null)
@@ -61,4 +61,6 @@ public class AuthRepo : IAuthRepo
         _dbContext.Users.Remove(user);
         await _dbContext.SaveChangesAsync();
     }
+
+
 }

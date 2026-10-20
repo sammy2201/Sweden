@@ -11,22 +11,24 @@ public class VisitSwedenRepository : IVisitSwedenRepository
           _dbContext = dbContext;
      }
 
-     public async Task<VisitSwedenUpsertResult> UpsertAttractionsAsync(IEnumerable<Attraction> attractions, CancellationToken cancellationToken = default)
+     public async Task<VisitSwedenUpsertResult> UpsertAttractionsRepoAsync(
+          IEnumerable<Attraction> attractions,
+          CancellationToken cancellationToken = default)
      {
           var incoming = attractions
-               .Where(a => !string.IsNullOrWhiteSpace(a.ExternalId))
-               .GroupBy(a => a.ExternalId)
-               .Select(g => g.First())
+               .Where(attraction => !string.IsNullOrWhiteSpace(attraction.ExternalId))
+               .GroupBy(attraction => attraction.ExternalId)
+               .Select(duplicateGroup => duplicateGroup.First())
                .ToList();
 
           if (incoming.Count == 0)
                return new VisitSwedenUpsertResult(0, 0);
 
-          var externalIds = incoming.Select(a => a.ExternalId).ToList();
+          var externalIds = incoming.Select(attraction => attraction.ExternalId).ToList();
 
           var existingByExternalId = await _dbContext.Attractions
-               .Where(a => externalIds.Contains(a.ExternalId))
-               .ToDictionaryAsync(a => a.ExternalId, cancellationToken);
+               .Where(attraction => externalIds.Contains(attraction.ExternalId))
+               .ToDictionaryAsync(attraction => attraction.ExternalId, cancellationToken);
 
           var inserted = 0;
           var updated = 0;

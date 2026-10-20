@@ -6,17 +6,17 @@ namespace SwedenStart;
 public class HealthController : ControllerBase
 {
 
-     private readonly IHealthService _healthService;
+   private readonly IHealthService _healthService;
 
-     public HealthController(IHealthService healthService)
-     {
-        _healthService = healthService;
-     }
-     
-      [HttpGet]
-     public async Task<ActionResult> GetHealth()
-     {
-       var response = await _healthService.GetHealthAsync();
-        return Ok(response);
-     }
+   public HealthController(IHealthService healthService)
+   {
+      _healthService = healthService;
+   }
+
+   [HttpGet]
+   public async Task<ActionResult> GetHealthControllerAsync()
+   {
+      var response = await _healthService.GetHealthServiceAsync();
+      return Ok(response);
+   }
 }

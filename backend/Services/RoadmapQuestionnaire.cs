@@ -3,8 +3,8 @@ namespace SwedenStart;
 public enum RoadmapDependencyOperator { Equals }
 public enum RoadmapDependencyEffect { Show, Hide, RequireClarification }
 
-public sealed record RoadmapQuestionOptionDto(string Id, string Value, string Label);
-public sealed record RoadmapQuestionDependencyDto(
+public record RoadmapQuestionOptionDto(string Id, string Value, string Label);
+public record RoadmapQuestionDependencyDto(
     string Id,
     string SourceQuestionId,
     string Operator,
@@ -12,7 +12,7 @@ public sealed record RoadmapQuestionDependencyDto(
     string DependentQuestionId,
     string Effect,
     string Explanation);
-public sealed record RoadmapQuestionDto(
+public record RoadmapQuestionDto(
     string Id,
     string Text,
     string AnswerType,
@@ -22,7 +22,7 @@ public sealed record RoadmapQuestionDto(
     IReadOnlyList<RoadmapQuestionDependencyDto> Dependencies,
     string? Guidance = null);
 
-public sealed class RoadmapQuestionnaire
+public class RoadmapQuestionnaire
 {
     private const string NotApplicable = "Not applicable";
     private readonly IReadOnlyDictionary<string, RoadmapQuestionConfiguration> _configurationById;
@@ -49,23 +49,31 @@ public sealed class RoadmapQuestionnaire
         && (question.Values.Contains(value, StringComparer.Ordinal)
             || question.AllowNotApplicable && value == NotApplicable);
 
-    public static IReadOnlyDictionary<string, string> Answers(RoadmapRequestDto a) => new Dictionary<string, string>(StringComparer.Ordinal)
+    public static IReadOnlyDictionary<string, string> Answers(RoadmapRequestDto request) => new Dictionary<string, string>(StringComparer.Ordinal)
     {
-        ["origin"] = a.Origin, ["residencePermit"] = a.ResidencePermit, ["liveInSweden"] = a.LiveInSweden,
-        ["personnummer"] = a.Personnummer, ["appliedPersonnummer"] = a.AppliedPersonnummer,
-        ["idCard"] = a.IdCard, ["bankAccount"] = a.BankAccount, ["bankId"] = a.BankId,
-        ["housing"] = a.Housing, ["planToDrive"] = a.PlanToDrive,
-        ["drivingLicenceType"] = a.DrivingLicenceType, ["purpose"] = a.Purpose, ["insurance"] = a.Insurance,
+        ["origin"] = request.Origin,
+        ["residencePermit"] = request.ResidencePermit,
+        ["liveInSweden"] = request.LiveInSweden,
+        ["personnummer"] = request.Personnummer,
+        ["appliedPersonnummer"] = request.AppliedPersonnummer,
+        ["idCard"] = request.IdCard,
+        ["bankAccount"] = request.BankAccount,
+        ["bankId"] = request.BankId,
+        ["housing"] = request.Housing,
+        ["planToDrive"] = request.PlanToDrive,
+        ["drivingLicenceType"] = request.DrivingLicenceType,
+        ["purpose"] = request.Purpose,
+        ["insurance"] = request.Insurance,
     };
 
-    public static bool IsVisible(RoadmapQuestionDto question, IReadOnlyDictionary<string, string> answers)
+    public bool IsVisible(RoadmapQuestionDto question, IReadOnlyDictionary<string, string> answers)
     {
-        var rules = question.Dependencies.Where(d => d.Effect is "Show" or "Hide").ToArray();
+        var rules = question.Dependencies.Where(dependency => dependency.Effect is "Show" or "Hide").ToArray();
         bool Matches(RoadmapQuestionDependencyDto dependency) =>
             dependency.Operator == RoadmapDependencyOperator.Equals.ToString() &&
             answers.TryGetValue(dependency.SourceQuestionId, out var value) &&
             string.Equals(value, dependency.Answer, StringComparison.Ordinal);
-        var showRules = rules.Where(d => d.Effect == "Show").ToArray();
-        return (showRules.Length == 0 || showRules.Any(Matches)) && !rules.Where(d => d.Effect == "Hide").Any(Matches);
+        var showRules = rules.Where(dependency => dependency.Effect == "Show").ToArray();
+        return (showRules.Length == 0 || showRules.Any(Matches)) && !rules.Where(dependency => dependency.Effect == "Hide").Any(Matches);
     }
 }

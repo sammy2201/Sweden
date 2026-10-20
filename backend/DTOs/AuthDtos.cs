@@ -49,9 +49,7 @@ public class LoginRequestDto
 public class AuthResponseDto
 {
     public string AccessToken { get; set; } = string.Empty;
-
     public string TokenType { get; set; } = "Bearer";
-
     public DateTime ExpiresAt { get; set; }
 }
 
@@ -70,6 +68,7 @@ public class UserDto
     public string City { get; set; } = string.Empty;
 
     public string Address { get; set; } = string.Empty;
+
 }
 
 public class UpdateUserProfileRequestDto
@@ -89,4 +88,5 @@ public class UpdateUserProfileRequestDto
     [Required]
     [StringLength(255, MinimumLength = 3)]
     public string Address { get; set; } = string.Empty;
+
 }

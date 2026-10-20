@@ -39,7 +39,7 @@ export class LoginComponent {
   isSubmitting = false;
   errorMessage = "";
 
-  submit(): void {
+  async submit(): Promise<void> {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -48,19 +48,17 @@ export class LoginComponent {
     this.isSubmitting = true;
     this.errorMessage = "";
 
-    this.authService.login(this.form.getRawValue()).subscribe({
-      next: () => {
-        this.isSubmitting = false;
-        const redirectTo = this.route.snapshot.queryParamMap.get("redirectTo");
-        this.router.navigateByUrl(redirectTo || "/");
-      },
-      error: (error: unknown) => {
-        this.isSubmitting = false;
-        this.errorMessage = getApiErrorMessage(
-          error,
-          "Invalid email or password.",
-        );
-      },
-    });
+    try {
+      await this.authService.login(this.form.getRawValue());
+      const redirectTo = this.route.snapshot.queryParamMap.get("redirectTo");
+      await this.router.navigateByUrl(redirectTo || "/");
+    } catch (error: unknown) {
+      this.errorMessage = getApiErrorMessage(
+        error,
+        "Invalid email or password.",
+      );
+    } finally {
+      this.isSubmitting = false;
+    }
   }
 }

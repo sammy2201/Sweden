@@ -18,25 +18,22 @@ public class TaxController : ControllerBase
 
      [HttpGet("rates")]
 
-     public IActionResult GetRates()
+     public IActionResult GetRatesController()
      {
-          return Ok(_taxService.GetTaxRates());
+          return Ok(_taxService.GetTaxRatesService());
      }
 
      [HttpPost("calculate")]
-     [ProducesResponseType(typeof(TaxCalculationResponse), StatusCodes.Status200OK)]
-     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-     public ActionResult<TaxCalculationResponse> Calculate([FromBody] TaxCalculationRequest request)
+     public ActionResult<TaxCalculationResponse> CalculateController([FromBody] TaxCalculationRequest request)
      {
-          var result = _taxService.Calculate(request);
+          var result = _taxService.CalculateService(request);
           return Ok(result);
      }
 
      [HttpGet("municipality")]
-     public IActionResult GetMunicipalities()
+     public IActionResult GetMunicipalitiesController()
      {
-          return Ok(_taxService.GetMunicipalities());
+          return Ok(_taxService.GetMunicipalitiesService());
      }
 
 }

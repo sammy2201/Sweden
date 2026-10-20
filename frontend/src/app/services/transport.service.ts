@@ -1,69 +1,48 @@
 import { Injectable } from "@angular/core";
-import { HttpClient, HttpParams } from "@angular/common/http";
-import { Observable } from "rxjs";
+import axios from "axios";
 import { environment } from "../../environments/environment";
-
-export interface TransportStation {
-  name: string;
-  stationId: string;
-}
-
-export interface TransportTripLeg {
-  operator: string;
-  transportType: string;
-  line: string;
-  from: string;
-  to: string;
-  departureTime: string;
-  arrivalTime: string;
-  originPlatform: string;
-  destinationPlatform: string;
-  direction: string;
-  isCancelled: boolean;
-}
-
-export interface TransportTrip {
-  operator: string;
-  departureTime: string;
-  arrivalTime: string;
-  duration: string;
-  numberOfChanges: number;
-  isDirect: boolean;
-  transportType: string;
-  originPlatform: string;
-  destinationPlatform: string;
-  direction: string;
-  isCancelled: boolean;
-  origin: TransportStation;
-  destination: TransportStation;
-  legs: TransportTripLeg[];
-}
+import { AuthService } from "./auth.service";
+import type { TransportTrip } from "../models/transport.models";
 
 @Injectable({
   providedIn: "root",
 })
 export class TransportService {
-  constructor(private readonly http: HttpClient) {}
+  constructor(private readonly authService: AuthService) {}
 
-  searchTrips(
+  async searchTrips(
     from: string,
     to: string,
     departureTime?: Date | null,
     arrivalTime?: Date | null,
-  ): Observable<TransportTrip[]> {
-    let params = new HttpParams().set("from", from).set("to", to);
+  ): Promise<TransportTrip[]> {
+    const params = {
+      from,
+      to,
+      ...(departureTime ? { departureTime: departureTime.toISOString() } : {}),
+      ...(arrivalTime ? { arrivalTime: arrivalTime.toISOString() } : {}),
+    };
 
-    if (departureTime) {
-      params = params.set("departureTime", departureTime.toISOString());
+    try {
+      const response = await axios.get<TransportTrip[]>(
+        `${environment.apiUrl}/transport/search`,
+        { ...this.requestConfig(), params },
+      );
+      return response.data;
+    } catch (error: unknown) {
+      this.handleUnauthorized(error);
     }
+  }
 
-    if (arrivalTime) {
-      params = params.set("arrivalTime", arrivalTime.toISOString());
+  private requestConfig() {
+    const token = this.authService.getValidAccessToken();
+    return token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  }
+
+  private handleUnauthorized(error: unknown): never {
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      this.authService.logout();
     }
-
-    return this.http.get<TransportTrip[]>(
-      `${environment.apiUrl}/transport/search`,
-      { params },
-    );
+    throw error;
   }
 }

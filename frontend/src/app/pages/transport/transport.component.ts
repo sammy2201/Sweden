@@ -2,7 +2,7 @@ import { Component, DestroyRef, inject } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { TransportService } from "../../services/transport.service";
-import type { TransportTrip } from "../../services/transport.service";
+import type { TransportTrip } from "../../models/transport.models";
 import { ActivatedRoute } from "@angular/router";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { CardModule } from "primeng/card";
@@ -73,7 +73,7 @@ export class TransportComponent {
       });
   }
 
-  searchTrips(): void {
+  async searchTrips(): Promise<void> {
     if (!this.from.trim() || !this.to.trim()) {
       return;
     }
@@ -93,21 +93,21 @@ export class TransportComponent {
 
     this.loading = true;
 
-    this.transportService
-      .searchTrips(this.from, this.to, this.departureTime, this.arrivalTime)
-      .subscribe({
-        next: (trips) => {
-          this.trips = trips;
-          this.loading = false;
-        },
-        error: (error: unknown) => {
-          this.apiErrorMessage = getApiErrorMessage(
-            error,
-            "We could not search transport right now.",
-          );
-          this.loading = false;
-        },
-      });
+    try {
+      this.trips = await this.transportService.searchTrips(
+        this.from,
+        this.to,
+        this.departureTime,
+        this.arrivalTime,
+      );
+    } catch (error: unknown) {
+      this.apiErrorMessage = getApiErrorMessage(
+        error,
+        "We could not search transport right now.",
+      );
+    } finally {
+      this.loading = false;
+    }
   }
 
   onDatePickerOpen(): void {

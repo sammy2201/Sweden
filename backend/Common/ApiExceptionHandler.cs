@@ -3,64 +3,45 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace SwedenStart;
 
-public sealed class ApiExceptionHandler(
+public class ApiExceptionHandler(
     IProblemDetailsService problemDetailsService,
     ILogger<ApiExceptionHandler> logger) : IExceptionHandler
 {
     public async ValueTask<bool> TryHandleAsync(
         HttpContext httpContext,
         Exception exception,
-        CancellationToken cancellationToken)
+        CancellationToken _)
     {
-        var (status, title, detail, code) = exception switch
-        {
-            ApiException ex => (ex.StatusCode, ex.Title, ex.Message, ex.Code),
-            UnauthorizedAccessException ex => (
-                StatusCodes.Status401Unauthorized,
-                "Unauthorized",
-                ex.Message,
-                (string?)null),
-            ArgumentException ex => (
-                StatusCodes.Status400BadRequest,
-                "Invalid request",
-                ex.Message,
-                (string?)null),
-            KeyNotFoundException ex => (
-                StatusCodes.Status404NotFound,
-                "Resource not found",
-                ex.Message,
-                (string?)null),
-            HttpRequestException => (
-                StatusCodes.Status502BadGateway,
-                "External service unavailable",
-                "A required external service is unavailable.",
-                (string?)null),
-            _ => (
-                StatusCodes.Status500InternalServerError,
-                "Server error",
-                "An unexpected error occurred.",
-                (string?)null)
-        };
+        var apiException = exception as ApiException;
+        var upstreamException = exception as HttpRequestException;
+        var status = apiException?.StatusCode
+            ?? (upstreamException is not null
+                ? StatusCodes.Status502BadGateway
+                : StatusCodes.Status500InternalServerError);
 
         if (status >= StatusCodes.Status500InternalServerError)
         {
-            logger.LogError(exception, "Unhandled API exception for {Path}", httpContext.Request.Path);
+            logger.LogError(exception, "Unhandled API exception");
         }
         else
         {
-            logger.LogInformation(exception, "API request failed with status {StatusCode}", status);
+            logger.LogInformation("API request failed with status {StatusCode}", status);
         }
 
         var problem = new ProblemDetails
         {
             Status = status,
-            Title = title,
-            Detail = detail,
+            Title = apiException?.Title
+                ?? (upstreamException is not null ? "Upstream service unavailable" : "Server error"),
+            Detail = apiException?.Message
+                ?? (upstreamException is not null
+                    ? "A required external service is unavailable."
+                    : "An unexpected error occurred."),
             Instance = httpContext.Request.Path
         };
-        if (!string.IsNullOrWhiteSpace(code))
+        if (!string.IsNullOrWhiteSpace(apiException?.Code))
         {
-            problem.Extensions["code"] = code;
+            problem.Extensions["code"] = apiException.Code;
         }
         problem.Extensions["traceId"] = httpContext.TraceIdentifier;
 

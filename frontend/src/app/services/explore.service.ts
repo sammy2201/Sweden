@@ -1,7 +1,7 @@
-import { HttpClient, HttpParams } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { map, Observable } from "rxjs";
+import axios from "axios";
 import { environment } from "../../environments/environment";
+import { AuthService } from "./auth.service";
 import {
   Attraction,
   AttractionDetail,
@@ -16,63 +16,81 @@ import {
   providedIn: "root",
 })
 export class ExploreService {
-  constructor(private readonly http: HttpClient) {}
+  constructor(private readonly authService: AuthService) {}
 
-  getCounties(): Observable<County[]> {
-    return this.http
-      .get<ExploreCountiesResponse>(`${environment.apiUrl}/explore/counties`)
-      .pipe(map((response) => response.counties ?? []));
+  async getCounties(): Promise<County[]> {
+    try {
+      const response = await axios.get<ExploreCountiesResponse>(
+        `${environment.apiUrl}/explore/counties`,
+        this.requestConfig(),
+      );
+      return response.data.counties ?? [];
+    } catch (error: unknown) {
+      this.handleUnauthorized(error);
+    }
   }
 
-  getCounty(countyId: string): Observable<County | undefined> {
-    return this.getCounties().pipe(
-      map((counties) => counties.find((county) => county.id === countyId)),
-    );
+  async getCounty(countyId: string): Promise<County | undefined> {
+    const counties = await this.getCounties();
+    return counties.find((county) => county.id === countyId);
   }
 
-  getAttractions(
+  async getAttractions(
     county: string,
     page = 1,
     pageSize = 12,
     category?: string,
-  ): Observable<PagedResponse<Attraction>> {
-    let params = new HttpParams()
-      .set("county", county)
-      .set("page", page)
-      .set("pageSize", pageSize);
-
+  ): Promise<PagedResponse<Attraction>> {
     const cleanedCategory = category?.trim();
-    if (cleanedCategory) {
-      params = params.set("category", cleanedCategory);
-    }
+    const params = {
+      county,
+      page,
+      pageSize,
+      ...(cleanedCategory ? { category: cleanedCategory } : {}),
+    };
 
-    return this.http
-      .get<ExploreAttractionsResponse>(
+    try {
+      const response = await axios.get<ExploreAttractionsResponse>(
         `${environment.apiUrl}/explore/attractions`,
-        {
-          params,
-        },
-      )
-      .pipe(
-        map((response) => ({
-          items: response.attractions ?? [],
-          page: response.page,
-          pageSize: response.pageSize,
-          totalCount: response.totalCount,
-          totalPages: response.totalPages,
-          hasNextPage: response.hasNextPage,
-          hasPreviousPage: response.hasPreviousPage,
-        })),
+        { ...this.requestConfig(), params },
       );
+      return {
+        items: response.data.attractions ?? [],
+        page: response.data.page,
+        pageSize: response.data.pageSize,
+        totalCount: response.data.totalCount,
+        totalPages: response.data.totalPages,
+        hasNextPage: response.data.hasNextPage,
+        hasPreviousPage: response.data.hasPreviousPage,
+      };
+    } catch (error: unknown) {
+      this.handleUnauthorized(error);
+    }
   }
 
-  getAttraction(
+  async getAttraction(
     attractionId: string,
-  ): Observable<AttractionDetail | undefined> {
-    return this.http
-      .get<ExploreAttractionDetailResponse>(
+  ): Promise<AttractionDetail | undefined> {
+    try {
+      const response = await axios.get<ExploreAttractionDetailResponse>(
         `${environment.apiUrl}/explore/attractions/${encodeURIComponent(attractionId)}`,
-      )
-      .pipe(map((response) => response.attraction));
+        this.requestConfig(),
+      );
+      return response.data.attraction;
+    } catch (error: unknown) {
+      this.handleUnauthorized(error);
+    }
+  }
+
+  private requestConfig() {
+    const token = this.authService.getValidAccessToken();
+    return token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  }
+
+  private handleUnauthorized(error: unknown): never {
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      this.authService.logout();
+    }
+    throw error;
   }
 }

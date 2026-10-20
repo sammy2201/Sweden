@@ -1,0 +1,271 @@
+{
+  "questions": [
+    {
+      "id": "origin",
+      "text": "Where are you from?",
+      "answerType": "select",
+      "values": [
+        "EU",
+        "Non-EU"
+      ],
+      "required": true,
+      "order": 1,
+      "allowNotApplicable": false,
+      "dependencies": [],
+      "guidance": "EU/Non-EU is a broad nationality category and does not separately identify EEA, Nordic, Swiss, or family-member status. These choices do not determine residence or work rights; check Swedish Migration Agency guidance for your purpose and individual circumstances."
+    },
+    {
+      "id": "residencePermit",
+      "text": "Do you already have a residence permit?",
+      "answerType": "select",
+      "values": [
+        "Yes",
+        "No"
+      ],
+      "required": true,
+      "order": 2,
+      "allowNotApplicable": false,
+      "dependencies": [
+        {
+          "id": "clarify-residence-rights-from-origin",
+          "sourceQuestionId": "origin",
+          "operator": "Equals",
+          "answer": "Non-EU",
+          "dependentQuestionId": "residencePermit",
+          "effect": "RequireClarification",
+          "explanation": "Origin alone does not determine residence rights or whether a permit is required; check rules for your individual situation and purpose."
+        }
+      ],
+      "guidance": "A No answer does not by itself establish that a permit is required; individual residence rights depend on more information."
+    },
+    {
+      "id": "liveInSweden",
+      "text": "Do you already live in Sweden?",
+      "answerType": "select",
+      "values": [
+        "Yes",
+        "No"
+      ],
+      "required": true,
+      "order": 3,
+      "allowNotApplicable": false,
+      "dependencies": [],
+      "guidance": null
+    },
+    {
+      "id": "personnummer",
+      "text": "Do you have a Personnummer?",
+      "answerType": "select",
+      "values": [
+        "Yes",
+        "No"
+      ],
+      "required": true,
+      "order": 4,
+      "allowNotApplicable": true,
+      "dependencies": [
+        {
+          "id": "show-personnummer-for-residents",
+          "sourceQuestionId": "liveInSweden",
+          "operator": "Equals",
+          "answer": "Yes",
+          "dependentQuestionId": "personnummer",
+          "effect": "Show",
+          "explanation": "Ask about registration only when the respondent already lives in Sweden."
+        }
+      ],
+      "guidance": null
+    },
+    {
+      "id": "appliedPersonnummer",
+      "text": "Have you already submitted an application for a Personnummer?",
+      "answerType": "select",
+      "values": [
+        "Yes",
+        "No",
+        "Waiting for decision"
+      ],
+      "required": true,
+      "order": 5,
+      "allowNotApplicable": true,
+      "dependencies": [
+        {
+          "id": "show-personnummer-application-status",
+          "sourceQuestionId": "personnummer",
+          "operator": "Equals",
+          "answer": "No",
+          "dependentQuestionId": "appliedPersonnummer",
+          "effect": "Show",
+          "explanation": "The application status only applies when the respondent does not already have a Personnummer."
+        }
+      ],
+      "guidance": "Choose Yes if you have submitted an application and are not specifically reporting that you are waiting for a decision. Choose Waiting for decision when your application is pending; choose No if you have not applied."
+    },
+    {
+      "id": "idCard",
+      "text": "Do you have a Swedish ID card?",
+      "answerType": "select",
+      "values": [
+        "Yes",
+        "No"
+      ],
+      "required": true,
+      "order": 6,
+      "allowNotApplicable": true,
+      "dependencies": [
+        {
+          "id": "show-id-card-for-residents",
+          "sourceQuestionId": "liveInSweden",
+          "operator": "Equals",
+          "answer": "Yes",
+          "dependentQuestionId": "idCard",
+          "effect": "Show",
+          "explanation": "Ask about identity documentation for respondents already living in Sweden."
+        }
+      ],
+      "guidance": null
+    },
+    {
+      "id": "bankAccount",
+      "text": "Do you have a Swedish bank account?",
+      "answerType": "select",
+      "values": [
+        "Yes",
+        "No"
+      ],
+      "required": true,
+      "order": 7,
+      "allowNotApplicable": true,
+      "dependencies": [
+        {
+          "id": "show-bank-account-for-residents",
+          "sourceQuestionId": "liveInSweden",
+          "operator": "Equals",
+          "answer": "Yes",
+          "dependentQuestionId": "bankAccount",
+          "effect": "Show",
+          "explanation": "Bank requirements vary; the answer is useful even when the respondent lacks a Personnummer or Swedish ID card."
+        }
+      ],
+      "guidance": null
+    },
+    {
+      "id": "bankId",
+      "text": "Do you have BankID?",
+      "answerType": "select",
+      "values": [
+        "Yes",
+        "No"
+      ],
+      "required": true,
+      "order": 8,
+      "allowNotApplicable": true,
+      "dependencies": [
+        {
+          "id": "show-bankid-for-residents",
+          "sourceQuestionId": "liveInSweden",
+          "operator": "Equals",
+          "answer": "Yes",
+          "dependentQuestionId": "bankId",
+          "effect": "Show",
+          "explanation": "BankID eligibility depends on the provider and is not guaranteed by holding a bank account."
+        }
+      ],
+      "guidance": "Current BankID guidance says a Swedish personal identity number is required. BankID is issued through banks, which confirm their checks; having a bank account alone does not guarantee eligibility."
+    },
+    {
+      "id": "housing",
+      "text": "What is your housing situation?",
+      "answerType": "select",
+      "values": [
+        "Permanent",
+        "Temporary",
+        "Still looking"
+      ],
+      "required": true,
+      "order": 9,
+      "allowNotApplicable": false,
+      "dependencies": [],
+      "guidance": null
+    },
+    {
+      "id": "planToDrive",
+      "text": "Do you plan to drive in Sweden?",
+      "answerType": "select",
+      "values": [
+        "Yes",
+        "No"
+      ],
+      "required": true,
+      "order": 10,
+      "allowNotApplicable": false,
+      "dependencies": [],
+      "guidance": null
+    },
+    {
+      "id": "drivingLicenceType",
+      "text": "Which licence do you have?",
+      "answerType": "select",
+      "values": [
+        "Swedish",
+        "EU",
+        "Other"
+      ],
+      "required": true,
+      "order": 11,
+      "allowNotApplicable": true,
+      "dependencies": [
+        {
+          "id": "show-licence-if-driving",
+          "sourceQuestionId": "planToDrive",
+          "operator": "Equals",
+          "answer": "Yes",
+          "dependentQuestionId": "drivingLicenceType",
+          "effect": "Show",
+          "explanation": "Licence information is only relevant when the respondent plans to drive."
+        }
+      ],
+      "guidance": "This answer describes the licence category, not its issuing country. Origin does not establish which driving rules apply."
+    },
+    {
+      "id": "purpose",
+      "text": "Why are you in Sweden?",
+      "answerType": "select",
+      "values": [
+        "Work",
+        "Study",
+        "Looking for work",
+        "Family"
+      ],
+      "required": true,
+      "order": 12,
+      "allowNotApplicable": false,
+      "dependencies": [],
+      "guidance": null
+    },
+    {
+      "id": "insurance",
+      "text": "Have you registered with Försäkringskassan?",
+      "answerType": "select",
+      "values": [
+        "Yes",
+        "No"
+      ],
+      "required": true,
+      "order": 13,
+      "allowNotApplicable": true,
+      "dependencies": [
+        {
+          "id": "show-insurance-for-residents",
+          "sourceQuestionId": "liveInSweden",
+          "operator": "Equals",
+          "answer": "Yes",
+          "dependentQuestionId": "insurance",
+          "effect": "Show",
+          "explanation": "Ask about Swedish social-insurance registration only for respondents already living in Sweden."
+        }
+      ],
+      "guidance": "This question tracks registration with Försäkringskassan only. Registration does not by itself establish insurance coverage or eligibility for a particular benefit."
+    }
+  ]
+}

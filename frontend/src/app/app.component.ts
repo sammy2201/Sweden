@@ -3,10 +3,8 @@ import { Router, RouterLink, RouterOutlet } from "@angular/router";
 import { AuthService } from "./services/auth.service";
 import { ButtonModule } from "primeng/button";
 import { SiteFooterComponent } from "./components/site-footer/site-footer.component";
-import {
-  GuideDirectoryService,
-  GuideLink,
-} from "./services/guide-directory.service";
+import { GuideDirectoryService } from "./services/guide-directory.service";
+import type { GuideLink } from "./models/guide.models";
 
 @Component({
   selector: "app-root",
@@ -18,17 +16,17 @@ export class AppComponent {
   readonly authService = inject(AuthService);
   readonly router = inject(Router);
   private readonly guideDirectory = inject(GuideDirectoryService);
+
   readonly searchQuery = signal("");
   readonly searchFocused = signal(false);
-  readonly mobileSearchOpen = signal(false);
-  readonly mobileMenuOpen = signal(false);
   readonly activeSuggestionIndex = signal(0);
+
   readonly suggestions = computed(() =>
     this.guideDirectory.search(this.searchQuery()).slice(0, 6),
   );
-  readonly searchPanelVisible = computed(
-    () => this.searchFocused() || this.mobileSearchOpen(),
-  );
+
+  readonly searchPanelVisible = computed(() => this.searchFocused());
+
   readonly activeSuggestionId = computed(() => {
     const index = this.activeSuggestionIndex();
     return index >= 0 && index < this.suggestions().length
@@ -49,6 +47,7 @@ export class AppComponent {
       window.clearTimeout(this.searchBlurTimer);
       this.searchBlurTimer = undefined;
     }
+
     this.searchFocused.set(true);
   }
 
@@ -65,7 +64,6 @@ export class AppComponent {
     if (event.key === "Escape") {
       event.preventDefault();
       this.searchFocused.set(false);
-      this.mobileSearchOpen.set(false);
       return;
     }
 
@@ -87,6 +85,7 @@ export class AppComponent {
       event.preventDefault();
       const activeIndex = this.activeSuggestionIndex();
       const guide = this.suggestions()[activeIndex < 0 ? 0 : activeIndex];
+
       if (guide) {
         this.navigateToGuide(guide);
       }
@@ -103,33 +102,13 @@ export class AppComponent {
     this.searchFocused.set(true);
   }
 
-  toggleMobileSearch(): void {
-    this.mobileSearchOpen.update((open) => !open);
-    this.mobileMenuOpen.set(false);
-    this.searchFocused.set(false);
-  }
-
-  toggleMobileMenu(): void {
-    this.mobileMenuOpen.update((open) => !open);
-    this.mobileSearchOpen.set(false);
-    this.searchFocused.set(false);
-  }
-
-  closeMobileMenu(): void {
-    this.mobileMenuOpen.set(false);
-  }
-
   navigateToGuide(guide: GuideLink): void {
     this.searchQuery.set("");
     this.searchFocused.set(false);
-    this.mobileSearchOpen.set(false);
-    this.mobileMenuOpen.set(false);
     this.router.navigateByUrl(guide.route);
   }
 
   logout(): void {
-    this.mobileMenuOpen.set(false);
-    this.mobileSearchOpen.set(false);
     this.searchFocused.set(false);
     this.authService.logout();
     this.router.navigate(["/login"]);

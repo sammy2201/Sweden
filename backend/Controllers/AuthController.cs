@@ -1,3 +1,4 @@
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
@@ -10,19 +11,25 @@ namespace SwedenStart;
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
+
+    // Constructor initializes the controller's private field with the auth service.
     public AuthController(IAuthService authService)
     {
         _authService = authService;
-
     }
 
     [HttpPost("login")]
     [AllowAnonymous]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
+    public async Task<IActionResult> LoginControllerAsync([FromBody] LoginRequestDto request)
     {
-        var token = await _authService.LoginAsync(request.Email, request.Password);
-        var expiresAt = new JwtSecurityTokenHandler().ReadJwtToken(token).ValidTo;
+        var token = await _authService.LoginServiceAsync(
+            request.Email,
+            request.Password);
+
+        var expiresAt = new JwtSecurityTokenHandler()
+            .ReadJwtToken(token)
+            .ValidTo;
+
         return Ok(new AuthResponseDto
         {
             AccessToken = token,
@@ -32,71 +39,107 @@ public class AuthController : ControllerBase
 
     [HttpPost("register")]
     [AllowAnonymous]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
-    public async Task<IActionResult> Register([FromBody] RegisterRequestDto request)
+    public async Task<IActionResult> RegisterControllerAsync(
+        [FromBody] RegisterRequestDto request)
     {
-        var created = await _authService.RegisterAsync(request.FirstName, request.LastName, request.Username, request.Email, request.City, request.Address, request.Password);
+        var created = await _authService.RegisterServiceAsync(
+            request.FirstName,
+            request.LastName,
+            request.Username,
+            request.Email,
+            request.City,
+            request.Address,
+            request.Password);
+
         if (!created)
         {
-            var problem = Problem(
-                statusCode: StatusCodes.Status409Conflict,
-                title: "Account already exists",
-                detail: "A user with that username or email already exists.");
-            if (problem.Value is ProblemDetails problemDetails)
-                problemDetails.Extensions["code"] = "ACCOUNT_ALREADY_EXISTS";
-            return problem;
+            throw new ApiException(
+                StatusCodes.Status409Conflict,
+                "Account already exists",
+                "A user with that username or email already exists.",
+                "ACCOUNT_ALREADY_EXISTS");
         }
 
-        return CreatedAtAction(nameof(Register), new { username = request.Username });
+        return StatusCode(
+            StatusCodes.Status201Created,
+            "Registration successful");
     }
-
 
     [HttpGet("user")]
     [Authorize]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetUser()
+    public async Task<IActionResult> GetUserControllerAsync()
     {
-        if (!TryGetCurrentUserId(out var id))
-            return Problem(statusCode: StatusCodes.Status401Unauthorized, title: "Unauthorized", detail: "The authenticated user could not be identified.");
+        var userId = GetCurrentUserId();
 
-        var user = await _authService.GetUserAsync(id);
+        if (userId == null)
+        {
+            throw new ApiException(
+                StatusCodes.Status401Unauthorized,
+                "Unauthorized",
+                "The authenticated user could not be identified.");
+        }
+
+        var user = await _authService.GetUserServiceAsync(userId.Value);
+
         if (user == null)
-            return Problem(statusCode: StatusCodes.Status404NotFound, title: "User not found", detail: "The requested user profile was not found.");
+        {
+            throw new ApiException(
+                StatusCodes.Status404NotFound,
+                "User not found",
+                "The requested user profile was not found.");
+        }
 
-        var dto = MapUserDto(user);
-
-        return Ok(dto);
+        return Ok(MapUserDto(user));
     }
 
     [HttpPut("user")]
     [Authorize]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> UpdateUser([FromBody] UpdateUserProfileRequestDto request)
+    public async Task<IActionResult> UpdateUserControllerAsync(
+        [FromBody] UpdateUserProfileRequestDto request)
     {
-        if (!TryGetCurrentUserId(out var id))
-            return Problem(statusCode: StatusCodes.Status401Unauthorized, title: "Unauthorized", detail: "The authenticated user could not be identified.");
+        var userId = GetCurrentUserId();
 
-        var user = await _authService.UpdateUserProfileAsync(
-            id,
+        if (userId == null)
+        {
+            throw new ApiException(
+                StatusCodes.Status401Unauthorized,
+                "Unauthorized",
+                "The authenticated user could not be identified.");
+        }
+
+        var user = await _authService.UpdateUserProfileServiceAsync(
+            userId.Value,
             request.FirstName,
             request.LastName,
             request.City,
             request.Address);
 
         if (user == null)
-            return Problem(statusCode: StatusCodes.Status404NotFound, title: "User not found", detail: "The requested user profile was not found.");
+        {
+            throw new ApiException(
+                StatusCodes.Status404NotFound,
+                "User not found",
+                "The requested user profile was not found.");
+        }
 
         return Ok(MapUserDto(user));
     }
 
-    private bool TryGetCurrentUserId(out Guid id)
+    // Gets the current user's ID from the authentication claims.
+    private Guid? GetCurrentUserId()
     {
-        var sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        return Guid.TryParse(sub, out id);
+        var userIdentifierClaim =
+            User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (Guid.TryParse(userIdentifierClaim, out var userId))
+        {
+            return userId;
+        }
+
+        return null;
     }
 
+    // Converts the database user into a DTO for the API response.
     private static UserDto MapUserDto(User user)
     {
         return new UserDto

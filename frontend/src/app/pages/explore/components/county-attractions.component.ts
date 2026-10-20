@@ -1,16 +1,7 @@
 import { CommonModule } from "@angular/common";
-import { Component, inject } from "@angular/core";
+import { Component, DestroyRef, OnInit, inject } from "@angular/core";
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
-import {
-  BehaviorSubject,
-  catchError,
-  combineLatest,
-  map,
-  of,
-  startWith,
-  switchMap,
-  take,
-} from "rxjs";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ButtonModule } from "primeng/button";
 import { CardModule } from "primeng/card";
 import { DividerModule } from "primeng/divider";
@@ -23,16 +14,12 @@ import {
 import { buildExploreErrorMessage } from "../explore.utils";
 import { AuthService } from "../../../services/auth.service";
 import { ExploreService } from "../../../services/explore.service";
+import { getCountyImagePath } from "../county-images";
 
 interface CountyAttractionsVm {
   loading: boolean;
   error: string | null;
   county: County | undefined;
-  paged: PagedResponse<Attraction>;
-}
-
-interface AttractionsLoadState {
-  error: string | null;
   paged: PagedResponse<Attraction>;
 }
 
@@ -60,68 +47,69 @@ const EMPTY_PAGED_RESPONSE: PagedResponse<Attraction> = {
   templateUrl: "./county-attractions.component.html",
   styleUrl: "./county-attractions.component.css",
 })
-export class CountyAttractionsComponent {
+export class CountyAttractionsComponent implements OnInit {
   private readonly exploreService = inject(ExploreService);
   private readonly route: ActivatedRoute = inject(ActivatedRoute);
   private readonly router: Router = inject(Router);
   private readonly authService: AuthService = inject(AuthService);
-  private readonly requestState$ = new BehaviorSubject<{
-    page: number;
-    pageSize: number;
-    category: string;
-  }>({
-    page: 1,
-    pageSize: 12,
-    category: "",
-  });
+  private readonly destroyRef = inject(DestroyRef);
+  private countyId = "";
+  private request = { page: 1, pageSize: 12, category: "" };
+  private loadSequence = 0;
+  readonly currentUser = this.authService.user;
+  vm: CountyAttractionsVm = {
+    loading: true,
+    error: null,
+    county: undefined,
+    paged: EMPTY_PAGED_RESPONSE,
+  };
 
-  readonly vm$ = combineLatest([
-    this.route.paramMap.pipe(map((params) => params.get("countyId") ?? "")),
-    this.requestState$,
-  ]).pipe(
-    switchMap(([countyId, request]) =>
-      combineLatest([
-        this.exploreService.getCounty(countyId),
-        this.exploreService.getAttractions(
-          countyId,
-          request.page,
-          request.pageSize,
-          request.category || undefined,
-        ).pipe(
-          map(
-            (paged): AttractionsLoadState => ({
-              error: null,
-              paged,
-            }),
-          ),
-          catchError((error: unknown) =>
-            of<AttractionsLoadState>({
-              error: buildExploreErrorMessage(error),
-              paged: EMPTY_PAGED_RESPONSE,
-            }),
-          ),
-        ),
-      ]).pipe(
-        map(
-          ([county, attractions]): CountyAttractionsVm => ({
-            loading: false,
-            error: attractions.error,
-            county,
-            paged: attractions.paged,
-          }),
-        ),
+  ngOnInit(): void {
+    this.route.paramMap
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((params) => {
+        this.countyId = params.get("countyId") ?? "";
+        void this.loadAttractions();
+      });
+  }
+
+  countyImagePath(countyId: string): string {
+    return getCountyImagePath(countyId);
+  }
+  private async loadAttractions(): Promise<void> {
+    const sequence = ++this.loadSequence;
+    this.vm = { ...this.vm, loading: true, error: null };
+
+    const [countyResult, attractionsResult] = await Promise.allSettled([
+      this.exploreService.getCounty(this.countyId),
+      this.exploreService.getAttractions(
+        this.countyId,
+        this.request.page,
+        this.request.pageSize,
+        this.request.category || undefined,
       ),
-    ),
-    startWith({
-      loading: true,
-      error: null,
-      county: undefined,
-      paged: EMPTY_PAGED_RESPONSE,
-    }),
-  );
+    ]);
+    if (sequence !== this.loadSequence) return;
+
+    this.vm = {
+      loading: false,
+      error:
+        attractionsResult.status === "rejected"
+          ? buildExploreErrorMessage(attractionsResult.reason)
+          : countyResult.status === "rejected"
+            ? buildExploreErrorMessage(countyResult.reason)
+            : null,
+      county:
+        countyResult.status === "fulfilled" ? countyResult.value : undefined,
+      paged:
+        attractionsResult.status === "fulfilled"
+          ? attractionsResult.value
+          : EMPTY_PAGED_RESPONSE,
+    };
+  }
 
   retry(): void {
-    this.requestState$.next({ ...this.requestState$.value });
+    void this.loadAttractions();
   }
 
   goToPreviousPage(currentPage: number): void {
@@ -129,49 +117,44 @@ export class CountyAttractionsComponent {
       return;
     }
 
-    const current = this.requestState$.value;
-    this.requestState$.next({
-      ...current,
-      page: currentPage - 1,
-    });
+    this.request.page = currentPage - 1;
+    void this.loadAttractions();
   }
 
   goToNextPage(currentPage: number): void {
-    const current = this.requestState$.value;
-    this.requestState$.next({
-      ...current,
-      page: currentPage + 1,
-    });
+    this.request.page = currentPage + 1;
+    void this.loadAttractions();
   }
 
-  planJourney(county: County | undefined, attraction: Attraction): void {
-    const fallbackOrigin = county?.name || "Stockholm";
+  async planJourney(
+    attraction: Attraction,
+    userCity?: string | null,
+  ): Promise<void> {
     const destination = attraction.city || attraction.name;
+    const origin = userCity?.trim();
 
-    const cachedAddress = this.authService.user()?.address?.trim();
-    if (cachedAddress) {
-      this.navigateToJourney(cachedAddress, destination);
+    if (origin) {
+      this.navigateToJourney(origin, destination);
       return;
     }
 
-    this.authService
-      .loadUserProfile()
-      .pipe(take(1))
-      .subscribe({
-        next: (profile) => {
-          const origin = profile.address?.trim() || fallbackOrigin;
-          this.navigateToJourney(origin, destination);
-        },
-        error: () => {
-          this.navigateToJourney(fallbackOrigin, destination);
-        },
-      });
+    if (!this.authService.isAuthenticated()) {
+      this.navigateToJourney(undefined, destination);
+      return;
+    }
+
+    try {
+      const profile = await this.authService.loadUserProfile();
+      this.navigateToJourney(profile.city?.trim() || undefined, destination);
+    } catch {
+      this.navigateToJourney(undefined, destination);
+    }
   }
 
-  private navigateToJourney(from: string, to: string): void {
+  private navigateToJourney(from: string | undefined, to: string): void {
     this.router.navigate(["/transport"], {
       queryParams: {
-        from,
+        ...(from ? { from } : {}),
         to,
       },
     });

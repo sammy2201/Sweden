@@ -70,12 +70,7 @@ ng build
 - `ng build` defaults to the production configuration, which enables Ahead-of-Time (AOT) compilation, minification, and tree-shaking.
 - Target specific configurations defined in `angular.json` using `--configuration`: `ng build --configuration=staging`.
 
-## 5. Testing
-
-- **Unit Tests**: Run `ng test` to execute unit tests via the configured test runner (e.g., Karma or Vitest).
-- **End-to-End (E2E)**: Run `ng e2e`. If no E2E framework is configured, the CLI will prompt to install one (Cypress, Playwright, Puppeteer, etc.).
-
-## 6. Deployment
+## 5. Deployment
 
 To deploy an application, you must first add a deployment builder, then run the deploy command:
 

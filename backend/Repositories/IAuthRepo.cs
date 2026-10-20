@@ -2,17 +2,17 @@ namespace SwedenStart;
 
 public interface IAuthRepo
 {
-    Task<User?> GetUserByUsernameAsync(string username);
+    Task<User?> GetUserByUsernameRepoAsync(string username);
 
-    Task<User?> GetUserByEmailAsync(string email);
+    Task<User?> GetUserByEmailRepoAsync(string email);
 
-    Task<User?> GetUserByIdAsync(Guid id);
+    Task<User?> GetUserByIdRepoAsync(Guid id);
 
-    Task<bool> UserExistsAsync(string username, string email);
+    Task<bool> UserExistsRepoAsync(string username, string email);
 
-    Task CreateUserAsync(User user);
+    Task CreateUserRepoAsync(User user);
 
-    Task UpdateUserAsync(User user);
+    Task UpdateUserRepoAsync(User user);
 
-    Task DeleteUserAsync(Guid id);
+    Task DeleteUserRepoAsync(Guid id);
 }

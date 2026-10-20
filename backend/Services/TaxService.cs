@@ -19,7 +19,7 @@ public class TaxService : ITaxService
                throw new InvalidOperationException("Tax data source returned no municipality rates.");
      }
 
-     public IEnumerable<MunicipalityTaxRate> GetTaxRates()
+     public IEnumerable<MunicipalityTaxRate> GetTaxRatesService()
      {
           return _rates
                .GroupBy(rate => NormalizeMunicipality(rate.Municipality), StringComparer.OrdinalIgnoreCase)
@@ -27,9 +27,8 @@ public class TaxService : ITaxService
                .OrderBy(rate => rate.Municipality, StringComparer.Create(new CultureInfo("sv-SE"), true));
      }
 
-     public TaxCalculationResponse Calculate(TaxCalculationRequest request)
+     public TaxCalculationResponse CalculateService(TaxCalculationRequest request)
      {
-
 
           var annualGrossIncome = RoundDownToHundred(request.MonthlySalary * 12m);
           var rate = FindMunicipalityRate(request.Municipality);
@@ -86,7 +85,10 @@ public class TaxService : ITaxService
                .ToList();
 
           if (matches.Count == 0)
-               throw new KeyNotFoundException("Municipality not found.");
+               throw new ApiException(
+                    StatusCodes.Status404NotFound,
+                    "Resource not found",
+                    "Municipality not found.");
 
           return AggregateMunicipality(matches);
      }
@@ -129,43 +131,43 @@ public class TaxService : ITaxService
 
      private static decimal CalculateStandardBasicDeduction(decimal annualIncome)
      {
-          var pbb = PriceBaseAmount;
+          var priceBaseAmount = PriceBaseAmount;
 
-          if (annualIncome <= 0.99m * pbb)
-               return 0.423m * pbb;
+          if (annualIncome <= 0.99m * priceBaseAmount)
+               return 0.423m * priceBaseAmount;
 
-          if (annualIncome <= 2.72m * pbb)
-               return (0.423m * pbb) + (0.20m * (annualIncome - (0.99m * pbb)));
+          if (annualIncome <= 2.72m * priceBaseAmount)
+               return (0.423m * priceBaseAmount) + (0.20m * (annualIncome - (0.99m * priceBaseAmount)));
 
-          if (annualIncome <= 3.11m * pbb)
-               return 0.77m * pbb;
+          if (annualIncome <= 3.11m * priceBaseAmount)
+               return 0.77m * priceBaseAmount;
 
-          if (annualIncome <= 7.88m * pbb)
-               return (0.77m * pbb) - (0.10m * (annualIncome - (3.11m * pbb)));
+          if (annualIncome <= 7.88m * priceBaseAmount)
+               return (0.77m * priceBaseAmount) - (0.10m * (annualIncome - (3.11m * priceBaseAmount)));
 
-          return 0.293m * pbb;
+          return 0.293m * priceBaseAmount;
      }
 
      private static decimal CalculateEnhancedBasicDeduction(decimal annualIncome)
      {
-          var pbb = PriceBaseAmount;
+          var priceBaseAmount = PriceBaseAmount;
 
-          if (annualIncome <= 0.99m * pbb)
+          if (annualIncome <= 0.99m * priceBaseAmount)
                return annualIncome;
 
-          if (annualIncome <= 1.11m * pbb)
-               return 0.99m * pbb;
+          if (annualIncome <= 1.11m * priceBaseAmount)
+               return 0.99m * priceBaseAmount;
 
-          if (annualIncome <= 2.72m * pbb)
-               return (0.99m * pbb) + (0.20m * (annualIncome - (1.11m * pbb)));
+          if (annualIncome <= 2.72m * priceBaseAmount)
+               return (0.99m * priceBaseAmount) + (0.20m * (annualIncome - (1.11m * priceBaseAmount)));
 
-          if (annualIncome <= 3.11m * pbb)
-               return 1.312m * pbb;
+          if (annualIncome <= 3.11m * priceBaseAmount)
+               return 1.312m * priceBaseAmount;
 
-          if (annualIncome <= 7.88m * pbb)
-               return (1.312m * pbb) - (0.02m * (annualIncome - (3.11m * pbb)));
+          if (annualIncome <= 7.88m * priceBaseAmount)
+               return (1.312m * priceBaseAmount) - (0.02m * (annualIncome - (3.11m * priceBaseAmount)));
 
-          return 1.985m * pbb;
+          return 1.985m * priceBaseAmount;
      }
 
      private static decimal CalculateEarnedIncomeTaxCredit(
@@ -187,24 +189,24 @@ public class TaxService : ITaxService
           decimal basicDeduction,
           decimal municipalIncomeTaxRate)
      {
-          var pbb = PriceBaseAmount;
+          var priceBaseAmount = PriceBaseAmount;
           decimal creditBase;
 
-          if (annualWorkIncome <= 0.91m * pbb)
+          if (annualWorkIncome <= 0.91m * priceBaseAmount)
           {
                creditBase = annualWorkIncome;
           }
-          else if (annualWorkIncome <= 3.24m * pbb)
+          else if (annualWorkIncome <= 3.24m * priceBaseAmount)
           {
-               creditBase = (0.91m * pbb) + (0.34m * (annualWorkIncome - (0.91m * pbb)));
+               creditBase = (0.91m * priceBaseAmount) + (0.34m * (annualWorkIncome - (0.91m * priceBaseAmount)));
           }
-          else if (annualWorkIncome <= 8.08m * pbb)
+          else if (annualWorkIncome <= 8.08m * priceBaseAmount)
           {
-               creditBase = (1.7022m * pbb) + (0.128m * (annualWorkIncome - (3.24m * pbb)));
+               creditBase = (1.7022m * priceBaseAmount) + (0.128m * (annualWorkIncome - (3.24m * priceBaseAmount)));
           }
           else
           {
-               creditBase = 2.32172m * pbb;
+               creditBase = 2.32172m * priceBaseAmount;
           }
 
           return Math.Max(0m, creditBase - basicDeduction) * Percent(municipalIncomeTaxRate);
@@ -277,11 +279,11 @@ public class TaxService : ITaxService
      }
 
 
-     public IEnumerable<string> GetMunicipalities()
+     public IEnumerable<string> GetMunicipalitiesService()
      {
           return _rates
-              .Select(r => ToDisplayMunicipality(r.Municipality))
+              .Select(rate => ToDisplayMunicipality(rate.Municipality))
               .Distinct(StringComparer.OrdinalIgnoreCase)
-              .OrderBy(m => m, StringComparer.Create(new CultureInfo("sv-SE"), true));
+              .OrderBy(municipality => municipality, StringComparer.Create(new CultureInfo("sv-SE"), true));
      }
 }

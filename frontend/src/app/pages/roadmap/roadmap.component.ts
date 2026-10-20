@@ -1,9 +1,6 @@
 import { CommonModule } from "@angular/common";
-import { HttpErrorResponse } from "@angular/common/http";
-import { Component, DestroyRef, OnInit, inject } from "@angular/core";
-import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { Component, OnInit, inject } from "@angular/core";
 import { FormsModule, NgModel } from "@angular/forms";
-import { RouterLink } from "@angular/router";
 import { ConfirmationService } from "primeng/api";
 import { ButtonModule } from "primeng/button";
 import { CheckboxModule } from "primeng/checkbox";
@@ -12,16 +9,20 @@ import { DialogModule } from "primeng/dialog";
 import { ProgressBarModule } from "primeng/progressbar";
 import { SelectModule } from "primeng/select";
 import {
+  getApiErrorMessage,
+  getApiErrorResponseData,
+  getApiErrorStatus,
+} from "../../utils/api-error";
+import { RoadmapService } from "../../services/roadmap.service";
+import type {
   RoadmapQuestion,
   RoadmapQuestionDependency,
   RoadmapRequest,
   RoadmapResponse,
-  RoadmapService,
   RoadmapTaskResponse,
-} from "../../services/roadmap.service";
-import { getApiErrorMessage } from "../../utils/api-error";
-import { GuideLink } from "../../services/guide-directory.service";
-import { RoadmapGuideService } from "../../services/roadmap-guide.service";
+} from "../../models/roadmap.models";
+import { ExploreService } from "../../services/explore.service";
+import { County } from "../../models/explore.models";
 
 type RoadmapField = RoadmapQuestion;
 
@@ -40,7 +41,6 @@ interface RoadmapPhase {
   imports: [
     CommonModule,
     FormsModule,
-    RouterLink,
     ButtonModule,
     CheckboxModule,
     ConfirmDialogModule,
@@ -54,13 +54,14 @@ interface RoadmapPhase {
 })
 export class RoadmapComponent implements OnInit {
   private readonly roadmapService = inject(RoadmapService);
-  private readonly destroyRef = inject(DestroyRef);
   private readonly confirmationService = inject(ConfirmationService);
-  private readonly roadmapGuideService = inject(RoadmapGuideService);
+  private readonly exploreService = inject(ExploreService);
 
   fields: RoadmapField[] = [];
   editAnswers: Partial<Record<keyof RoadmapRequest, string>> = {};
   tasks: RoadmapTaskResponse[] = [];
+  transportCounties: County[] = [];
+  transportCounty: County | null = null;
   hasExistingRoadmap = false;
   isLoadingExistingRoadmap = true;
   isLoadingQuestions = true;
@@ -72,6 +73,7 @@ export class RoadmapComponent implements OnInit {
   selectedTask: RoadmapTaskResponse | null = null;
   selectedCompletion = true;
   taskDialogError = "";
+  taskUpdateError = "";
   generationError = "";
   successMessage = "";
   private currentRoadmapResponse: RoadmapResponse | null = null;
@@ -81,7 +83,9 @@ export class RoadmapComponent implements OnInit {
   }
 
   get applicableTasks(): RoadmapTaskResponse[] {
-    return this.tasks.filter((task) => task.state !== "NotApplicable");
+    return this.tasks.filter(
+      (task) => task.state !== "NotApplicable" && !this.isOptionalTask(task),
+    );
   }
 
   get completedTaskCount(): number {
@@ -118,15 +122,22 @@ export class RoadmapComponent implements OnInit {
 
   get nextTask(): RoadmapTaskResponse | null {
     return (
-      this.tasks.find(
+      this.applicableTasks.find(
         (task) =>
-          task.state !== "NotApplicable" &&
           !task.completed &&
           task.state !== "Completed" &&
           task.state !== "Waiting" &&
           this.unmetPrerequisiteTitles(task).length === 0,
       ) ??
-      this.tasks.find((task) => task.state === "Waiting" && !task.completed) ??
+      this.applicableTasks.find(
+        (task) => task.state === "Waiting" && !task.completed,
+      ) ??
+      this.tasks.find(
+        (task) =>
+          this.isOptionalTask(task) &&
+          !task.completed &&
+          task.state !== "Completed",
+      ) ??
       null
     );
   }
@@ -141,7 +152,7 @@ export class RoadmapComponent implements OnInit {
         phases.set(phaseInfo.id, phase);
       }
       phase.tasks.push(task);
-      if (task.state !== "NotApplicable") {
+      if (task.state !== "NotApplicable" && !this.isOptionalTask(task)) {
         phase.taskCount += 1;
         if (task.completed || task.state === "Completed")
           phase.completedCount += 1;
@@ -159,23 +170,43 @@ export class RoadmapComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.roadmapService
-      .getQuestions()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (questions) => {
-          this.fields = [...questions].sort((a, b) => a.order - b.order);
-          this.isLoadingQuestions = false;
-        },
-        error: (error: unknown) => {
-          this.generationError = getApiErrorMessage(
-            error,
-            "We could not load the roadmap questions.",
-          );
-          this.isLoadingQuestions = false;
-        },
-      });
-    this.loadExistingRoadmap();
+    void this.loadQuestions();
+    void this.loadExistingRoadmap();
+    void this.loadTransportCounty();
+  }
+
+  private async loadQuestions(): Promise<void> {
+    try {
+      const questions = await this.roadmapService.getQuestions();
+      this.fields = [...questions].sort(
+        (firstQuestion, secondQuestion) =>
+          firstQuestion.order - secondQuestion.order,
+      );
+    } catch (error: unknown) {
+      this.generationError = getApiErrorMessage(
+        error,
+        "We could not load the roadmap questions.",
+      );
+    } finally {
+      this.isLoadingQuestions = false;
+    }
+  }
+
+  private async loadTransportCounty(): Promise<void> {
+    try {
+      this.transportCounties = await this.exploreService.getCounties();
+    } catch {
+      this.transportCounties = [];
+    }
+  }
+
+  selectTransportCounty(county: County | null): void {
+    if (!county || county.id === this.transportCounty?.id) return;
+    this.transportCounty = county;
+  }
+
+  isPublicTransportTask(task: RoadmapTaskResponse): boolean {
+    return task.title === "Get a Public Transport Card";
   }
 
   startRoadmapUpdate(): void {
@@ -207,7 +238,7 @@ export class RoadmapComponent implements OnInit {
     this.generationError = "";
   }
 
-  saveRoadmap(): void {
+  async saveRoadmap(): Promise<void> {
     if (this.isGenerating || this.fields.length === 0) return;
 
     this.isGenerating = true;
@@ -218,47 +249,38 @@ export class RoadmapComponent implements OnInit {
       ? this.roadmapService.updateRoadmap(request)
       : this.roadmapService.generateRoadmap(request);
 
-    saveRequest.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (response) => {
-        this.applyRoadmapResponse(response);
-        this.isEditingExistingRoadmap = false;
-        this.isCreatingRoadmap = false;
-        this.isGenerating = false;
-        this.successMessage = "Your roadmap has been updated.";
-      },
-      error: (error: unknown) => {
-        this.generationError = getApiErrorMessage(
-          error,
-          "We could not save your roadmap right now. Please try again.",
-        );
-        this.isGenerating = false;
-      },
-    });
+    try {
+      const response = await saveRequest;
+      this.applyRoadmapResponse(response);
+      this.isEditingExistingRoadmap = false;
+      this.isCreatingRoadmap = false;
+      this.successMessage = "Your roadmap has been updated.";
+    } catch (error: unknown) {
+      this.generationError = getApiErrorMessage(
+        error,
+        "We could not save your roadmap right now. Please try again.",
+      );
+    } finally {
+      this.isGenerating = false;
+    }
   }
 
-  private loadExistingRoadmap(): void {
-    this.roadmapService
-      .getRoadmap()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (response) => {
-          if (response?.id) {
-            this.applyRoadmapResponse(response);
-            this.hasExistingRoadmap = true;
-          }
-          this.isLoadingExistingRoadmap = false;
-        },
-        error: (error: unknown) => {
-          this.generationError =
-            error instanceof HttpErrorResponse && error.status === 404
-              ? ""
-              : getApiErrorMessage(
-                  error,
-                  "We could not load your roadmap right now.",
-                );
-          this.isLoadingExistingRoadmap = false;
-        },
-      });
+  private async loadExistingRoadmap(): Promise<void> {
+    try {
+      const response = await this.roadmapService.getRoadmap();
+      if (response?.id) {
+        this.applyRoadmapResponse(response);
+      }
+    } catch (error: unknown) {
+      if (getApiErrorStatus(error) !== 404) {
+        this.generationError = getApiErrorMessage(
+          error,
+          "We could not load your roadmap right now.",
+        );
+      }
+    } finally {
+      this.isLoadingExistingRoadmap = false;
+    }
   }
 
   private applyRoadmapResponse(response: RoadmapResponse): void {
@@ -360,6 +382,7 @@ export class RoadmapComponent implements OnInit {
     this.selectedTask = task;
     this.selectedCompletion = completed;
     this.taskDialogError = "";
+    this.taskUpdateError = "";
   }
 
   closeTaskCompletionDialog(): void {
@@ -369,35 +392,76 @@ export class RoadmapComponent implements OnInit {
     this.taskDialogError = "";
   }
 
-  confirmTaskCompletion(): void {
+  async confirmTaskCompletion(): Promise<void> {
     const task = this.selectedTask;
     if (!task || !this.canChangeTask(task, this.selectedCompletion)) return;
 
     this.pendingTaskIds.add(task.id);
     this.taskDialogError = "";
-    this.roadmapService
-      .updateTaskCompletion(task.id, this.selectedCompletion)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (response) => {
-          this.applyRoadmapResponse(response);
-          this.selectedTask = null;
-          this.successMessage = this.selectedCompletion
-            ? "Step marked complete. Your roadmap progress is up to date."
-            : "Step marked as not done. Your roadmap progress is up to date.";
-        },
-        error: (error: unknown) => {
-          this.taskDialogError = getApiErrorMessage(
-            error,
-            "We could not update this step. Your saved progress has not changed.",
-          );
-        },
-      })
-      .add(() => this.pendingTaskIds.delete(task.id));
+    try {
+      const response = await this.roadmapService.updateTaskCompletion(
+        task.id,
+        this.selectedCompletion,
+      );
+      this.applyRoadmapResponse(response);
+      this.selectedTask = null;
+      this.successMessage = this.selectedCompletion
+        ? "Step marked complete. Your roadmap progress is up to date."
+        : "Step marked as not done. Your roadmap progress is up to date.";
+    } catch (error: unknown) {
+      if (this.isUnavailableTaskError(error)) {
+        this.selectedTask = null;
+        await this.refreshAfterUnavailableTask();
+      } else {
+        this.taskDialogError = getApiErrorMessage(
+          error,
+          "We could not update this step. Your saved progress has not changed.",
+        );
+      }
+    } finally {
+      this.pendingTaskIds.delete(task.id);
+    }
   }
 
-  guideForTask(task: RoadmapTaskResponse): GuideLink | null {
-    return this.roadmapGuideService.forTaskRule(task.ruleId);
+  private isUnavailableTaskError(error: unknown): boolean {
+    const status = getApiErrorStatus(error);
+    if (status === 404) return true;
+    const data = getApiErrorResponseData(error);
+    if (status !== 409 || typeof data !== "object" || data === null)
+      return false;
+    return "code" in data && data.code === "ROADMAP_TASK_NOT_APPLICABLE";
+  }
+
+  private async refreshAfterUnavailableTask(): Promise<void> {
+    try {
+      const response = await this.roadmapService.getRoadmap();
+      if (response) {
+        this.applyRoadmapResponse(response);
+        this.taskUpdateError =
+          "This task was not updated because it is no longer available. The roadmap has been refreshed.";
+      } else {
+        this.clearRoadmap();
+        this.taskUpdateError =
+          "Your roadmap is no longer available. Refresh the page or create a new roadmap.";
+      }
+    } catch (error: unknown) {
+      if (getApiErrorStatus(error) === 404) {
+        this.clearRoadmap();
+        this.taskUpdateError =
+          "Your roadmap is no longer available. Refresh the page or create a new roadmap.";
+      } else {
+        this.taskUpdateError = getApiErrorMessage(
+          error,
+          "The task was not updated, and we could not refresh your roadmap.",
+        );
+      }
+    }
+  }
+
+  private clearRoadmap(): void {
+    this.hasExistingRoadmap = false;
+    this.currentRoadmapResponse = null;
+    this.tasks = [];
   }
 
   unmetPrerequisiteTitles(task: RoadmapTaskResponse): string[] {
@@ -454,9 +518,17 @@ export class RoadmapComponent implements OnInit {
     return this.nextTask?.id === task.id;
   }
 
+  isOptionalTask(task: RoadmapTaskResponse): boolean {
+    return (
+      task.state === "Optional" ||
+      (task.state === "Completed" && task.stateBeforeCompletion === "Optional")
+    );
+  }
+
   statusLabel(task: RoadmapTaskResponse): string {
     if (task.state === "NotApplicable") return "Not applicable";
     if (task.completed || task.state === "Completed") return "Completed";
+    if (this.isOptionalTask(task)) return "Optional";
     if (this.unmetPrerequisiteTitles(task).length > 0) return "Blocked";
     if (task.state === "Applicable") return "Next step";
     return task.state;
@@ -487,34 +559,29 @@ export class RoadmapComponent implements OnInit {
       rejectLabel: "Cancel",
       acceptButtonProps: { severity: "danger" },
       rejectButtonProps: { severity: "secondary", outlined: true },
-      accept: () => this.deleteRoadmap(),
+      accept: () => {
+        void this.deleteRoadmap();
+      },
     });
   }
 
-  private deleteRoadmap(): void {
+  private async deleteRoadmap(): Promise<void> {
     if (this.isDeleting) return;
     this.isDeleting = true;
     this.generationError = "";
     this.successMessage = "";
-    this.roadmapService
-      .deleteRoadmap()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          this.hasExistingRoadmap = false;
-          this.currentRoadmapResponse = null;
-          this.tasks = [];
-          this.isDeleting = false;
-          this.successMessage = "Your roadmap has been deleted.";
-        },
-        error: (error: unknown) => {
-          this.generationError = getApiErrorMessage(
-            error,
-            "We could not delete your roadmap right now.",
-          );
-          this.isDeleting = false;
-        },
-      });
+    try {
+      await this.roadmapService.deleteRoadmap();
+      this.clearRoadmap();
+      this.successMessage = "Your roadmap has been deleted.";
+    } catch (error: unknown) {
+      this.generationError = getApiErrorMessage(
+        error,
+        "We could not delete your roadmap right now.",
+      );
+    } finally {
+      this.isDeleting = false;
+    }
   }
 
   private phaseFor(

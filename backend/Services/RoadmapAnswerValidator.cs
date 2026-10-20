@@ -15,9 +15,10 @@ public static class RoadmapAnswerValidator
         foreach (var question in questionnaire.Questions)
         {
             if (!answers.TryGetValue(question.Id, out var value) || errors.ContainsKey(question.Id)) continue;
-            if (RoadmapQuestionnaire.IsVisible(question, answers) && value == NotApplicable)
+            var isVisible = questionnaire.IsVisible(question, answers);
+            if (isVisible && value == NotApplicable)
                 errors[question.Id] = [$"{question.Text} is required for your answers."];
-            else if (!RoadmapQuestionnaire.IsVisible(question, answers) && value != NotApplicable)
+            else if (!isVisible && value != NotApplicable)
                 errors[question.Id] = [$"{question.Text} is not applicable based on your earlier answers."];
         }
 

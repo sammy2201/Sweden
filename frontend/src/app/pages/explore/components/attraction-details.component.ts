@@ -1,15 +1,7 @@
 import { CommonModule } from "@angular/common";
-import { Component, inject } from "@angular/core";
+import { Component, DestroyRef, OnInit, inject } from "@angular/core";
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
-import {
-  catchError,
-  combineLatest,
-  map,
-  of,
-  startWith,
-  switchMap,
-  take,
-} from "rxjs";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ButtonModule } from "primeng/button";
 import { CardModule } from "primeng/card";
 import { DividerModule } from "primeng/divider";
@@ -24,7 +16,8 @@ import { ExploreService } from "../../../services/explore.service";
 
 interface AttractionDetailVm {
   loading: boolean;
-  error: string | null;
+  countyError: string | null;
+  attractionError: string | null;
   county: County | undefined;
   attraction: AttractionDetail | undefined;
 }
@@ -46,79 +39,101 @@ interface AttractionDetailVm {
   templateUrl: "./attraction-details.component.html",
   styleUrl: "./attraction-details.component.css",
 })
-export class AttractionDetailsComponent {
+export class AttractionDetailsComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly exploreService = inject(ExploreService);
   private readonly authService = inject(AuthService);
+  private readonly destroyRef = inject(DestroyRef);
+  private countyId = "";
+  private attractionId = "";
+  private loadSequence = 0;
+  readonly currentUser = this.authService.user;
 
-  readonly vm$ = this.route.paramMap.pipe(
-    switchMap((params) => {
-      const countyId = params.get("countyId") ?? "";
-      const attractionId = params.get("attractionId") ?? "";
+  vm: AttractionDetailVm = {
+    loading: true,
+    countyError: null,
+    attractionError: null,
+    county: undefined,
+    attraction: undefined,
+  };
 
-      return combineLatest([
-        this.exploreService.getCounty(countyId),
-        this.exploreService.getAttraction(attractionId),
-      ]);
-    }),
-    map(
-      ([county, attraction]): AttractionDetailVm => ({
-        loading: false,
-        error: null,
-        county,
-        attraction,
-      }),
-    ),
-    startWith({
-      loading: true,
-      error: null,
-      county: undefined,
-      attraction: undefined,
-    }),
-    catchError((error: unknown) =>
-      of({
-        loading: false,
-        error: buildExploreErrorMessage(error),
-        county: undefined,
-        attraction: undefined,
-      }),
-    ),
-  );
+  ngOnInit(): void {
+    this.route.paramMap
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((params) => {
+        this.countyId = params.get("countyId") ?? "";
+        this.attractionId = params.get("attractionId") ?? "";
+        void this.loadDetails();
+      });
+  }
+
+  private async loadDetails(): Promise<void> {
+    const sequence = ++this.loadSequence;
+    this.vm = { ...this.vm, loading: true };
+    const [countyResult, attractionResult] = await Promise.allSettled([
+      this.exploreService.getCounty(this.countyId),
+      this.exploreService.getAttraction(this.attractionId),
+    ]);
+    if (sequence !== this.loadSequence) return;
+
+    this.vm = {
+      loading: false,
+      countyError:
+        countyResult.status === "rejected"
+          ? buildExploreErrorMessage(countyResult.reason)
+          : null,
+      attractionError:
+        attractionResult.status === "rejected"
+          ? buildExploreErrorMessage(attractionResult.reason)
+          : null,
+      county:
+        countyResult.status === "fulfilled" ? countyResult.value : undefined,
+      attraction:
+        attractionResult.status === "fulfilled"
+          ? attractionResult.value
+          : undefined,
+    };
+  }
+
+  retry(): void {
+    void this.loadDetails();
+  }
 
   mapsUrl(attraction: AttractionDetail): string {
     const query = attraction.address || attraction.name;
     return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
   }
 
-  planJourney(county: County | undefined, attraction: AttractionDetail): void {
-    const fallbackOrigin = county?.name || "Stockholm";
+  async planJourney(
+    attraction: AttractionDetail,
+    userCity?: string | null,
+  ): Promise<void> {
     const destination = attraction.city || attraction.name;
+    const origin = userCity?.trim();
 
-    const cachedAddress = this.authService.user()?.address?.trim();
-    if (cachedAddress) {
-      this.navigateToJourney(cachedAddress, destination);
+    if (origin) {
+      this.navigateToJourney(origin, destination);
       return;
     }
 
-    this.authService
-      .loadUserProfile()
-      .pipe(take(1))
-      .subscribe({
-        next: (profile) => {
-          const origin = profile.address?.trim() || fallbackOrigin;
-          this.navigateToJourney(origin, destination);
-        },
-        error: () => {
-          this.navigateToJourney(fallbackOrigin, destination);
-        },
-      });
+    if (!this.authService.isAuthenticated()) {
+      this.navigateToJourney(undefined, destination);
+      return;
+    }
+
+    try {
+      const profile = await this.authService.loadUserProfile();
+      this.navigateToJourney(profile.city?.trim() || undefined, destination);
+    } catch {
+      this.navigateToJourney(undefined, destination);
+    }
   }
 
-  private navigateToJourney(from: string, to: string): void {
+  private navigateToJourney(from: string | undefined, to: string): void {
     this.router.navigate(["/transport"], {
       queryParams: {
-        from,
+        ...(from ? { from } : {}),
         to,
       },
     });
