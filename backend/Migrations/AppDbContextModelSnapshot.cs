@@ -166,10 +166,6 @@ namespace SwedenStart.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("PrerequisitesJson")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<int>("Priority")
                         .HasColumnType("integer");
 

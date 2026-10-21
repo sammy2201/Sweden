@@ -1,9 +1,4 @@
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json;
-
 namespace SwedenStart;
-
-public record RoadmapTaskPrerequisite(string RuleId, string Explanation);
 
 public class RoadmapTask
 {
@@ -20,12 +15,4 @@ public class RoadmapTask
     public string StateBeforeCompletion { get; set; } = "Recommended";
     public string? ResourceUrl { get; set; }
     public string RuleExplanation { get; set; } = string.Empty;
-    public string PrerequisitesJson { get; set; } = "[]";
-
-    [NotMapped]
-    public List<RoadmapTaskPrerequisite> Prerequisites
-    {
-        get => JsonSerializer.Deserialize<List<RoadmapTaskPrerequisite>>(PrerequisitesJson) ?? [];
-        set => PrerequisitesJson = JsonSerializer.Serialize(value);
-    }
 }

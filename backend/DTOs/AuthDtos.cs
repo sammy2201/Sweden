@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SwedenStart;
 
-public class RegisterRequestDto
+public class RegisterRequestDto : IValidatableObject
 {
     [Required]
     [StringLength(50, MinimumLength = 2)]
@@ -27,12 +27,22 @@ public class RegisterRequestDto
     [StringLength(100, MinimumLength = 2)]
     public string City { get; set; } = string.Empty;
 
-    [StringLength(255, MinimumLength = 3)]
+    [StringLength(255)]
     public string Address { get; set; } = string.Empty;
 
     [Required]
     [StringLength(100, MinimumLength = 8)]
     public string Password { get; set; } = string.Empty;
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if (!string.IsNullOrWhiteSpace(Address) && Address.Trim().Length < 3)
+        {
+            yield return new ValidationResult(
+                "Address must be at least 3 characters when provided.",
+                [nameof(Address)]);
+        }
+    }
 }
 
 public class LoginRequestDto

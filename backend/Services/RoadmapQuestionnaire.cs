@@ -68,6 +68,10 @@ public class RoadmapQuestionnaire
 
     public bool IsVisible(RoadmapQuestionDto question, IReadOnlyDictionary<string, string> answers)
     {
+        if (answers.TryGetValue("residencePermit", out var residencePermit)
+            && residencePermit == "No")
+            return question.Id is "origin" or "residencePermit";
+
         var rules = question.Dependencies.Where(dependency => dependency.Effect is "Show" or "Hide").ToArray();
         bool Matches(RoadmapQuestionDependencyDto dependency) =>
             dependency.Operator == RoadmapDependencyOperator.Equals.ToString() &&

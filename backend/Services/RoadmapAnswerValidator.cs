@@ -8,15 +8,17 @@ public static class RoadmapAnswerValidator
     {
         var errors = new Dictionary<string, string[]>(StringComparer.Ordinal);
         var answers = RoadmapQuestionnaire.Answers(request);
-        foreach (var (questionId, value) in answers)
-            if (!questionnaire.IsAllowedValue(questionId, value))
-                errors[questionId] = [$"Select a valid {questionId} option."];
-
         foreach (var question in questionnaire.Questions)
         {
-            if (!answers.TryGetValue(question.Id, out var value) || errors.ContainsKey(question.Id)) continue;
+            if (!answers.TryGetValue(question.Id, out var value)) continue;
             var isVisible = questionnaire.IsVisible(question, answers);
-            if (isVisible && value == NotApplicable)
+            if (!isVisible && request.ResidencePermit == "No") continue;
+
+            if (!questionnaire.IsAllowedValue(question.Id, value))
+                errors[question.Id] = [$"Select a valid {question.Id} option."];
+
+            if (isVisible && question.Required
+                && (string.IsNullOrWhiteSpace(value) || value == NotApplicable))
                 errors[question.Id] = [$"{question.Text} is required for your answers."];
             else if (!isVisible && value != NotApplicable)
                 errors[question.Id] = [$"{question.Text} is not applicable based on your earlier answers."];

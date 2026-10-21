@@ -188,9 +188,7 @@
                       (task.completed || task.state === 'Completed')
                     "
                     [class.current]="isCurrentTask(task)"
-                    [class.waiting]="
-                      task.state === 'Waiting' || isTaskBlocked(task)
-                    "
+                    [class.waiting]="task.state === 'Waiting'"
                     [class.not-applicable]="task.state === 'NotApplicable'">
                     <div class="timeline-rail" aria-hidden="true">
                       <span class="timeline-node">
@@ -222,7 +220,6 @@
                             task.completed || task.state === 'Completed'
                           "
                           [class.status-waiting]="task.state === 'Waiting'"
-                          [class.status-blocked]="isTaskBlocked(task)"
                           [class.status-inactive]="
                             task.state === 'NotApplicable'
                           "
@@ -317,22 +314,6 @@
                           >{{ task.ruleExplanation }}
                         </p>
                       }
-                      @if (task.prerequisites.length > 0) {
-                        <div
-                          class="prerequisite-list"
-                          aria-label="Prerequisites">
-                          @for (
-                            prerequisite of task.prerequisites;
-                            track prerequisite.ruleId
-                          ) {
-                            <span class="prerequisite"
-                              ><i class="pi pi-link" aria-hidden="true"></i
-                              >{{ prerequisite.explanation }}</span
-                            >
-                          }
-                        </div>
-                      }
-
                       <footer class="step-footer">
                         <div class="step-links">
                           @if (task.resourceUrl) {
@@ -364,12 +345,7 @@
                               [ngModelOptions]="{ standalone: true }"
                               [disabled]="
                                 pendingTaskIds.has(task.id) ||
-                                !canChangeTask(
-                                  task,
-                                  !(
-                                    task.completed || task.state === 'Completed'
-                                  )
-                                )
+                                !canChangeTask(task)
                               "
                               [ariaLabel]="
                                 task.completed || task.state === 'Completed'
@@ -393,11 +369,7 @@
                           </label>
                           @if (
                             task.state === "Waiting" ||
-                            (task.state !== "NotApplicable" &&
-                              !task.completed &&
-                              unmetPrerequisiteTitles(task).length > 0) ||
-                            ((task.completed || task.state === "Completed") &&
-                              completedDependentTitles(task).length > 0)
+                            task.state === "NotApplicable"
                           ) {
                             <small class="completion-block-reason">{{
                               taskActionBlockReason(task)

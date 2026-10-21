@@ -53,37 +53,10 @@ public class RoadmapTaskCatalog
         foreach (var rule in rules)
         {
             foreach (var condition in rule.When
-                .Concat(rule.Variants.SelectMany(variant => variant.When))
-                .Concat(rule.Prerequisites.SelectMany(prerequisite => prerequisite.When)))
+                .Concat(rule.Variants.SelectMany(variant => variant.When)))
                 if (!questionIds.Contains(condition.QuestionId))
                     throw new InvalidOperationException($"Roadmap task rule '{rule.RuleId}' references unknown question '{condition.QuestionId}'.");
-            foreach (var prerequisite in rule.Prerequisites)
-                if (!rulesById.ContainsKey(prerequisite.RuleId))
-                    throw new InvalidOperationException($"Roadmap task rule '{rule.RuleId}' references unknown prerequisite '{prerequisite.RuleId}'.");
         }
-
-        ValidateDependencyGraph(rules, rulesById);
-    }
-
-    private static void ValidateDependencyGraph(
-        IReadOnlyList<RoadmapTaskRuleConfiguration> rules,
-        IReadOnlyDictionary<string, RoadmapTaskRuleConfiguration> rulesById)
-    {
-        var visited = new HashSet<string>(StringComparer.Ordinal);
-        var visiting = new HashSet<string>(StringComparer.Ordinal);
-
-        void Visit(string ruleId)
-        {
-            if (visited.Contains(ruleId)) return;
-            if (!visiting.Add(ruleId))
-                throw new InvalidOperationException($"Roadmap task prerequisite cycle includes '{ruleId}'.");
-            foreach (var prerequisiteId in rulesById[ruleId].Prerequisites.Select(prerequisite => prerequisite.RuleId))
-                Visit(prerequisiteId);
-            visiting.Remove(ruleId);
-            visited.Add(ruleId);
-        }
-
-        foreach (var rule in rules) Visit(rule.RuleId);
     }
 }
 
@@ -122,7 +95,6 @@ public class RoadmapTaskRuleConfiguration
     public string? ResourceUrl { get; set; }
     public string Explanation { get; set; } = string.Empty;
     public List<RoadmapTaskVariantConfiguration> Variants { get; set; } = [];
-    public List<RoadmapTaskPrerequisiteConfiguration> Prerequisites { get; set; } = [];
 }
 
 public class RoadmapTaskVariantConfiguration
@@ -131,13 +103,6 @@ public class RoadmapTaskVariantConfiguration
     public string? Title { get; set; }
     public string? Description { get; set; }
     public string? ResourceUrl { get; set; }
-}
-
-public class RoadmapTaskPrerequisiteConfiguration
-{
-    public string RuleId { get; set; } = string.Empty;
-    public string Explanation { get; set; } = string.Empty;
-    public List<RoadmapAnswerConditionConfiguration> When { get; set; } = [];
 }
 
 public class RoadmapAnswerConditionConfiguration

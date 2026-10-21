@@ -99,17 +99,13 @@ export class RoadmapComponent implements OnInit {
       (task) =>
         !task.completed &&
         task.state !== "Completed" &&
-        task.state !== "Waiting" &&
-        this.unmetPrerequisiteTitles(task).length === 0,
+        task.state !== "Waiting",
     ).length;
   }
 
   get waitingTaskCount(): number {
     return this.applicableTasks.filter(
-      (task) =>
-        !task.completed &&
-        (task.state === "Waiting" ||
-          this.unmetPrerequisiteTitles(task).length > 0),
+      (task) => !task.completed && task.state === "Waiting",
     ).length;
   }
 
@@ -126,8 +122,7 @@ export class RoadmapComponent implements OnInit {
         (task) =>
           !task.completed &&
           task.state !== "Completed" &&
-          task.state !== "Waiting" &&
-          this.unmetPrerequisiteTitles(task).length === 0,
+          task.state !== "Waiting",
       ) ??
       this.applicableTasks.find(
         (task) => task.state === "Waiting" && !task.completed,
@@ -290,6 +285,25 @@ export class RoadmapComponent implements OnInit {
   }
 
   private toRequest(): RoadmapRequest {
+    const notApplicable = "Not applicable";
+    if (this.editAnswers.residencePermit === "No") {
+      return {
+        origin: this.editAnswers.origin ?? "",
+        residencePermit: "No",
+        liveInSweden: notApplicable,
+        personnummer: notApplicable,
+        appliedPersonnummer: notApplicable,
+        idCard: notApplicable,
+        bankAccount: notApplicable,
+        bankId: notApplicable,
+        housing: notApplicable,
+        planToDrive: notApplicable,
+        drivingLicenceType: notApplicable,
+        purpose: notApplicable,
+        insurance: notApplicable,
+      };
+    }
+
     const liveInSweden = this.editAnswers.liveInSweden ?? "";
     const personnummer =
       liveInSweden === "Yes"
@@ -332,6 +346,9 @@ export class RoadmapComponent implements OnInit {
   }
 
   private isVisible(field: RoadmapField): boolean {
+    if (this.editAnswers.residencePermit === "No")
+      return field.id === "origin" || field.id === "residencePermit";
+
     const showRules = field.dependencies.filter(
       (dependency) => dependency.effect === "Show",
     );
@@ -378,7 +395,7 @@ export class RoadmapComponent implements OnInit {
     task: RoadmapTaskResponse,
     completed: boolean,
   ): void {
-    if (!this.canChangeTask(task, completed)) return;
+    if (!this.canChangeTask(task)) return;
     this.selectedTask = task;
     this.selectedCompletion = completed;
     this.taskDialogError = "";
@@ -394,7 +411,7 @@ export class RoadmapComponent implements OnInit {
 
   async confirmTaskCompletion(): Promise<void> {
     const task = this.selectedTask;
-    if (!task || !this.canChangeTask(task, this.selectedCompletion)) return;
+    if (!task || !this.canChangeTask(task)) return;
 
     this.pendingTaskIds.add(task.id);
     this.taskDialogError = "";
@@ -464,43 +481,14 @@ export class RoadmapComponent implements OnInit {
     this.tasks = [];
   }
 
-  unmetPrerequisiteTitles(task: RoadmapTaskResponse): string[] {
-    const taskByRule = new Map(
-      this.tasks.map((candidate) => [candidate.ruleId, candidate]),
-    );
-    return task.prerequisites.flatMap((prerequisite) => {
-      const required = taskByRule.get(prerequisite.ruleId);
-      return required &&
-        required.state !== "NotApplicable" &&
-        !required.completed &&
-        required.state !== "Completed"
-        ? [required.title]
-        : [];
-    });
-  }
-
-  completedDependentTitles(task: RoadmapTaskResponse): string[] {
-    return this.tasks
-      .filter(
-        (candidate) =>
-          (candidate.completed || candidate.state === "Completed") &&
-          candidate.state !== "NotApplicable" &&
-          candidate.prerequisites.some(
-            (prerequisite) => prerequisite.ruleId === task.ruleId,
-          ),
-      )
-      .map((candidate) => candidate.title);
-  }
-
-  canChangeTask(task: RoadmapTaskResponse, completed: boolean): boolean {
+  canChangeTask(task: RoadmapTaskResponse): boolean {
     if (
       task.state === "NotApplicable" ||
       task.state === "Waiting" ||
       this.pendingTaskIds.has(task.id)
     )
       return false;
-    if (completed) return this.unmetPrerequisiteTitles(task).length === 0;
-    return this.completedDependentTitles(task).length === 0;
+    return task.state !== "NotApplicable" && task.state !== "Waiting";
   }
 
   taskActionBlockReason(task: RoadmapTaskResponse): string {
@@ -508,10 +496,7 @@ export class RoadmapComponent implements OnInit {
       return "This step does not apply to your answers.";
     if (task.state === "Waiting")
       return "This step is waiting for an update before it can be completed.";
-    const prerequisites = this.unmetPrerequisiteTitles(task);
-    if (prerequisites.length)
-      return `Complete ${prerequisites.join(", ")} first.`;
-    return `First mark ${this.completedDependentTitles(task).join(", ")} as not done.`;
+    return "This step is waiting for an update before it can be completed.";
   }
 
   isCurrentTask(task: RoadmapTaskResponse): boolean {
@@ -529,18 +514,8 @@ export class RoadmapComponent implements OnInit {
     if (task.state === "NotApplicable") return "Not applicable";
     if (task.completed || task.state === "Completed") return "Completed";
     if (this.isOptionalTask(task)) return "Optional";
-    if (this.unmetPrerequisiteTitles(task).length > 0) return "Blocked";
     if (task.state === "Applicable") return "Next step";
     return task.state;
-  }
-
-  isTaskBlocked(task: RoadmapTaskResponse): boolean {
-    return (
-      task.state !== "NotApplicable" &&
-      !task.completed &&
-      task.state !== "Completed" &&
-      this.unmetPrerequisiteTitles(task).length > 0
-    );
   }
 
   priorityLabel(priority: number): string {

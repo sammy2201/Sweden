@@ -26,7 +26,6 @@ export interface RoadmapTaskResponse {
   stateBeforeCompletion: string;
   resourceUrl?: string | null;
   ruleExplanation: string;
-  prerequisites: { ruleId: string; explanation: string }[];
 }
 
 export interface RoadmapQuestionDependency {

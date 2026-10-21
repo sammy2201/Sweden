@@ -29,9 +29,7 @@ public class RoadmapRepository : IRoadmapRepository
             throw new ApiException(
                 StatusCodes.Status409Conflict,
                 "Roadmap already exists",
-                "A roadmap already exists for this user.",
-                "ROADMAP_ALREADY_EXISTS",
-                exception);
+                "A roadmap already exists for this user.");
         }
 
         return roadmap;

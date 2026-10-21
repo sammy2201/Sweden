@@ -33,13 +33,12 @@ public class TransportController : ControllerBase
                var trips = await _transportService.SearchTripsServiceAsync(from, to, departureTime, arrivalTime);
                return Ok(trips);
           }
-          catch (HttpRequestException exception)
+          catch (HttpRequestException)
           {
                throw new ApiException(
                     StatusCodes.Status502BadGateway,
                     "Transport service unavailable",
-                    "A required external service is unavailable.",
-                    innerException: exception);
+                    "A required external service is unavailable.");
           }
      }
 }

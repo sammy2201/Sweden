@@ -328,17 +328,26 @@ h2 {
   border-radius: 1rem;
   background: var(--app-surface);
   box-shadow: 0 2px 8px rgb(15 23 42 / 3%);
-  transition: border-color 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    opacity 160ms ease;
 }
 
 .timeline-item.current .step-card {
   border-color: var(--app-blue-300, var(--app-primary));
-  box-shadow: 0 0 0 3px rgb(0 106 167 / 8%), var(--app-shadow);
+  box-shadow:
+    0 0 0 3px rgb(0 106 167 / 8%),
+    var(--app-shadow);
 }
 
 .timeline-item.completed .step-card {
   border-color: var(--app-success-border);
-  background: linear-gradient(110deg, var(--app-success-soft) 0%, var(--app-surface) 48%);
+  background: linear-gradient(
+    110deg,
+    var(--app-success-soft) 0%,
+    var(--app-surface) 48%
+  );
 }
 
 .timeline-item.completed .timeline-node {
@@ -408,11 +417,6 @@ h2 {
   color: var(--app-warning-text);
 }
 
-.status-pill.status-blocked {
-  background: var(--app-warning-soft);
-  color: var(--app-warning-text);
-}
-
 .status-pill.status-inactive {
   background: var(--app-surface-muted);
   color: var(--app-text-muted);
@@ -446,8 +450,7 @@ h2 {
   color: var(--app-warning-text);
 }
 
-.step-explanation,
-.prerequisite {
+.step-explanation {
   display: flex;
   align-items: flex-start;
   gap: 0.45rem;
@@ -457,26 +460,10 @@ h2 {
   line-height: 1.5;
 }
 
-.step-explanation i,
-.prerequisite i {
+.step-explanation i {
   flex: 0 0 auto;
   margin-top: 0.15rem;
   color: var(--app-primary-dark);
-}
-
-.prerequisite-list {
-  display: grid;
-  gap: 0.25rem;
-  margin-top: 0.65rem;
-  padding: 0.75rem 0.85rem;
-  border-left: 2px solid var(--app-border-strong);
-  border-radius: 0 0.5rem 0.5rem 0;
-  background: var(--app-surface-alt);
-}
-
-.prerequisite {
-  margin: 0;
-  font-size: 0.81rem;
 }
 
 .step-footer {
@@ -652,7 +639,9 @@ h2 {
     grid-template-columns: 1fr;
   }
 
-  .step-footer { align-items: flex-start; }
+  .step-footer {
+    align-items: flex-start;
+  }
 }
 
 @media (max-width: 560px) {
@@ -705,5 +694,4 @@ h2 {
   .edit-grid {
     grid-template-columns: 1fr;
   }
-
 }

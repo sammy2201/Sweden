@@ -39,10 +39,7 @@ public class ApiExceptionHandler(
                     : "An unexpected error occurred."),
             Instance = httpContext.Request.Path
         };
-        if (!string.IsNullOrWhiteSpace(apiException?.Code))
-        {
-            problem.Extensions["code"] = apiException.Code;
-        }
+
         problem.Extensions["traceId"] = httpContext.TraceIdentifier;
 
         httpContext.Response.StatusCode = status;

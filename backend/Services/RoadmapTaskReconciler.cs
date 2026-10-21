@@ -53,7 +53,6 @@ public static class RoadmapTaskReconciler
                     : replacement.State;
             oldTask.ResourceUrl = replacement.ResourceUrl;
             oldTask.RuleExplanation = replacement.RuleExplanation;
-            oldTask.PrerequisitesJson = replacement.PrerequisitesJson;
         }
         var newTasks = generatedByRule.Values.ToArray();
         foreach (var task in newTasks)
@@ -85,7 +84,8 @@ public static class RoadmapTaskReconciler
 
         var newTasks = Reconcile(roadmap.Tasks, generatedTasks, roadmap.Id, preserveExistingState: true);
         roadmap.Tasks.AddRange(newTasks);
-        EnsurePublicTransportCard(roadmap);
+        if (roadmap.ResidencePermit != "No")
+            EnsurePublicTransportCard(roadmap);
     }
 
     private static void EnsurePublicTransportCard(Roadmap roadmap)
@@ -121,6 +121,5 @@ public static class RoadmapTaskReconciler
         transportCard.StateBeforeCompletion = "Optional";
         transportCard.ResourceUrl = null;
         transportCard.RuleExplanation = PublicTransportCardExplanation;
-        transportCard.PrerequisitesJson = "[]";
     }
 }

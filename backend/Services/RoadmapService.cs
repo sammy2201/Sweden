@@ -45,8 +45,7 @@ public class RoadmapService : IRoadmapService
             throw new ApiException(
                 StatusCodes.Status404NotFound,
                 "Roadmap not found",
-                "Roadmap not found for this user.",
-                "ROADMAP_NOT_FOUND");
+                "Roadmap not found for this user.");
         }
 
         ApplyAnswers(roadmap, request);
@@ -70,8 +69,7 @@ public class RoadmapService : IRoadmapService
             throw new ApiException(
                 StatusCodes.Status404NotFound,
                 "Roadmap not found",
-                "No roadmap exists for this user.",
-                "ROADMAP_NOT_FOUND");
+                "No roadmap exists for this user.");
         }
 
         await ReconcileSavedRoadmapAsync(roadmap);
@@ -82,8 +80,7 @@ public class RoadmapService : IRoadmapService
             throw new ApiException(
                 StatusCodes.Status404NotFound,
                 "Roadmap task not found",
-                "This task is no longer part of your roadmap. Refresh the roadmap and try again.",
-                "ROADMAP_TASK_NOT_FOUND");
+                "This task is no longer part of your roadmap. Refresh the roadmap and try again.");
         }
 
         if (task.State == "NotApplicable")
@@ -91,8 +88,7 @@ public class RoadmapService : IRoadmapService
             throw new ApiException(
                 StatusCodes.Status409Conflict,
                 "Roadmap task is no longer applicable",
-                "This task no longer applies to your answers. Refresh the roadmap to see the current steps.",
-                "ROADMAP_TASK_NOT_APPLICABLE");
+                "This task no longer applies to your answers. Refresh the roadmap to see the current steps.");
         }
 
         if (completed)
@@ -101,35 +97,21 @@ public class RoadmapService : IRoadmapService
             {
                 throw new ApiException(
                     StatusCodes.Status409Conflict,
-                    "Step prerequisites are incomplete",
-                    "This step is waiting for an update and cannot be marked complete yet.",
-                    "ROADMAP_PREREQUISITES_INCOMPLETE");
-            }
-
-            var blockingPrerequisites = RoadmapTaskPrerequisiteGuard.GetUnmetTitles(task, roadmap.Tasks);
-            if (blockingPrerequisites.Count > 0)
-            {
-                throw new ApiException(
-                    StatusCodes.Status409Conflict,
-                    "Step prerequisites are incomplete",
-                    $"Complete {string.Join(", ", blockingPrerequisites)} before marking this step complete.",
-                    "ROADMAP_PREREQUISITES_INCOMPLETE");
+                    "Task is waiting",
+                    "This step is waiting for an update and cannot be marked complete yet.");
             }
         }
-        else
+
+        if (completed)
         {
-            var completedDependents = RoadmapTaskPrerequisiteGuard.GetCompletedDependentTitles(task, roadmap.Tasks);
-            if (completedDependents.Count > 0)
-            {
-                throw new ApiException(
-                    StatusCodes.Status409Conflict,
-                    "Step prerequisites are incomplete",
-                    $"First mark {string.Join(", ", completedDependents)} incomplete, then update this prerequisite step.",
-                    "ROADMAP_PREREQUISITES_INCOMPLETE");
-            }
+            if (task.State != "Completed") task.StateBeforeCompletion = task.State;
+            task.State = "Completed";
         }
-
-        RoadmapTaskPrerequisiteGuard.ApplyCompletionState(task, completed);
+        else if (task.State == "Completed")
+        {
+            task.State = task.StateBeforeCompletion;
+        }
+        task.Completed = completed;
         await _roadmapRepository.SaveRoadmapChangesRepoAsync();
 
         return MapToResponse(roadmap);
@@ -177,7 +159,7 @@ public class RoadmapService : IRoadmapService
             DrivingLicenceType = roadmap.DrivingLicenceType,
             Purpose = roadmap.Purpose,
             Insurance = roadmap.Insurance,
-            Tasks = RoadmapTaskOrdering.Topological(roadmap.Tasks).Select(task => new RoadmapTaskDto
+            Tasks = RoadmapTaskOrdering.ByPriority(roadmap.Tasks).Select(task => new RoadmapTaskDto
             {
                 Id = task.Id,
                 Title = task.Title,
@@ -190,7 +172,6 @@ public class RoadmapService : IRoadmapService
                 StateBeforeCompletion = task.StateBeforeCompletion,
                 ResourceUrl = task.ResourceUrl,
                 RuleExplanation = task.RuleExplanation,
-                Prerequisites = task.Prerequisites,
             }).ToList(),
         };
     }

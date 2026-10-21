@@ -56,8 +56,7 @@ public class AuthController : ControllerBase
             throw new ApiException(
                 StatusCodes.Status409Conflict,
                 "Account already exists",
-                "A user with that username or email already exists.",
-                "ACCOUNT_ALREADY_EXISTS");
+                "A user with that username or email already exists.");
         }
 
         return StatusCode(

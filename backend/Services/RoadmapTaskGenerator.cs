@@ -9,15 +9,17 @@ public class RoadmapTaskGenerator
     public List<RoadmapTask> Generate(RoadmapRequestDto answers)
     {
         var answerValues = RoadmapQuestionnaire.Answers(answers);
+        var hasNoResidencePermit = string.Equals(answers.ResidencePermit, "No", StringComparison.Ordinal);
         var tasks = _catalog.Rules
-            .Where(rule => Matches(rule.When, answerValues))
+            .Where(rule => (!hasNoResidencePermit || rule.RuleId == "residence-status")
+                && Matches(rule.When, answerValues))
             .Select(rule => CreateTask(rule, answers, answerValues))
             .ToList();
 
         if (tasks.Select(task => task.RuleId).Distinct(StringComparer.Ordinal).Count() != tasks.Count)
             throw new InvalidOperationException("Roadmap rules produced duplicate task IDs.");
 
-        return RoadmapTaskOrdering.Topological(tasks);
+        return RoadmapTaskOrdering.ByPriority(tasks);
     }
 
     private static RoadmapTask CreateTask(
@@ -26,11 +28,6 @@ public class RoadmapTaskGenerator
         IReadOnlyDictionary<string, string> answerValues)
     {
         var variant = rule.Variants.FirstOrDefault(candidate => Matches(candidate.When, answerValues));
-        var prerequisites = rule.Prerequisites
-            .Where(prerequisite => Matches(prerequisite.When, answerValues))
-            .Select(prerequisite => new RoadmapTaskPrerequisite(prerequisite.RuleId, prerequisite.Explanation))
-            .ToList();
-
         return new RoadmapTask
         {
             RuleId = rule.RuleId,
@@ -42,7 +39,6 @@ public class RoadmapTaskGenerator
             StateBeforeCompletion = rule.State,
             ResourceUrl = variant?.ResourceUrl ?? rule.ResourceUrl,
             RuleExplanation = rule.Explanation,
-            Prerequisites = prerequisites,
         };
     }
 
@@ -59,25 +55,8 @@ public class RoadmapTaskGenerator
 
 public static class RoadmapTaskOrdering
 {
-    public static List<RoadmapTask> Topological(IEnumerable<RoadmapTask> source)
-    {
-        var tasks = source.ToDictionary(task => task.RuleId, StringComparer.Ordinal);
-        var ordered = new List<RoadmapTask>();
-        var visiting = new HashSet<string>(StringComparer.Ordinal);
-        var visited = new HashSet<string>(StringComparer.Ordinal);
-
-        void Visit(RoadmapTask task)
-        {
-            if (visited.Contains(task.RuleId)) return;
-            if (!visiting.Add(task.RuleId)) throw new InvalidOperationException($"Roadmap task prerequisite cycle at '{task.RuleId}'.");
-            foreach (var prerequisite in task.Prerequisites.Select(prerequisite => prerequisite.RuleId).Where(tasks.ContainsKey).Order(StringComparer.Ordinal))
-                Visit(tasks[prerequisite]);
-            visiting.Remove(task.RuleId);
-            visited.Add(task.RuleId);
-            ordered.Add(task);
-        }
-
-        foreach (var task in tasks.Values.OrderBy(roadmapTask => roadmapTask.Priority).ThenBy(roadmapTask => roadmapTask.RuleId, StringComparer.Ordinal)) Visit(task);
-        return ordered;
-    }
+    public static List<RoadmapTask> ByPriority(IEnumerable<RoadmapTask> source) => source
+        .OrderBy(task => task.Priority)
+        .ThenBy(task => task.RuleId, StringComparer.Ordinal)
+        .ToList();
 }

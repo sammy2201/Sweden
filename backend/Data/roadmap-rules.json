@@ -23,8 +23,8 @@
           "equals": "No"
         }
       ],
-      "title": "Review residence guidance for your situation",
-      "description": "Review Swedish Migration Agency guidance for your nationality category ({origin}), purpose ({purpose}), and individual circumstances. These answers do not determine whether you need a permit or have a right of residence.",
+      "title": "Check the residence permit and application guidance for your situation",
+      "description": "Review Swedish Migration Agency guidance for your nationality category ({origin}), purpose ({purpose}), and individual circumstances to find out which residence permit or right of residence applies and how to proceed. These answers do not determine whether you need a permit or have a right of residence.",
       "category": "Residence",
       "priority": 2,
       "resourceUrl": "https://www.migrationsverket.se/en/you-want-to-apply.html",
@@ -131,8 +131,7 @@
           "description": "Ask Skatteverket how population registration, personal-number status, and identity documents apply to your circumstances before preparing an application.",
           "resourceUrl": "https://www.skatteverket.se/servicelankar/otherlanguages/inenglishengelska/individualsandemployees/livinginsweden/swedishtaxagencyidentitycards/howtoapplyfororrenewidcard.4.3810a01c150939e893f1e20d.html"
         }
-      ],
-      "prerequisites": []
+      ]
     },
     {
       "ruleId": "bank-account",
@@ -170,8 +169,7 @@
       "category": "Banking",
       "priority": 3,
       "resourceUrl": "https://www.bankid.com/en/individuals/get-bankid",
-      "explanation": "The respondent reports not having BankID. Current BankID guidance says a Swedish personal identity number is required; the issuing bank must confirm its checks and availability for this situation.",
-      "prerequisites": []
+      "explanation": "The respondent reports not having BankID. Current BankID guidance says a Swedish personal identity number is required; the issuing bank must confirm its checks and availability for this situation."
     },
     {
       "ruleId": "insurance-review",
