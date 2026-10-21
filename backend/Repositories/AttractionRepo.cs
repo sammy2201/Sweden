@@ -5,10 +5,12 @@ namespace SwedenStart;
 public class AttractionRepository : IAttractionRepository
 {
      private readonly AppDbContext _dbContext;
+     private readonly CountyService _countyService;
 
-     public AttractionRepository(AppDbContext dbContext)
+     public AttractionRepository(AppDbContext dbContext, CountyService countyService)
      {
           _dbContext = dbContext;
+          _countyService = countyService;
      }
 
      public async Task<bool> HasAnyAttractionsRepoAsync()
@@ -26,8 +28,8 @@ public class AttractionRepository : IAttractionRepository
 
           if (!string.IsNullOrWhiteSpace(county))
           {
-               var countyId = CountyData.ResolveCountyId(county);
-               var countyValues = CountyData.GetCountyFilterValues(county);
+               var countyId = _countyService.ResolveCountyId(county);
+               var countyValues = _countyService.GetCountyFilterValues(county);
                query = string.IsNullOrWhiteSpace(countyId)
                     ? query.Where(attraction => countyValues.Contains(attraction.County ?? string.Empty))
                     : query.Where(attraction => attraction.County == countyId || countyValues.Contains(attraction.County ?? string.Empty));

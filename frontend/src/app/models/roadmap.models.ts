@@ -42,7 +42,6 @@ export interface RoadmapQuestionDependency {
 export interface RoadmapQuestion {
   id: keyof RoadmapRequest;
   text: string;
-  answerType: "select" | "radio";
   options: { id: string; value: string; label: string }[];
   required: boolean;
   order: number;

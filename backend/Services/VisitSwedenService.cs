@@ -12,17 +12,20 @@ public class VisitSwedenService : IVisitSwedenService
      private readonly HttpClient _httpClient;
      private readonly ILogger<VisitSwedenService> _logger;
      private readonly IVisitSwedenRepository _repository;
+     private readonly CountyService _countyService;
 
 
      public VisitSwedenService(
          HttpClient httpClient,
          ILogger<VisitSwedenService> logger,
-         IVisitSwedenRepository repository
+         IVisitSwedenRepository repository,
+         CountyService countyService
      )
      {
           _httpClient = httpClient;
           _logger = logger;
           _repository = repository;
+          _countyService = countyService;
 
      }
      public Task<VisitSwedenSyncResult> SyncAttractionsServiceAsync(
@@ -213,7 +216,7 @@ public class VisitSwedenService : IVisitSwedenService
                  longitude.Value is >= -180 and <= 180;
      }
 
-     private static Attraction? MapAttraction(JsonElement child)
+     private Attraction? MapAttraction(JsonElement child)
      {
           var contextId = GetString(child, "contextId");
           var entryId = GetString(child, "entryId");
@@ -240,7 +243,7 @@ public class VisitSwedenService : IVisitSwedenService
                DescriptionEn = description.English,
                DescriptionSv = description.Swedish,
                Website = GetIdValue(node, "schema:url"),
-               County = CountyData.ResolveCountyId(GetCountySlug(node)),
+               County = _countyService.ResolveCountyId(GetCountySlug(node)),
                City = GetCity(node),
                Address = BuildAddress(node),
                Category = TrimSchemaPrefix(GetString(node, "@type")),

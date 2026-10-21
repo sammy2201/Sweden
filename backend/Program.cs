@@ -83,6 +83,8 @@ builder.Services.AddOpenApi(options =>
 
 builder.Services.AddScoped<IAuthRepo, AuthRepo>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddSingleton<CountyDataProvider>();
+builder.Services.AddSingleton<CountyService>();
 
 builder.Services.AddAuthentication(options =>
 {

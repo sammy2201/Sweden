@@ -9,17 +9,19 @@ namespace SwedenStart;
 public class ExploreController : ControllerBase
 {
      private readonly IExploreService _exploreService;
+     private readonly CountyService _countyService;
 
-     public ExploreController(IExploreService exploreService)
+     public ExploreController(IExploreService exploreService, CountyService countyService)
      {
           _exploreService = exploreService;
+          _countyService = countyService;
      }
 
      [HttpGet("counties")]
      [AllowAnonymous]
      public ActionResult<ExploreCountiesResponseDto> GetCountiesController()
      {
-          var counties = CountyData.GetCounties();
+          var counties = _countyService.GetCounties();
 
           return Ok(new ExploreCountiesResponseDto
           {
