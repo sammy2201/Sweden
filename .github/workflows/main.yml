@@ -69,3 +69,5 @@ jobs:
                       done
                       echo "Deployment did not become healthy at $DEPLOYMENT_URL/api/health" >&2
                       exit 1
+
+                 #   ji
