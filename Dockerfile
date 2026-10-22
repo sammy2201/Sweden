@@ -17,6 +17,7 @@ RUN dotnet publish backend/SwedenStart.csproj --configuration Release --no-resto
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 ENV ASPNETCORE_HTTP_PORTS=8080
+ENV PORT=8080
 EXPOSE 8080
 COPY --from=backend-build /app/publish ./
 ENTRYPOINT ["dotnet", "SwedenStart.dll"]
